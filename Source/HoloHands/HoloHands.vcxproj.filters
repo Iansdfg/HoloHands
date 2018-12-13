@@ -64,6 +64,9 @@
       <Filter>Content</Filter>
     </ClCompile>
     <ClCompile Include="HoloHandsMain.cpp" />
+    <ClCompile Include="Content\QuadRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -78,25 +81,35 @@
       <Filter>Content</Filter>
     </ClInclude>
     <ClInclude Include="HoloHandsMain.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Content\VertexShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\GeometryShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\PixelShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\VPRTVertexShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
+    <ClInclude Include="Content\QuadRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HoloHands_TemporaryKey.pfx" />
+    <None Include="Content\Shaders\Quad.ps.hlsl.vsspell" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\Shaders\GeometryShader.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\Shaders\PixelShader.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\Shaders\Quad.ps.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\Shaders\Quad.vs.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\Shaders\VertexShader.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\Shaders\VPRTVertexShader.hlsl">
+      <Filter>Content\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

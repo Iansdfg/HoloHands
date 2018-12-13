@@ -221,6 +221,25 @@ void DX::DeviceResources::CreateDeviceResources()
     {
         m_supportsVprt = true;
     }
+
+    //Update state.
+    ID3D11RasterizerState1 * g_pRasterState;
+
+    D3D11_RASTERIZER_DESC1 rasterizerState;
+    rasterizerState.FillMode = D3D11_FILL_SOLID;
+    rasterizerState.CullMode = D3D11_CULL_NONE;
+    rasterizerState.FrontCounterClockwise = true;
+    rasterizerState.DepthBias = false;
+    rasterizerState.DepthBiasClamp = 0;
+    rasterizerState.SlopeScaledDepthBias = 0;
+    rasterizerState.DepthClipEnable = true;
+    rasterizerState.ScissorEnable = false;
+    rasterizerState.MultisampleEnable = false;
+    rasterizerState.AntialiasedLineEnable = false;
+    rasterizerState.ForcedSampleCount = 0;
+    m_d3dDevice->CreateRasterizerState1(&rasterizerState, &g_pRasterState);
+
+    m_d3dContext->RSSetState(g_pRasterState);
 }
 
 // Validates the back buffer for each HolographicCamera and recreates

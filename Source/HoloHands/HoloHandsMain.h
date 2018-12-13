@@ -8,15 +8,14 @@
 //     * Remove the unused code from your app's Main class.
 //     * Delete the Content folder provided with this template.
 //
-#define DRAW_SAMPLE_CONTENT
 
 #include "Common\DeviceResources.h"
 #include "Common\StepTimer.h"
 
-#ifdef DRAW_SAMPLE_CONTENT
 #include "Content\SpinningCubeRenderer.h"
 #include "Content\SpatialInputHandler.h"
-#endif
+
+#include "Content\QuadRenderer.h"
 
 // Updates, renders, and presents holographic content using Direct3D.
 namespace HoloHands
@@ -66,14 +65,9 @@ namespace HoloHands
         // and when tearing down AppMain.
         void UnregisterHolographicEventHandlers();
 
-#ifdef DRAW_SAMPLE_CONTENT
-        // Renders a colorful holographic cube that's 20 centimeters wide. This sample content
-        // is used to demonstrate world-locked rendering.
+        std::unique_ptr<QuadRenderer>                           m_quadRenderer;
         std::unique_ptr<SpinningCubeRenderer>                           m_spinningCubeRenderer;
-
-        // Listens for the Pressed spatial input event.
         std::shared_ptr<SpatialInputHandler>                            m_spatialInputHandler;
-#endif
 
         // Cached pointer to device resources.
         std::shared_ptr<DX::DeviceResources>                            m_deviceResources;

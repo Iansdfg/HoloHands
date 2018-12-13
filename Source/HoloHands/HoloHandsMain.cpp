@@ -31,16 +31,11 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
 
     m_holographicSpace = holographicSpace;
 
-    //
-    // TODO: Add code here to initialize your holographic content.
-    //
 
-#ifdef DRAW_SAMPLE_CONTENT
-    // Initialize the sample hologram.
     m_spinningCubeRenderer = std::make_unique<SpinningCubeRenderer>(m_deviceResources);
-
     m_spatialInputHandler = std::make_unique<SpatialInputHandler>();
-#endif
+
+    m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources);
 
     // Use the default SpatialLocator to track the motion of the device.
     m_locator = SpatialLocator::GetDefault();
@@ -152,42 +147,26 @@ HolographicFrame^ HoloHandsMain::Update()
     // for creating the stereo view matrices when rendering the sample content.
     SpatialCoordinateSystem^ currentCoordinateSystem = m_referenceFrame->CoordinateSystem;
 
-#ifdef DRAW_SAMPLE_CONTENT
-    // Check for new input state since the last frame.
     SpatialInteractionSourceState^ pointerState = m_spatialInputHandler->CheckForInput();
     if (pointerState != nullptr)
     {
-        // When a Pressed gesture is detected, the sample hologram will be repositioned
-        // two meters in front of the user.
-        m_spinningCubeRenderer->PositionHologram(
-            pointerState->TryGetPointerPose(currentCoordinateSystem)
-            );
+       // When a Pressed gesture is detected, the sample hologram will be repositioned
+       // two meters in front of the user.
+       m_spinningCubeRenderer->PositionHologram(
+          pointerState->TryGetPointerPose(currentCoordinateSystem)
+       );
     }
-#endif
 
     m_timer.Tick([&] ()
     {
-        //
-        // TODO: Update scene objects.
-        //
-        // Put time-based updates here. By default this code will run once per frame,
-        // but if you change the StepTimer to use a fixed time step this code will
-        // run as many times as needed to get to the current step.
-        //
 
-#ifdef DRAW_SAMPLE_CONTENT
-        m_spinningCubeRenderer->Update(m_timer);
-#endif
+       m_spinningCubeRenderer->Update(m_timer);
+        m_quadRenderer->Update(m_timer);
+
     });
-
-    // We complete the frame update by using information about our content positioning
-    // to set the focus point.
 
     for (auto cameraPose : prediction->CameraPoses)
     {
-#ifdef DRAW_SAMPLE_CONTENT
-        // The HolographicCameraRenderingParameters class provides access to set
-        // the image stabilization parameters.
         HolographicCameraRenderingParameters^ renderingParameters = holographicFrame->GetRenderingParameters(cameraPose);
 
         // SetFocusPoint informs the system about a specific point in your scene to
@@ -200,9 +179,8 @@ HolographicFrame^ HoloHandsMain::Update()
         // hologram is at a fixed point so we only need to indicate its position.
         renderingParameters->SetFocusPoint(
             currentCoordinateSystem,
-            m_spinningCubeRenderer->GetPosition()
+           m_spinningCubeRenderer->GetPosition()
             );
-#endif
     }
 
     // The holographic frame will be used to get up-to-date view and projection matrices and
@@ -220,14 +198,6 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
     {
         return false;
     }
-
-    //
-    // TODO: Add code for pre-pass rendering here.
-    //
-    // Take care of any tasks that are not specific to an individual holographic
-    // camera. This includes anything that doesn't need the final view or projection
-    // matrix, such as lighting maps.
-    //
 
     // Lock the set of holographic camera resources, then draw to each camera
     // in this frame.
@@ -283,14 +253,14 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
             // Attach the view/projection constant buffer for this camera to the graphics pipeline.
             bool cameraActive = pCameraResources->AttachViewProjectionBuffer(m_deviceResources);
 
-#ifdef DRAW_SAMPLE_CONTENT
             // Only render world-locked content when positional tracking is active.
             if (cameraActive)
             {
-                // Draw the sample hologram.
-                m_spinningCubeRenderer->Render();
+               m_spinningCubeRenderer->Render();
+
+                m_quadRenderer->Render();
             }
-#endif
+
             atLeastOneCameraRendered = true;
         }
 
@@ -322,18 +292,17 @@ void HoloHandsMain::LoadAppState()
 // need to be released before this method returns.
 void HoloHandsMain::OnDeviceLost()
 {
-#ifdef DRAW_SAMPLE_CONTENT
-    m_spinningCubeRenderer->ReleaseDeviceDependentResources();
-#endif
+   m_spinningCubeRenderer->ReleaseDeviceDependentResources();
+    m_quadRenderer->ReleaseDeviceDependentResources();
 }
 
 // Notifies classes that use Direct3D device resources that the device resources
 // may now be recreated.
 void HoloHandsMain::OnDeviceRestored()
 {
-#ifdef DRAW_SAMPLE_CONTENT
-    m_spinningCubeRenderer->CreateDeviceDependentResources();
-#endif
+   m_spinningCubeRenderer->CreateDeviceDependentResources();
+   
+   m_quadRenderer->CreateDeviceDependentResources();
 }
 
 void HoloHandsMain::OnLocatabilityChanged(SpatialLocator^ sender, Object^ args)
