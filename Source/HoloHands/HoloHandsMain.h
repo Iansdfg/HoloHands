@@ -66,8 +66,6 @@ namespace HoloHands
         void UnregisterHolographicEventHandlers();
 
         std::unique_ptr<QuadRenderer> m_quadRenderer;
-        std::unique_ptr<SpinningCubeRenderer> m_spinningCubeRenderer;
-        std::shared_ptr<SpatialInputHandler> m_spatialInputHandler;
 
         // Cached pointer to device resources.
         std::shared_ptr<DX::DeviceResources> m_deviceResources;

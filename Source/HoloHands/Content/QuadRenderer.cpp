@@ -30,11 +30,6 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
 
 void QuadRenderer::Update(const DX::StepTimer& timer)
 {
-   if (!m_loadingComplete)
-   {
-      return;
-   }
-
    const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
       XMLoadFloat3(&m_headPosition),
       XMLoadFloat3(&m_quadPosition),
@@ -43,6 +38,11 @@ void QuadRenderer::Update(const DX::StepTimer& timer)
    const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&m_quadPosition));
 
    XMStoreFloat4x4(&m_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
+
+   if (!m_loadingComplete)
+   {
+      return;
+   }
 
    const auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -163,22 +163,31 @@ void QuadRenderer::CreateDeviceDependentResources()
    task<void> shaderTaskGroup = createPSTask && createVSTask;
    task<void> createQuadTask = shaderTaskGroup.then([this]()
    {
-      static const std::array<VertexPositionColor, 4> triangleVertices =
+      static const std::array<VertexPositionColor, 4> quadVertices =
       { {
-          { XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-          { XMFLOAT3(-0.5f, +0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-          { XMFLOAT3(+0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-          { XMFLOAT3(+0.5f, +0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
+          { XMFLOAT3(-0.3f, -0.3f, 0.f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+          { XMFLOAT3(-0.3f, +0.3f, 0.f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
+          { XMFLOAT3(+0.3f, -0.3f, 0.f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+          { XMFLOAT3(+0.3f, +0.3f, 0.f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
       } };
 
-      m_vertexCount = static_cast<unsigned int>(triangleVertices.size());
+      //static const std::array<VertexPositionColor, 4> quadVertices =
+      //{ {
+      //    { XMFLOAT3(-0.2f,  0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+      //    { XMFLOAT3(0.2f,  0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+      //    { XMFLOAT3(0.2f, -0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+      //    { XMFLOAT3(-0.2f, -0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+      //} };
+
+
+      m_vertexCount = static_cast<unsigned int>(quadVertices.size());
 
       D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-      vertexBufferData.pSysMem = triangleVertices.data();
+      vertexBufferData.pSysMem = quadVertices.data();
       vertexBufferData.SysMemPitch = 0;
       vertexBufferData.SysMemSlicePitch = 0;
 
-      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionColor) * static_cast<UINT>(triangleVertices.size()), D3D11_BIND_VERTEX_BUFFER);
+      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionColor) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
 
       DX::ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateBuffer(
