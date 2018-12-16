@@ -118,7 +118,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="Content\Shaders\Quad.ps.hlsl.vsspell" />
     <None Include="HoloHands_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

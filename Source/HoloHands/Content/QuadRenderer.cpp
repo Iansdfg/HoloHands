@@ -10,22 +10,39 @@ using namespace Windows::UI::Input::Spatial;
 
 QuadRenderer::QuadRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources)
    :
-   m_deviceResources(deviceResources)
+   m_deviceResources(deviceResources),
+   m_quadPosition({ 0.f, 0.f, -2.f })
 {
    CreateDeviceDependentResources();
 }
 
+void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
+{
+   if (pointerPose != nullptr)
+   {
+      m_headPosition = pointerPose->Head->Position;
+      m_headForwardDirection = pointerPose->Head->ForwardDirection;
+      m_headUpDirection = pointerPose->Head->UpDirection;
+
+      m_quadPosition = m_headPosition + m_headForwardDirection * 2.0;
+   }
+}
+
 void QuadRenderer::Update(const DX::StepTimer& timer)
 {
-   Windows::Foundation::Numerics::float3 position = { 0.f, 0.f, -2.f };
-   const XMMATRIX modelTransform = XMMatrixTranslationFromVector(XMLoadFloat3(&position));
-
-   XMStoreFloat4x4(&m_modelConstantBufferData.model, XMMatrixTranspose(modelTransform));
-
    if (!m_loadingComplete)
    {
       return;
    }
+
+   const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
+      XMLoadFloat3(&m_headPosition),
+      XMLoadFloat3(&m_quadPosition),
+      XMLoadFloat3(&m_headUpDirection)));
+
+   const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&m_quadPosition));
+
+   XMStoreFloat4x4(&m_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
 
    const auto context = m_deviceResources->GetD3DDeviceContext();
 

@@ -90,7 +90,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HoloHands_TemporaryKey.pfx" />
-    <None Include="Content\Shaders\Quad.ps.hlsl.vsspell" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\Shaders\GeometryShader.hlsl">
