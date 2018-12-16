@@ -10,6 +10,7 @@ using namespace Microsoft::WRL;
 using namespace Windows::Graphics::DirectX::Direct3D11;
 using namespace Windows::Graphics::Holographic;
 using namespace Windows::Perception::Spatial;
+using namespace Windows::Foundation::Numerics;
 
 DX::CameraResources::CameraResources(HolographicCamera^ camera) :
     m_holographicCamera(camera),
@@ -173,6 +174,13 @@ void DX::CameraResources::UpdateViewProjectionBuffer(
 
     // The projection transform for each frame is provided by the HolographicCameraPose.
     HolographicStereoTransform cameraProjectionTransform = cameraPose->ProjectionTransform;
+
+    auto vp = cameraPose->Viewport;
+
+    XMMATRIX projectionLeft = XMMatrixInverse(nullptr, XMLoadFloat4x4(&cameraProjectionTransform.Left));
+    XMVECTOR topLeft = XMLoadFloat3(&float3(-1, -1, 0));
+
+    XMVECTOR tl = XMVector3Transform(topLeft, projectionLeft);
 
     // Get a container object with the view and projection matrices for the given
     // pose in the given coordinate system.

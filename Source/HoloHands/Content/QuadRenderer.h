@@ -9,7 +9,10 @@ namespace HoloHands
    class QuadRenderer
    {
    public:
-      QuadRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+      QuadRenderer(
+         const std::shared_ptr<DX::DeviceResources>& deviceResources,
+         const Windows::Foundation::Size& size);
+
       void CreateDeviceDependentResources();
       void ReleaseDeviceDependentResources();
       void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
@@ -32,6 +35,7 @@ namespace HoloHands
 
       bool m_loadingComplete = false;
 
+      Windows::Foundation::Size m_quadSize;
       Windows::Foundation::Numerics::float3 m_quadPosition;
       Windows::Foundation::Numerics::float3 m_headPosition;
       Windows::Foundation::Numerics::float3 m_headForwardDirection;

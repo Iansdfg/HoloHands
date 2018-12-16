@@ -30,7 +30,7 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
 
    m_holographicSpace = holographicSpace;
 
-   m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources);
+   m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources, Size(1268, 720));
 
    m_locator = SpatialLocator::GetDefault();
 
@@ -150,7 +150,7 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
          ID3D11RenderTargetView *const targets[1] = { pCameraResources->GetBackBufferRenderTargetView() };
          context->OMSetRenderTargets(1, targets, depthStencilView);
 
-         context->ClearRenderTargetView(targets[0], DirectX::Colors::Transparent);
+         context->ClearRenderTargetView(targets[0], DirectX::Colors::Transparent); //DirectX::Colors::Red
          context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
          //pCameraResources->UpdateViewProjectionBuffer(m_deviceResources, cameraPose, m_referenceFrame->CoordinateSystem);

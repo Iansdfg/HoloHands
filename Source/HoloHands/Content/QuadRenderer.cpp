@@ -5,13 +5,17 @@
 using namespace HoloHands;
 using namespace Concurrency;
 using namespace DirectX;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 using namespace Windows::UI::Input::Spatial;
 
-QuadRenderer::QuadRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources)
+QuadRenderer::QuadRenderer(
+   const std::shared_ptr<DX::DeviceResources>& deviceResources,
+   const Size& size)
    :
    m_deviceResources(deviceResources),
-   m_quadPosition({ 0.f, 0.f, -2.f })
+   m_quadPosition({ 0.f, 0.f, -2.f }),
+   m_quadSize(size)
 {
    CreateDeviceDependentResources();
 }
@@ -24,7 +28,8 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
       m_headForwardDirection = pointerPose->Head->ForwardDirection;
       m_headUpDirection = pointerPose->Head->UpDirection;
 
-      m_quadPosition = m_headPosition + m_headForwardDirection * 2.0;
+      float distance = 2;
+      m_quadPosition = m_headPosition + m_headForwardDirection * distance;
    }
 }
 
@@ -163,22 +168,19 @@ void QuadRenderer::CreateDeviceDependentResources()
    task<void> shaderTaskGroup = createPSTask && createVSTask;
    task<void> createQuadTask = shaderTaskGroup.then([this]()
    {
+      float aspect = m_quadSize.Width / m_quadSize.Height;
+
+      float scale = 0.5f;
+      float halfWidth = aspect * scale * 0.5f;
+      float halfHeight = 1 * scale * 0.5f;
+
       static const std::array<VertexPositionColor, 4> quadVertices =
       { {
-          { XMFLOAT3(-0.3f, -0.3f, 0.f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-          { XMFLOAT3(-0.3f, +0.3f, 0.f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-          { XMFLOAT3(+0.3f, -0.3f, 0.f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-          { XMFLOAT3(+0.3f, +0.3f, 0.f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
+          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
+          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
+          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
+          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
       } };
-
-      //static const std::array<VertexPositionColor, 4> quadVertices =
-      //{ {
-      //    { XMFLOAT3(-0.2f,  0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
-      //    { XMFLOAT3(0.2f,  0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
-      //    { XMFLOAT3(0.2f, -0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
-      //    { XMFLOAT3(-0.2f, -0.2f, 0.f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
-      //} };
-
 
       m_vertexCount = static_cast<unsigned int>(quadVertices.size());
 
