@@ -8,6 +8,7 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 using namespace Windows::UI::Input::Spatial;
+using namespace Microsoft::WRL;
 
 QuadRenderer::QuadRenderer(
    const std::shared_ptr<DX::DeviceResources>& deviceResources,
@@ -71,7 +72,7 @@ void QuadRenderer::Render()
 
    const auto context = m_deviceResources->GetD3DDeviceContext();
 
-   const UINT stride = sizeof(VertexPositionColor);
+   const UINT stride = sizeof(VertexPositionTextureCoords);
    const UINT offset = 0;
    context->IASetVertexBuffers(
       0,
@@ -102,12 +103,58 @@ void QuadRenderer::Render()
       0
    );
 
-   context->DrawInstanced(
-      m_vertexCount,   // Index count per instance.
-      2,              // Instance count.
-      0,              // Base vertex location.
-      0               // Start instance location.
-   );
+   context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+
+   context->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
+
+   context->DrawInstanced(m_vertexCount, 2, 0, 0);
+}
+
+std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uint32_t& height)
+{
+   ComPtr<IWICImagingFactory> wicFactory;
+   DX::ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
+
+   ComPtr<IWICBitmapDecoder> decoder;
+   DX::ThrowIfFailed(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
+
+   ComPtr<IWICBitmapFrameDecode> frame;
+   DX::ThrowIfFailed(decoder->GetFrame(0, frame.GetAddressOf()));
+
+   DX::ThrowIfFailed(frame->GetSize(&width, &height));
+
+   WICPixelFormatGUID pixelFormat;
+   DX::ThrowIfFailed(frame->GetPixelFormat(&pixelFormat));
+
+   uint32_t rowPitch = width * sizeof(uint32_t);
+   uint32_t imageSize = rowPitch * height;
+
+   std::vector<uint8_t> image;
+   image.resize(size_t(imageSize));
+
+   if (memcmp(&pixelFormat, &GUID_WICPixelFormat32bppBGRA, sizeof(GUID)) == 0)
+   {
+      DX::ThrowIfFailed(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+   }
+   else
+   {
+      ComPtr<IWICFormatConverter> formatConverter;
+      DX::ThrowIfFailed(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
+
+      BOOL canConvert = FALSE;
+      DX::ThrowIfFailed(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
+      if (!canConvert)
+      {
+         throw std::exception("CanConvert");
+      }
+
+      DX::ThrowIfFailed(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
+         WICBitmapDitherTypeErrorDiffusion, nullptr, 0, WICBitmapPaletteTypeMedianCut));
+
+      DX::ThrowIfFailed(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+   }
+
+   return image;
 }
 
 void QuadRenderer::CreateDeviceDependentResources()
@@ -130,7 +177,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> vertexDesc =
       { {
           { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-          { "COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+          { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
       } };
 
       DX::ThrowIfFailed(
@@ -165,7 +212,47 @@ void QuadRenderer::CreateDeviceDependentResources()
       );
    });
 
-   task<void> shaderTaskGroup = createPSTask && createVSTask;
+   task<void> createTexture = concurrency::create_task([this]
+   {
+      // Create sampler.
+      D3D11_SAMPLER_DESC samplerDesc = {};
+      samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+      samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+      samplerDesc.MinLOD = 0;
+      samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+      DX::ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
+            m_sampler.ReleaseAndGetAddressOf()));
+
+      // Create texture.
+      D3D11_TEXTURE2D_DESC txtDesc = {};
+      txtDesc.MipLevels = txtDesc.ArraySize = 1;
+      txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // sunset.jpg is in sRGB colorspace
+      txtDesc.SampleDesc.Count = 1;
+      txtDesc.Usage = D3D11_USAGE_IMMUTABLE;
+      txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+      auto image = LoadBGRAImage(L"Assets/sunset.jpg", txtDesc.Width, txtDesc.Height);
+
+      D3D11_SUBRESOURCE_DATA initialData = {};
+      initialData.pSysMem = image.data();
+      initialData.SysMemPitch = txtDesc.Width * sizeof(uint32_t);
+
+      ComPtr<ID3D11Texture2D> tex;
+      DX::ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateTexture2D(&txtDesc, &initialData,
+            tex.GetAddressOf()));
+
+      DX::ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateShaderResourceView(tex.Get(),
+            nullptr, m_texture.ReleaseAndGetAddressOf()));
+   });
+
+   task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;
    task<void> createQuadTask = shaderTaskGroup.then([this]()
    {
       float aspect = m_quadSize.Width / m_quadSize.Height;
@@ -174,12 +261,12 @@ void QuadRenderer::CreateDeviceDependentResources()
       float halfWidth = aspect * scale * 0.5f;
       float halfHeight = 1 * scale * 0.5f;
 
-      static const std::array<VertexPositionColor, 4> quadVertices =
+      static const std::array<VertexPositionTextureCoords, 4> quadVertices =
       { {
-          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
+          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT2(0.f, 1.f) },
+          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT2(0.f, 0.f) },
+          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT2(1.f, 1.f) },
+          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT2(1.f, 0.f) },
       } };
 
       m_vertexCount = static_cast<unsigned int>(quadVertices.size());
@@ -189,7 +276,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       vertexBufferData.SysMemPitch = 0;
       vertexBufferData.SysMemSlicePitch = 0;
 
-      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionColor) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
+      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
 
       DX::ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateBuffer(

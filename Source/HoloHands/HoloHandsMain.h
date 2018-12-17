@@ -12,9 +12,6 @@
 #include "Common\DeviceResources.h"
 #include "Common\StepTimer.h"
 
-#include "Content\SpinningCubeRenderer.h"
-#include "Content\SpatialInputHandler.h"
-
 #include "Content\QuadRenderer.h"
 
 // Updates, renders, and presents holographic content using Direct3D.

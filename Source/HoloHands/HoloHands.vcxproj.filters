@@ -57,12 +57,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="AppView.cpp" />
-    <ClCompile Include="Content\SpatialInputHandler.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
-    <ClCompile Include="Content\SpinningCubeRenderer.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
     <ClCompile Include="HoloHandsMain.cpp" />
     <ClCompile Include="Content\QuadRenderer.cpp">
       <Filter>Content</Filter>
@@ -71,12 +65,6 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AppView.h" />
-    <ClInclude Include="Content\SpatialInputHandler.h">
-      <Filter>Content</Filter>
-    </ClInclude>
-    <ClInclude Include="Content\SpinningCubeRenderer.h">
-      <Filter>Content</Filter>
-    </ClInclude>
     <ClInclude Include="Content\ShaderStructures.h">
       <Filter>Content</Filter>
     </ClInclude>
@@ -92,23 +80,16 @@
     <None Include="HoloHands_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Content\Shaders\GeometryShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\PixelShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Content\Shaders\Quad.ps.hlsl">
       <Filter>Content\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Content\Shaders\Quad.vs.hlsl">
       <Filter>Content\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Content\Shaders\VertexShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\VPRTVertexShader.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\sunset.jpg">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>

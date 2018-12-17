@@ -40,5 +40,8 @@ namespace HoloHands
       Windows::Foundation::Numerics::float3 m_headPosition;
       Windows::Foundation::Numerics::float3 m_headForwardDirection;
       Windows::Foundation::Numerics::float3 m_headUpDirection;
+
+      Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+      Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
    };
 }
