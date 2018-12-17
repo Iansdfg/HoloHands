@@ -162,7 +162,6 @@ void QuadRenderer::CreateDeviceDependentResources()
    task<std::vector<byte>> loadVSTask = DX::ReadDataAsync(L"ms-appx:///Quad.vs.cso");
    task<std::vector<byte>> loadPSTask = DX::ReadDataAsync(L"ms-appx:///Quad.ps.cso");
 
-   // After the vertex shader file is loaded, create the shader and input layout.
    task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
    {
       DX::ThrowIfFailed(
@@ -214,7 +213,6 @@ void QuadRenderer::CreateDeviceDependentResources()
 
    task<void> createTexture = concurrency::create_task([this]
    {
-      // Create sampler.
       D3D11_SAMPLER_DESC samplerDesc = {};
       samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
       samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -228,10 +226,9 @@ void QuadRenderer::CreateDeviceDependentResources()
          m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
             m_sampler.ReleaseAndGetAddressOf()));
 
-      // Create texture.
       D3D11_TEXTURE2D_DESC txtDesc = {};
       txtDesc.MipLevels = txtDesc.ArraySize = 1;
-      txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // sunset.jpg is in sRGB colorspace
+      txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
       txtDesc.SampleDesc.Count = 1;
       txtDesc.Usage = D3D11_USAGE_IMMUTABLE;
       txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
