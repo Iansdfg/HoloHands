@@ -14,6 +14,9 @@ namespace HoloHands
          Windows::Media::Capture::Frames::MediaFrameArrivedEventArgs^ args);
    private:
       concurrency::task<void> LoadMediaSourceAsync();
+      Platform::String ^ GetKeyForSensor(
+         Windows::Foundation::Collections::IMapView<Platform::String^, Windows::Media::Capture::Frames::MediaFrameSource^>^ frameSources,
+         Platform::String ^ sensorName);
       concurrency::task<void> LoadMediaSourceWorkerAsync();
       concurrency::task<bool> TryInitializeMediaCaptureAsync(Windows::Media::Capture::Frames::MediaFrameSourceGroup^ group);
       concurrency::task<void> CleanupMediaCaptureAsync();
@@ -28,22 +31,7 @@ namespace HoloHands
       int m_selectedSourceGroupIndex = 1;
       bool m_sensorsFound = false;
 
-      struct VolatileState
-      {
-         std::mutex m_mutex;
-
-         // The currently selected source group.
-         int m_selectedStreamId{ 1 };
-
-         std::vector<std::pair<Windows::Media::Capture::Frames::MediaFrameReader^, Windows::Foundation::EventRegistrationToken>> m_readers;
-
-         //std::map<Windows::Media::Capture::Frames::MediaFrameSourceKind, FrameRenderer^> m_frameRenderers;
-         //std::map<int, FrameRenderer^> m_frameRenderers;
-         std::map<int, int> m_FrameReadersToSourceIdMap;
-         std::map<int, int> m_frameCount;
-
-         // Setting this to false enabled displaying all the streams atlease for one frame
-         bool m_firstRunComplete{ false };
-      } m_volatileState;
+      Windows::Media::Capture::Frames::MediaFrameReader^ m_frameReader;
+      Windows::Foundation::EventRegistrationToken m_frameArrivedToken;
    };
 }
