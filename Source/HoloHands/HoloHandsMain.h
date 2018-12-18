@@ -13,6 +13,7 @@
 #include "Common\StepTimer.h"
 
 #include "Content\QuadRenderer.h"
+#include "DepthSensor.h"
 
 // Updates, renders, and presents holographic content using Direct3D.
 namespace HoloHands
@@ -83,5 +84,7 @@ namespace HoloHands
         Windows::Foundation::EventRegistrationToken m_cameraAddedToken;
         Windows::Foundation::EventRegistrationToken m_cameraRemovedToken;
         Windows::Foundation::EventRegistrationToken m_locatabilityChangedToken;
+
+        DepthSensor^ m_depthSensor = nullptr;
     };
 }

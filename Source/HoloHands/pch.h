@@ -11,3 +11,6 @@
 #include <wincodec.h>
 #include <WindowsNumerics.h>
 
+#include <ppltasks.h>
+#include <ppl.h>
+#include <collection.h>

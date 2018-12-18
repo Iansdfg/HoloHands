@@ -93,6 +93,7 @@
   <ItemGroup>
     <ClInclude Include="AppView.h" />
     <ClInclude Include="Content\QuadRenderer.h" />
+    <ClInclude Include="DepthSensor.h" />
     <ClInclude Include="HoloHandsMain.h" />
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
@@ -104,6 +105,7 @@
   <ItemGroup>
     <ClCompile Include="AppView.cpp" />
     <ClCompile Include="Content\QuadRenderer.cpp" />
+    <ClCompile Include="DepthSensor.cpp" />
     <ClCompile Include="HoloHandsMain.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="Common\CameraResources.cpp" />
@@ -144,6 +146,7 @@
   </ImportGroup>
   <PropertyGroup>
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <PackageCertificateThumbprint>A2D6FE47376E961B56DF583C2A0BB135459BFD13</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\$(MSBuildProjectName)\</OutDir>

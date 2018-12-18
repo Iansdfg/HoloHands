@@ -61,6 +61,7 @@
     <ClCompile Include="Content\QuadRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="DepthSensor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -72,6 +73,7 @@
     <ClInclude Include="Content\QuadRenderer.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="DepthSensor.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

@@ -5,7 +5,6 @@
 #include <windows.graphics.directx.direct3d11.interop.h>
 #include <Collection.h>
 
-
 using namespace HoloHands;
 
 using namespace concurrency;
@@ -100,6 +99,11 @@ HolographicFrame^ HoloHandsMain::Update()
    
    m_timer.Tick([&]()
    {
+      if (m_depthSensor == nullptr)
+      {
+         m_depthSensor = ref new DepthSensor();
+      }
+
       SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(attachedCoordinateSystem, prediction->Timestamp);
 
       m_quadRenderer->UpdatePosition(pose);
