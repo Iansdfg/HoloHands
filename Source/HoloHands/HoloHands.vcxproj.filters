@@ -62,6 +62,7 @@
       <Filter>Content</Filter>
     </ClCompile>
     <ClCompile Include="DepthSensor.cpp" />
+    <ClCompile Include="DepthTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -74,6 +75,7 @@
       <Filter>Content</Filter>
     </ClInclude>
     <ClInclude Include="DepthSensor.h" />
+    <ClInclude Include="DepthTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

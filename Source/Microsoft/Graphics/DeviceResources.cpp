@@ -148,9 +148,6 @@ void Graphics::DeviceResources::CreateDeviceResources()
         D3D_FEATURE_LEVEL_12_1,
         D3D_FEATURE_LEVEL_12_0,
         D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0
     };
 
     // Create the Direct3D 11 API device object and a corresponding context.

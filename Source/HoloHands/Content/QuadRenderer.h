@@ -6,6 +6,8 @@
 
 namespace HoloHands
 {
+   class DepthTexture;
+
    class QuadRenderer
    {
    public:
@@ -17,7 +19,7 @@ namespace HoloHands
       void ReleaseDeviceDependentResources();
       void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
       void Update(const DX::StepTimer& timer);
-      void Render();
+      void Render(const DepthTexture& depthTexture);
 
       Windows::Foundation::Numerics::float3 GetQuadPosition() { return m_quadPosition; }
 

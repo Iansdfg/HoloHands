@@ -14,7 +14,8 @@
 
 #include "Content\QuadRenderer.h"
 #include "DepthSensor.h"
-
+#include "DepthTexture.h"  
+   
 // Updates, renders, and presents holographic content using Direct3D.
 namespace HoloHands
 {
@@ -86,5 +87,6 @@ namespace HoloHands
         Windows::Foundation::EventRegistrationToken m_locatabilityChangedToken;
 
         DepthSensor^ m_depthSensor = nullptr;
+        std::unique_ptr<DepthTexture> m_depthTexture = nullptr;
     };
 }

@@ -30,6 +30,12 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
    m_holographicSpace = holographicSpace;
 
    m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources, Size(1268, 720));
+   m_depthTexture = std::make_unique<DepthTexture>(m_deviceResources);
+   m_depthSensor = ref new DepthSensor();
+   //m_depthSensor->SetTexture(m_depthTexture.get());
+
+   m_quadRenderer->CreateDeviceDependentResources();
+   m_depthTexture->CreateDeviceDependentResources();
 
    m_locator = SpatialLocator::GetDefault();
 
@@ -99,11 +105,6 @@ HolographicFrame^ HoloHandsMain::Update()
    
    m_timer.Tick([&]()
    {
-      if (m_depthSensor == nullptr)
-      {
-         m_depthSensor = ref new DepthSensor();
-      }
-
       SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(attachedCoordinateSystem, prediction->Timestamp);
 
       m_quadRenderer->UpdatePosition(pose);
@@ -167,7 +168,9 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
          if (cameraActive)
          {
-            m_quadRenderer->Render();
+            m_depthTexture->CopyFromBitmap(m_depthSensor->GetLatestBitmap()); //TODO: only copy when frame arrived.
+            //m_depthTexture->CopyFromVideoMediaFrame(m_depthSensor->GetLatestBitmap());
+            m_quadRenderer->Render(*m_depthTexture.get());
          }
 
          atLeastOneCameraRendered = true;
@@ -200,11 +203,13 @@ void HoloHandsMain::LoadAppState()
 void HoloHandsMain::OnDeviceLost()
 {
    m_quadRenderer->ReleaseDeviceDependentResources();
+   m_depthTexture->ReleaseDeviceDependentResources();
 }
 
 void HoloHandsMain::OnDeviceRestored()
 {
    m_quadRenderer->CreateDeviceDependentResources();
+   m_depthTexture->CreateDeviceDependentResources();
 }
 
 void HoloHandsMain::OnLocatabilityChanged(SpatialLocator^ sender, Object^ args)

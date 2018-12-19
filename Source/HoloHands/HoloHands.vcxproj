@@ -61,7 +61,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Microsoft\Io\Include;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -75,7 +75,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Microsoft\Io\Include;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -94,6 +94,7 @@
     <ClInclude Include="AppView.h" />
     <ClInclude Include="Content\QuadRenderer.h" />
     <ClInclude Include="DepthSensor.h" />
+    <ClInclude Include="DepthTexture.h" />
     <ClInclude Include="HoloHandsMain.h" />
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
@@ -106,6 +107,7 @@
     <ClCompile Include="AppView.cpp" />
     <ClCompile Include="Content\QuadRenderer.cpp" />
     <ClCompile Include="DepthSensor.cpp" />
+    <ClCompile Include="DepthTexture.cpp" />
     <ClCompile Include="HoloHandsMain.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="Common\CameraResources.cpp" />
@@ -134,8 +136,17 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft\Debugging\Debugging.vcxproj">
+      <Project>{ad347424-7340-47ce-a979-2c7f2df0eb38}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft\HoloLensForCV\HoloLensForCV.vcxproj">
       <Project>{208c932d-a71e-4c67-a444-0697e9a4226e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft\Io\Io.vcxproj">
+      <Project>{6e542043-c5d1-4850-b43e-e9295b640c2b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft\OpenCVHelpers\OpenCVHelpers.vcxproj">
+      <Project>{940a6d80-0775-4272-84c9-1585c4757071}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

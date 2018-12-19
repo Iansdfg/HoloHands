@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "QuadRenderer.h"
 #include "Common\DirectXHelper.h"
+#include "DepthTexture.h"
 
 using namespace HoloHands;
 using namespace Concurrency;
@@ -63,7 +64,7 @@ void QuadRenderer::Update(const DX::StepTimer& timer)
 }
 
 
-void QuadRenderer::Render()
+void QuadRenderer::Render(const DepthTexture& depthTexture)
 {
    if (!m_loadingComplete)
    {
@@ -105,7 +106,11 @@ void QuadRenderer::Render()
 
    context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
 
-   context->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
+   auto texture = depthTexture.GetTextureView();
+   if (texture != nullptr)
+   {
+      context->PSSetShaderResources(0, 1, &texture);
+   }
 
    context->DrawInstanced(m_vertexCount, 2, 0, 0);
 }
@@ -225,7 +230,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       DX::ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
             m_sampler.ReleaseAndGetAddressOf()));
-
+/*
       D3D11_TEXTURE2D_DESC txtDesc = {};
       txtDesc.MipLevels = txtDesc.ArraySize = 1;
       txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -246,7 +251,7 @@ void QuadRenderer::CreateDeviceDependentResources()
 
       DX::ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateShaderResourceView(tex.Get(),
-            nullptr, m_texture.ReleaseAndGetAddressOf()));
+            nullptr, m_texture.ReleaseAndGetAddressOf()));*/
    });
 
    task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;

@@ -14,3 +14,4 @@
 #include <ppltasks.h>
 #include <ppl.h>
 #include <collection.h>
+#include <memory>

@@ -85,7 +85,7 @@ namespace Graphics
         Windows::Graphics::Holographic::HolographicSpace^       _holographicSpace = nullptr;
 
         // Properties of the Direct3D device currently in use.
-        D3D_FEATURE_LEVEL                                       _d3dFeatureLevel = D3D_FEATURE_LEVEL_10_0;
+        D3D_FEATURE_LEVEL                                       _d3dFeatureLevel = D3D_FEATURE_LEVEL_11_1;
 
         // The IDeviceNotify can be held directly as it owns the DeviceResources.
         IDeviceNotify*                                          _deviceNotify = nullptr;
