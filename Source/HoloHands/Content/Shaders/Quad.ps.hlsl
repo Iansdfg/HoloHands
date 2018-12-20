@@ -9,6 +9,17 @@ SamplerState quadSampler : register(s0);
 
 min16float4 main(PixelShaderInput input) : SV_TARGET
 {
-    min16float depth = quadTexture.Sample(quadSampler, input.texCoord).r * 10.0;
-    return min16float4(depth, depth, depth, 1.0f);
+   const float min = 0.00;
+   const float max = 0.020;
+
+   min16float depth = quadTexture.Sample(quadSampler, input.texCoord).r;
+   min16float color = (depth - min) / (max - min); //normalize to min, max rang.e
+   color = 1 - color; //invert.
+
+   if (color <= 0 || color >= 1.0)
+   {
+      return min16float4(1, 0, 0, 0); //out of range.
+   }
+
+    return min16float4(color, color, color, 1);
 }

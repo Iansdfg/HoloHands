@@ -26,6 +26,16 @@ DepthSensor::DepthSensor()
    }, task_continuation_context::use_current());
 }
 
+void HoloHands::DepthSensor::Lock()
+{
+   m_locked = true; //TODO: use mutex.
+}
+
+void HoloHands::DepthSensor::Unlock()
+{
+   m_locked = false;
+}
+
 
 EXTERN_GUID(MFSampleExtension_DeviceTimestamp, 0x8f3e35e7, 0x2dcd, 0x4887, 0x86, 0x22, 0x2a, 0x58, 0xba, 0xa6, 0x52, 0xb0);
 EXTERN_GUID(MFSampleExtension_Spatial_CameraViewTransform, 0x4e251fa4, 0x830f, 0x4770, 0x85, 0x9a, 0x4b, 0x8d, 0x99, 0xaa, 0x80, 0x9b);
@@ -598,12 +608,15 @@ void DepthSensor::FrameReader_FrameArrived(MediaFrameReader^ sender, MediaFrameA
 
          String^ name = m_volatileState.m_names[sourceId];
 
-         //if (name == ref new String(L"Short Throw ToF Depth"))
-            if (name == ref new String(L"Long Throw ToF Depth"))
+         if (name == ref new String(L"Short Throw ToF Depth"))
+            //if (name == ref new String(L"Long Throw ToF Depth"))
          {
             SoftwareBitmap^ softwareBitmap = frame->VideoMediaFrame->SoftwareBitmap;
 
-            m_latestBitmap = softwareBitmap;
+            if (!m_locked) //TODO: use mutex.
+            {
+               m_latestBitmap = softwareBitmap;
+            }
          }
       }
    }

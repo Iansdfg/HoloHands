@@ -10,6 +10,9 @@ namespace HoloHands
 
       Windows::Graphics::Imaging::SoftwareBitmap^ GetLatestBitmap() { return m_latestBitmap; };
 
+      void Lock();
+      void Unlock();
+
    private:
 
       void FrameReader_FrameArrived(
@@ -39,7 +42,7 @@ namespace HoloHands
 
       Windows::Graphics::Imaging::SoftwareBitmap^ m_latestBitmap;
 
-
+      bool m_locked = false;
       struct VolatileState
       {
          std::mutex m_mutex;

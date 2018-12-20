@@ -168,7 +168,9 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
          if (cameraActive)
          {
+            m_depthSensor->Lock();
             m_depthTexture->CopyFromBitmap(m_depthSensor->GetLatestBitmap()); //TODO: only copy when frame arrived.
+            m_depthSensor->Unlock();
             //m_depthTexture->CopyFromVideoMediaFrame(m_depthSensor->GetLatestBitmap());
             m_quadRenderer->Render(*m_depthTexture.get());
          }
