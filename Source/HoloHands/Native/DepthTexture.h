@@ -14,8 +14,8 @@ namespace HoloHands
          void CreateDeviceDependentResources() override;
          void ReleaseDeviceDependentResources() override;
 
-         ID3D11Texture2D* GetTexture(void) const { return m_texture.Get(); }         
-         ID3D11ShaderResourceView* GetTextureView(void) const { return m_textureView.Get(); }
+         ID3D11Texture2D* GetTexture(void) const;
+         ID3D11ShaderResourceView* GetTextureView(void) const;
 
       private:
          Microsoft::WRL::ComPtr<ID3D11Texture2D> m_texture;

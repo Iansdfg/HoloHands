@@ -2,16 +2,19 @@
 
 namespace HoloHands
 {
-   public ref class DepthSensor sealed
+   class DepthTexture;
+
+   class DepthSensor
    {
    public:
-      DepthSensor();
+      DepthSensor(DepthTexture& texture);
 
-      Windows::Graphics::Imaging::SoftwareBitmap^ GetLatestBitmap() { return m_latestBitmap; };
+      Windows::Graphics::Imaging::SoftwareBitmap^ GetLatestBitmap();
 
       void Lock();
       void Unlock();
 
+      bool HasNewBitmap();
    private:
 
       void FrameReader_FrameArrived(
@@ -39,19 +42,20 @@ namespace HoloHands
       Windows::Media::Capture::Frames::MediaFrameReader^ m_frameReader;
       Windows::Foundation::EventRegistrationToken m_frameArrivedToken;
 
+      DepthTexture& m_texture;
+      std::mutex m_readingBitmap;
+
       Windows::Graphics::Imaging::SoftwareBitmap^ m_latestBitmap;
 
-      bool m_locked = false;
+      bool m_hasNewBitmap = false;
       struct VolatileState
       {
          std::mutex m_mutex;
 
-         // The currently selected source group.
          int m_selectedStreamId{ 1 };
 
          std::vector<std::pair<Windows::Media::Capture::Frames::MediaFrameReader^, Windows::Foundation::EventRegistrationToken>> m_readers;
 
-         //std::map<Windows::Media::Capture::Frames::MediaFrameSourceKind, FrameRenderer^> m_frameRenderers;
          std::map<int, Platform::String^> m_names;
          std::map<int, int> m_FrameReadersToSourceIdMap;
          std::map<int, int> m_frameCount;

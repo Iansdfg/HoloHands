@@ -3,9 +3,8 @@
 #include "Native/Rendering/DeviceResources.h"
 #include "Native/Rendering/QuadRenderer.h"
 #include "Native/Utils/StepTimer.h"
-#include "Native/DepthTexture.h"  
-
-#include "Managed/DepthSensor.h"
+#include "Native/DepthTexture.h"
+#include "Native/DepthSensor.h"
 
 namespace HoloHands
 {
@@ -76,7 +75,7 @@ namespace HoloHands
         Windows::Foundation::EventRegistrationToken m_cameraRemovedToken;
         Windows::Foundation::EventRegistrationToken m_locatabilityChangedToken;
 
-        DepthSensor^ m_depthSensor = nullptr;
+        std::unique_ptr<DepthSensor> m_depthSensor = nullptr;
         std::unique_ptr<DepthTexture> m_depthTexture = nullptr;
     };
 }

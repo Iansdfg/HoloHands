@@ -17,8 +17,11 @@ using namespace Windows::Media::Capture;
 using namespace Windows::Media::Capture::Frames;
 using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::Storage;
+using namespace std::placeholders;
 
-DepthSensor::DepthSensor()
+DepthSensor::DepthSensor(DepthTexture& texture)
+   :
+   m_texture(texture)
 {
    LoadMediaSourceWorkerAsync()
       .then([this]()
@@ -26,14 +29,25 @@ DepthSensor::DepthSensor()
    }, task_continuation_context::use_current());
 }
 
+Windows::Graphics::Imaging::SoftwareBitmap ^ HoloHands::DepthSensor::GetLatestBitmap()
+{
+   m_hasNewBitmap = false;
+   return m_latestBitmap;
+}
+
 void HoloHands::DepthSensor::Lock()
 {
-   m_locked = true; //TODO: use mutex.
+   m_readingBitmap.lock();
 }
 
 void HoloHands::DepthSensor::Unlock()
 {
-   m_locked = false;
+   m_readingBitmap.unlock();
+}
+
+bool HoloHands::DepthSensor::HasNewBitmap()
+{
+   return m_hasNewBitmap;
 }
 
 
@@ -208,159 +222,6 @@ String^ GetSubtypeForFrameReader(MediaFrameSourceKind kind, MediaFrameFormat^ fo
    }
 }
 
-//TODO: doesn't work, for some reason you have to loop through all the key/value pairs.
-/*
-task<void> DepthSensor::LoadMediaSourceWorkerAsync()
-{
-   return CleanupMediaCaptureAsync()
-      .then([this]()
-   {
-      return create_task(MediaFrameSourceGroup::FindAllAsync());
-   }, task_continuation_context::get_current_winrt_context())
-      .then([this](IVectorView<MediaFrameSourceGroup^>^ allGroups)
-   {
-      if (allGroups->Size == 0)
-      {
-         OutputDebugString(L"No source groups found.\n");
-         return task_from_result();
-      }
-
-      MediaFrameSourceGroup^ selectedGroup;
-
-      for (uint32_t i = 0; i < allGroups->Size; ++i)
-      {
-         MediaFrameSourceGroup^ candidateGroup = allGroups->GetAt(i);
-
-         if (candidateGroup->DisplayName == "Sensor Streaming")
-         {
-            m_selectedSourceGroupIndex = i;
-            selectedGroup = candidateGroup;
-            break;
-         }
-      }
-
-      if (!selectedGroup)
-      {
-         OutputDebugString(L"No Sensor Streaming groups found.\n");
-         return task_from_result();
-      }
-
-      OutputDebugString(("Found " + allGroups->Size.ToString() + " groups and " +
-         "selecting index [" + m_selectedSourceGroupIndex.ToString() + "] : " +
-         selectedGroup->DisplayName + "\n")->Data());
-
-      // Initialize MediaCapture with selected group.
-      return TryInitializeMediaCaptureAsync(selectedGroup)
-         .then([this, selectedGroup](bool initialized)
-      {
-         if (!initialized)
-         {
-            return CleanupMediaCaptureAsync();
-         }
-
-         // Set up frame readers, register event handlers and start streaming.
-         auto startedKinds = std::make_shared<std::unordered_set<MediaFrameSourceKind>>();
-         task<void> createReadersTask = task_from_result();
-
-         String^ selectedSensorName = ref new String(L"Short Throw ToF Depth");
-         //String^ selectedSensorName = ref new String(L"Visible Light Left-Left");
-
-         String^ selectedSensorKey = GetKeyForSensor(m_mediaCapture->FrameSources, selectedSensorName);
-
-         bool containsKey = m_mediaCapture->FrameSources->HasKey(selectedSensorKey);
-         if (!containsKey)
-         {
-            OutputDebugString(("Error: No sensor found with the name: " + selectedSensorName + "\n")->Data());
-            return task_from_result();
-         }
-
-         //MediaFrameSource^ source = m_mediaCapture->FrameSources->Lookup(selectedSensorKey);
-         MediaFrameSource^ source = nullptr;
-
-         //TODO: use Lookup instead.
-         for (IKeyValuePair<String^, MediaFrameSource^>^ kvp : m_mediaCapture->FrameSources)
-         {
-            if (kvp->Key == selectedSensorKey)
-            {
-               source = kvp->Value;
-               continue;
-            }
-          }
-
-         MediaFrameSourceKind kind = source->Info->SourceKind;
-
-         std::wstring sourceIdStr(source->Info->Id->Data());
-
-         Platform::String^ sensorName(kind.ToString());
-
-         DebugOutputAllProperties(source->Info->Properties);
-
-         GetSensorName(source, sensorName);
-
-         createReadersTask = createReadersTask.then([this, startedKinds, source, kind]()
-         {
-            String^ requestedSubtype = nullptr;
-
-            //Find supported sensor format.
-            auto found = std::find_if(begin(source->SupportedFormats), end(source->SupportedFormats),
-               [&](MediaFrameFormat^ format)
-            {
-               requestedSubtype = GetSubtypeForFrameReader(kind, format);
-
-               return requestedSubtype != nullptr;
-            });
-
-            if (requestedSubtype == nullptr)
-            {
-               return task_from_result();
-            }
-
-            // Tell the source to use the format we can render.
-            return create_task(source->SetFormatAsync(*found))
-               .then([this, source, requestedSubtype]()
-            {
-               return create_task(m_mediaCapture->CreateFrameReaderAsync(source, requestedSubtype));
-            }, task_continuation_context::get_current_winrt_context())
-               .then([this, kind, source](MediaFrameReader^ frameReader)
-            {
-               // Add frame reader to the internal lookup
-               m_frameReader = frameReader;
-
-               m_frameArrivedToken = m_frameReader->FrameArrived +=
-                  ref new TypedEventHandler<MediaFrameReader^, MediaFrameArrivedEventArgs^>(this, &DepthSensor::FrameReader_FrameArrived);
-
-               OutputDebugString((kind.ToString() + " reader created" + "\n")->Data());
-
-               return create_task(m_frameReader->StartAsync());
-            }, task_continuation_context::get_current_winrt_context())
-               .then([this, kind, startedKinds](MediaFrameReaderStartStatus status)
-            {
-               if (status == MediaFrameReaderStartStatus::Success)
-               {
-                  OutputDebugString(("Started " + kind.ToString() + " reader." + "\n")->Data());
-                  startedKinds->insert(kind);
-               }
-               else
-               {
-                  OutputDebugString(("Unable to start " + kind.ToString() + "  reader. Error: " + status.ToString() + "\n")->Data());
-               }
-            }, task_continuation_context::get_current_winrt_context());
-         }, task_continuation_context::get_current_winrt_context());
-
-         // Run the loop and see if any sources were used.
-         return createReadersTask.then([this, startedKinds, selectedGroup]()
-         {
-            if (startedKinds->size() == 0)
-            {
-               OutputDebugString(("No eligible sources in " + selectedGroup->DisplayName + "." + "\n")->Data());
-            }
-         }, task_continuation_context::get_current_winrt_context());
-      }, task_continuation_context::get_current_winrt_context());
-   }, task_continuation_context::get_current_winrt_context());
-}
-*/
-
-
 task<void> DepthSensor::LoadMediaSourceWorkerAsync()
 {
    return CleanupMediaCaptureAsync()
@@ -482,7 +343,8 @@ task<void> DepthSensor::LoadMediaSourceWorkerAsync()
                   m_volatileState.m_FrameReadersToSourceIdMap[frameReader->GetHashCode()] = id;
 
                   EventRegistrationToken token = frameReader->FrameArrived +=
-                     ref new TypedEventHandler<MediaFrameReader^, MediaFrameArrivedEventArgs^>(this, &DepthSensor::FrameReader_FrameArrived);
+                     ref new TypedEventHandler<MediaFrameReader^, MediaFrameArrivedEventArgs^>(
+                        std::bind(&DepthSensor::FrameReader_FrameArrived, this, _1, _2));
 
                   // Keep track of created reader and event handler so it can be stopped later.
                   m_volatileState.m_readers.push_back(std::make_pair(frameReader, token));
@@ -600,6 +462,8 @@ void DepthSensor::FrameReader_FrameArrived(MediaFrameReader^ sender, MediaFrameA
    {
       if (frame != nullptr)
       {
+         m_readingBitmap.lock();
+
          std::lock_guard<std::mutex> lockGuard(m_volatileState.m_mutex);
 
          // Find the corresponding source id
@@ -611,13 +475,11 @@ void DepthSensor::FrameReader_FrameArrived(MediaFrameReader^ sender, MediaFrameA
          if (name == ref new String(L"Short Throw ToF Depth"))
             //if (name == ref new String(L"Long Throw ToF Depth"))
          {
-            SoftwareBitmap^ softwareBitmap = frame->VideoMediaFrame->SoftwareBitmap;
-
-            if (!m_locked) //TODO: use mutex.
-            {
-               m_latestBitmap = softwareBitmap;
-            }
+            m_latestBitmap = frame->VideoMediaFrame->SoftwareBitmap;
+            m_hasNewBitmap = true;
          }
+
+         m_readingBitmap.unlock();
       }
    }
 }

@@ -115,7 +115,6 @@ void DepthTexture::CreateDeviceDependentResources()
       m_texture.Get(),
       D3D11_SRV_DIMENSION_TEXTURE2D,
       DXGI_FORMAT_R16_UNORM);
-   //);
 
    ThrowIfFailed(
       m_deviceResources->GetD3DDevice()->CreateShaderResourceView(
@@ -130,5 +129,15 @@ void DepthTexture::ReleaseDeviceDependentResources()
    {
       m_texture.Reset();
    }
+}
+
+ID3D11Texture2D* DepthTexture::GetTexture(void) const
+{
+   return m_texture.Get();
+}
+
+ID3D11ShaderResourceView* DepthTexture::GetTextureView(void) const
+{
+   return m_textureView.Get();
 }
 

@@ -32,8 +32,7 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
 
    m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources, Size(1268, 720));
    m_depthTexture = std::make_unique<DepthTexture>(m_deviceResources);
-   m_depthSensor = ref new DepthSensor();
-   //m_depthSensor->SetTexture(m_depthTexture.get());
+   m_depthSensor = std::make_unique<DepthSensor>(*m_depthTexture.get());
 
    m_quadRenderer->CreateDeviceDependentResources();
    m_depthTexture->CreateDeviceDependentResources();
@@ -169,10 +168,16 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
          if (cameraActive)
          {
-            m_depthSensor->Lock();
-            m_depthTexture->CopyFromBitmap(m_depthSensor->GetLatestBitmap()); //TODO: only copy when frame arrived.
-            m_depthSensor->Unlock();
-            //m_depthTexture->CopyFromVideoMediaFrame(m_depthSensor->GetLatestBitmap());
+            if (m_depthSensor->HasNewBitmap())
+            {
+               m_depthSensor->Lock();
+
+               auto bitmap = m_depthSensor->GetLatestBitmap();
+               m_depthTexture->CopyFromBitmap(bitmap);
+
+               m_depthSensor->Unlock();
+            }
+
             m_quadRenderer->Render(*m_depthTexture.get());
          }
 
@@ -185,22 +190,12 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
 void HoloHandsMain::SaveAppState()
 {
-   //
-   // TODO: Insert code here to save your app state.
-   //       This method is called when the app is about to suspend.
-   //
-   //       For example, store information in the SpatialAnchorStore.
-   //
+   //TODO:
 }
 
 void HoloHandsMain::LoadAppState()
 {
-   //
-   // TODO: Insert code here to load your app state.
-   //       This method is called when the app resumes.
-   //
-   //       For example, load information from the SpatialAnchorStore.
-   //
+   //TODO:
 }
 
 void HoloHandsMain::OnDeviceLost()

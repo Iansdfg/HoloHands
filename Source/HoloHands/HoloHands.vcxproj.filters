@@ -56,13 +56,13 @@
     <ClCompile Include="Managed\AppView.cpp">
       <Filter>Managed</Filter>
     </ClCompile>
-    <ClCompile Include="Managed\DepthSensor.cpp">
-      <Filter>Managed</Filter>
-    </ClCompile>
     <ClCompile Include="Native\DepthTexture.cpp">
       <Filter>Native</Filter>
     </ClCompile>
     <ClCompile Include="Native\HoloHandsMain.cpp">
+      <Filter>Native</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\DepthSensor.cpp">
       <Filter>Native</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,9 +86,6 @@
     <ClInclude Include="Managed\AppView.h">
       <Filter>Managed</Filter>
     </ClInclude>
-    <ClInclude Include="Managed\DepthSensor.h">
-      <Filter>Managed</Filter>
-    </ClInclude>
     <ClInclude Include="Native\DepthTexture.h">
       <Filter>Native</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Native\Utils\StepTimer.h">
       <Filter>Native\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\DepthSensor.h">
+      <Filter>Native</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
