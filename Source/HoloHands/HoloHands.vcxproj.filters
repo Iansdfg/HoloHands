@@ -62,7 +62,7 @@
     <ClCompile Include="Native\HoloHandsMain.cpp">
       <Filter>Native</Filter>
     </ClCompile>
-    <ClCompile Include="Native\DepthSensor.cpp">
+    <ClCompile Include="Native\Sensor.cpp">
       <Filter>Native</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,7 +95,7 @@
     <ClInclude Include="Native\Utils\StepTimer.h">
       <Filter>Native\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Native\DepthSensor.h">
+    <ClInclude Include="Native\Sensor.h">
       <Filter>Native</Filter>
     </ClInclude>
   </ItemGroup>

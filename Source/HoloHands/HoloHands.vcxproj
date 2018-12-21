@@ -92,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Managed\AppView.h" />
-    <ClInclude Include="Native\DepthSensor.h" />
+    <ClInclude Include="Native\Sensor.h" />
     <ClInclude Include="Native\DepthTexture.h" />
     <ClInclude Include="Native\HoloHandsMain.h" />
     <ClInclude Include="Native\Rendering\CameraResources.h" />
@@ -105,7 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Managed\AppView.cpp" />
-    <ClCompile Include="Native\DepthSensor.cpp" />
+    <ClCompile Include="Native\Sensor.cpp" />
     <ClCompile Include="Native\DepthTexture.cpp" />
     <ClCompile Include="Native\HoloHandsMain.cpp" />
     <ClCompile Include="Native\Rendering\CameraResources.cpp" />
