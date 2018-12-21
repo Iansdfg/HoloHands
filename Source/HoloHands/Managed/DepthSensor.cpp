@@ -2,10 +2,10 @@
 
 #include "DepthSensor.h"
 
-#include "DepthTexture.h"
+#include "Native/DepthTexture.h"
+#include "Io/All.h"
 #include <unordered_set>
 #include <sstream>
-#include "Io\All.h"
 
 using namespace HoloHands;
 using namespace Concurrency;

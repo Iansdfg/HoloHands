@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/DeviceResources.h"
+#include "Native/Rendering/DeviceResources.h"
 
 namespace HoloHands
 {

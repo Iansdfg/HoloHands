@@ -1,22 +1,12 @@
 #pragma once
 
-//
-// Comment out this preprocessor definition to disable all of the
-// sample content.
-//
-// To remove the content after disabling it:
-//     * Remove the unused code from your app's Main class.
-//     * Delete the Content folder provided with this template.
-//
+#include "Native/Rendering/DeviceResources.h"
+#include "Native/Rendering/QuadRenderer.h"
+#include "Native/Utils/StepTimer.h"
+#include "Native/DepthTexture.h"  
 
-#include "Common\DeviceResources.h"
-#include "Common\StepTimer.h"
+#include "Managed/DepthSensor.h"
 
-#include "Content\QuadRenderer.h"
-#include "DepthSensor.h"
-#include "DepthTexture.h"  
-   
-// Updates, renders, and presents holographic content using Direct3D.
 namespace HoloHands
 {
     class HoloHandsMain : public DX::IDeviceNotify

@@ -1,7 +1,8 @@
 #include "pch.h"
-#include "HoloHandsMain.h"
-#include "Common\DirectXHelper.h"
 
+#include "HoloHandsMain.h"
+
+#include "Native/Rendering/DirectXHelper.h"
 #include <windows.graphics.directx.direct3d11.interop.h>
 #include <Collection.h>
 

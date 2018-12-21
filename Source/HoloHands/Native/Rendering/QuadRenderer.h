@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\Common\DeviceResources.h"
-#include "..\Common\StepTimer.h"
-#include "ShaderStructures.h"
+#include "Native/Rendering/DeviceResources.h"
+#include "Native/Rendering/ShaderStructures.h"
+#include "Native/Utils/StepTimer.h"
 
 namespace HoloHands
 {

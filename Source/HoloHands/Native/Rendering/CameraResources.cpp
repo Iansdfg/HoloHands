@@ -1,8 +1,9 @@
 #include "pch.h"
 
 #include "CameraResources.h"
-#include "Common\DirectXHelper.h"
-#include "DeviceResources.h"
+
+#include "Native/Rendering/DirectXHelper.h"
+#include "Native/Rendering/DeviceResources.h"
 #include <windows.graphics.directx.direct3d11.interop.h>
 
 using namespace DirectX;

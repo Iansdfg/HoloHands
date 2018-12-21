@@ -1,37 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Common">
-      <UniqueIdentifier>a8d641f4-77ef-4f83-aa52-df17b1fe1e6b</UniqueIdentifier>
-    </Filter>
     <Filter Include="Assets">
       <UniqueIdentifier>3865892a-c798-41ed-a4fc-b69a563cbb80</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
-    <Filter Include="Content">
-      <UniqueIdentifier>90fb00a4-d70a-4086-aaa7-ad194ea9fb17</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Content\Shaders">
-      <UniqueIdentifier>8edf25b1-5861-4fff-901f-c776b133339f</UniqueIdentifier>
-    </Filter>
-    <ClInclude Include="Common\DirectXHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\StepTimer.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\DeviceResources.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClCompile Include="Common\DeviceResources.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClInclude Include="Common\CameraResources.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClCompile Include="Common\CameraResources.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
@@ -53,29 +26,78 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
+    <Filter Include="Native">
+      <UniqueIdentifier>{2f1926b7-c202-433f-a2ee-c21e90565fd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managed">
+      <UniqueIdentifier>{41eb6604-90a8-458c-bb7c-c9f5ef00e052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Native\Rendering">
+      <UniqueIdentifier>{633981d2-71b3-44de-8ab1-f5dd03e7018d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Native\Rendering\Shaders">
+      <UniqueIdentifier>{a382a5fa-e49e-40bf-a3a9-b36c8cd55618}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Native\Utils">
+      <UniqueIdentifier>{b5d9deef-61c8-4838-950f-9328245b8a00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="AppView.cpp" />
-    <ClCompile Include="HoloHandsMain.cpp" />
-    <ClCompile Include="Content\QuadRenderer.cpp">
-      <Filter>Content</Filter>
+    <ClCompile Include="Native\Rendering\CameraResources.cpp">
+      <Filter>Native\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="DepthSensor.cpp" />
-    <ClCompile Include="DepthTexture.cpp" />
+    <ClCompile Include="Native\Rendering\DeviceResources.cpp">
+      <Filter>Native\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\Rendering\QuadRenderer.cpp">
+      <Filter>Native\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Managed\AppView.cpp">
+      <Filter>Managed</Filter>
+    </ClCompile>
+    <ClCompile Include="Managed\DepthSensor.cpp">
+      <Filter>Managed</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\DepthTexture.cpp">
+      <Filter>Native</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\HoloHandsMain.cpp">
+      <Filter>Native</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="AppView.h" />
-    <ClInclude Include="Content\ShaderStructures.h">
-      <Filter>Content</Filter>
+    <ClInclude Include="Native\Rendering\CameraResources.h">
+      <Filter>Native\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="HoloHandsMain.h" />
-    <ClInclude Include="Content\QuadRenderer.h">
-      <Filter>Content</Filter>
+    <ClInclude Include="Native\Rendering\DeviceResources.h">
+      <Filter>Native\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="DepthSensor.h" />
-    <ClInclude Include="DepthTexture.h" />
+    <ClInclude Include="Native\Rendering\DirectXHelper.h">
+      <Filter>Native\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\Rendering\QuadRenderer.h">
+      <Filter>Native\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\Rendering\ShaderStructures.h">
+      <Filter>Native\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Managed\AppView.h">
+      <Filter>Managed</Filter>
+    </ClInclude>
+    <ClInclude Include="Managed\DepthSensor.h">
+      <Filter>Managed</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\DepthTexture.h">
+      <Filter>Native</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\HoloHandsMain.h">
+      <Filter>Native</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\Utils\StepTimer.h">
+      <Filter>Native\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -84,16 +106,16 @@
     <None Include="HoloHands_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Content\Shaders\Quad.ps.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Quad.vs.hlsl">
-      <Filter>Content\Shaders</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="Assets\sunset.jpg">
       <Filter>Assets</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Native\Rendering\Shaders\Quad.vs.hlsl">
+      <Filter>Native\Rendering\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Native\Rendering\Shaders\Quad.ps.hlsl">
+      <Filter>Native\Rendering\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -1,7 +1,9 @@
 #include "pch.h"
+
 #include "QuadRenderer.h"
-#include "Common\DirectXHelper.h"
-#include "DepthTexture.h"
+
+#include "Native/Rendering/DirectXHelper.h"
+#include "Native/DepthTexture.h"
 
 using namespace HoloHands;
 using namespace Concurrency;

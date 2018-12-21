@@ -2,7 +2,6 @@
 
 namespace HoloHands
 {
-
    public ref class DepthSensor sealed
    {
    public:

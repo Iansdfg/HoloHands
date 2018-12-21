@@ -2,10 +2,10 @@
 
 #include "DepthTexture.h"
 
-#include "Common\DirectXHelper.h"
-#include <MemoryBuffer.h>
+#include "Native/Rendering/DirectXHelper.h"
 
-#include "Io\All.h"
+#include "Io/All.h"
+#include <MemoryBuffer.h>
 
 using namespace HoloHands;
 using namespace Concurrency;

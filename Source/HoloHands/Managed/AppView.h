@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common\DeviceResources.h"
-#include "HoloHandsMain.h"
+#include "Native/Rendering/DeviceResources.h"
+#include "Native/HoloHandsMain.h"
 
 namespace HoloHands
 {

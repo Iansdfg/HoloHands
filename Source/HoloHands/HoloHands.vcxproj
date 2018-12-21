@@ -91,26 +91,26 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppView.h" />
-    <ClInclude Include="Content\QuadRenderer.h" />
-    <ClInclude Include="DepthSensor.h" />
-    <ClInclude Include="DepthTexture.h" />
-    <ClInclude Include="HoloHandsMain.h" />
-    <ClInclude Include="Common\DeviceResources.h" />
-    <ClInclude Include="Common\DirectXHelper.h" />
-    <ClInclude Include="Common\CameraResources.h" />
-    <ClInclude Include="Common\StepTimer.h" />
-    <ClInclude Include="Content\ShaderStructures.h" />
+    <ClInclude Include="Managed\AppView.h" />
+    <ClInclude Include="Managed\DepthSensor.h" />
+    <ClInclude Include="Native\DepthTexture.h" />
+    <ClInclude Include="Native\HoloHandsMain.h" />
+    <ClInclude Include="Native\Rendering\CameraResources.h" />
+    <ClInclude Include="Native\Rendering\DeviceResources.h" />
+    <ClInclude Include="Native\Rendering\DirectXHelper.h" />
+    <ClInclude Include="Native\Rendering\QuadRenderer.h" />
+    <ClInclude Include="Native\Rendering\ShaderStructures.h" />
+    <ClInclude Include="Native\Utils\StepTimer.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AppView.cpp" />
-    <ClCompile Include="Content\QuadRenderer.cpp" />
-    <ClCompile Include="DepthSensor.cpp" />
-    <ClCompile Include="DepthTexture.cpp" />
-    <ClCompile Include="HoloHandsMain.cpp" />
-    <ClCompile Include="Common\DeviceResources.cpp" />
-    <ClCompile Include="Common\CameraResources.cpp" />
+    <ClCompile Include="Managed\AppView.cpp" />
+    <ClCompile Include="Managed\DepthSensor.cpp" />
+    <ClCompile Include="Native\DepthTexture.cpp" />
+    <ClCompile Include="Native\HoloHandsMain.cpp" />
+    <ClCompile Include="Native\Rendering\CameraResources.cpp" />
+    <ClCompile Include="Native\Rendering\DeviceResources.cpp" />
+    <ClCompile Include="Native\Rendering\QuadRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -120,20 +120,6 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="HoloHands_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Content\Shaders\Quad.ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Content\Shaders\Quad.vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft\Debugging\Debugging.vcxproj">
@@ -148,6 +134,20 @@
     <ProjectReference Include="..\Microsoft\OpenCVHelpers\OpenCVHelpers.vcxproj">
       <Project>{940a6d80-0775-4272-84c9-1585c4757071}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Native\Rendering\Shaders\Quad.ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Native\Rendering\Shaders\Quad.vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
