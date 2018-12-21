@@ -34,7 +34,7 @@ namespace HoloHands
     private:
         std::unique_ptr<HoloHandsMain> m_main;
 
-        std::shared_ptr<DX::DeviceResources>                m_deviceResources;
+        std::shared_ptr<DeviceResources>                m_deviceResources;
         bool                                                m_windowClosed  = false;
         bool                                                m_windowVisible = true;
 

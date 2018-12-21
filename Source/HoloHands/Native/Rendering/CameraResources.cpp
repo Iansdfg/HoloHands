@@ -6,6 +6,7 @@
 #include "Native/Rendering/DeviceResources.h"
 #include <windows.graphics.directx.direct3d11.interop.h>
 
+using namespace HoloHands;
 using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace Windows::Graphics::DirectX::Direct3D11;
@@ -13,7 +14,7 @@ using namespace Windows::Graphics::Holographic;
 using namespace Windows::Perception::Spatial;
 using namespace Windows::Foundation::Numerics;
 
-DX::CameraResources::CameraResources(HolographicCamera^ camera) :
+CameraResources::CameraResources(HolographicCamera^ camera) :
     m_holographicCamera(camera),
     m_isStereo(camera->IsStereo),
     m_d3dRenderTargetSize(camera->RenderTargetSize)
@@ -28,8 +29,8 @@ DX::CameraResources::CameraResources(HolographicCamera^ camera) :
 // Updates resources associated with a holographic camera's swap chain.
 // The app does not access the swap chain directly, but it does create
 // resource views for the back buffer.
-void DX::CameraResources::CreateResourcesForBackBuffer(
-    DX::DeviceResources* pDeviceResources,
+void CameraResources::CreateResourcesForBackBuffer(
+    DeviceResources* pDeviceResources,
     HolographicCameraRenderingParameters^ cameraParameters
     )
 {
@@ -65,7 +66,7 @@ void DX::CameraResources::CreateResourcesForBackBuffer(
         // Create a render target view of the back buffer.
         // Creating this resource is inexpensive, and is better than keeping track of
         // the back buffers in order to pre-allocate render target views for each one.
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             device->CreateRenderTargetView(
                 m_d3dBackBuffer.Get(),
                 nullptr,
@@ -105,7 +106,7 @@ void DX::CameraResources::CreateResourcesForBackBuffer(
             );
 
         ComPtr<ID3D11Texture2D> depthStencil;
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             device->CreateTexture2D(
                 &depthStencilDesc,
                 nullptr,
@@ -116,7 +117,7 @@ void DX::CameraResources::CreateResourcesForBackBuffer(
         CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(
             m_isStereo ? D3D11_DSV_DIMENSION_TEXTURE2DARRAY : D3D11_DSV_DIMENSION_TEXTURE2D
             );
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             device->CreateDepthStencilView(
                 depthStencil.Get(),
                 &depthStencilViewDesc,
@@ -130,7 +131,7 @@ void DX::CameraResources::CreateResourcesForBackBuffer(
     {
         // Create a constant buffer to store view and projection matrices for the camera.
         CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             device->CreateBuffer(
                 &constantBufferDesc,
                 nullptr,
@@ -141,7 +142,7 @@ void DX::CameraResources::CreateResourcesForBackBuffer(
 }
 
 // Releases resources associated with a back buffer.
-void DX::CameraResources::ReleaseResourcesForBackBuffer(DX::DeviceResources* pDeviceResources)
+void CameraResources::ReleaseResourcesForBackBuffer(DeviceResources* pDeviceResources)
 {
     const auto context = pDeviceResources->GetD3DDeviceContext();
 
@@ -159,8 +160,8 @@ void DX::CameraResources::ReleaseResourcesForBackBuffer(DX::DeviceResources* pDe
 }
 
 // Updates the view/projection constant buffer for a holographic camera.
-void DX::CameraResources::UpdateViewProjectionBuffer(
-    std::shared_ptr<DX::DeviceResources> deviceResources,
+void CameraResources::UpdateViewProjectionBuffer(
+    std::shared_ptr<DeviceResources> deviceResources,
     HolographicCameraPose^ cameraPose,
     SpatialCoordinateSystem^ coordinateSystem
     )
@@ -193,7 +194,7 @@ void DX::CameraResources::UpdateViewProjectionBuffer(
     // This usually means that positional tracking is not active for the current frame, in
     // which case it is possible to use a SpatialLocatorAttachedFrameOfReference to render
     // content that is not world-locked instead.
-    DX::ViewProjectionConstantBuffer viewProjectionConstantBufferData;
+    ViewProjectionConstantBuffer viewProjectionConstantBufferData;
     bool viewTransformAcquired = viewTransformContainer != nullptr;
     if (viewTransformAcquired)
     {
@@ -239,8 +240,8 @@ void DX::CameraResources::UpdateViewProjectionBuffer(
 
 // Gets the view-projection constant buffer for the HolographicCamera and attaches it
 // to the shader pipeline.
-bool DX::CameraResources::AttachViewProjectionBuffer(
-    std::shared_ptr<DX::DeviceResources> deviceResources
+bool CameraResources::AttachViewProjectionBuffer(
+    std::shared_ptr<DeviceResources> deviceResources
     )
 {
     // This method uses Direct3D device-based resources.

@@ -3,7 +3,7 @@
 
 #include "CameraResources.h"
 
-namespace DX
+namespace HoloHands
 {
    // Provides an interface for an application that owns DeviceResources to be notified of the device being lost or created.
    interface IDeviceNotify
@@ -107,19 +107,18 @@ namespace DX
    protected:
       std::shared_ptr<DeviceResources> m_deviceResources;
    };
-}
 
-
-// Device-based resources for holographic cameras are stored in a std::map. Access this list by providing a
-// callback to this function, and the std::map will be guarded from add and remove
-// events until the callback returns. The callback is processed immediately and must
-// not contain any nested calls to UseHolographicCameraResources.
-// The callback takes a parameter of type std::map<UINT32, std::unique_ptr<DX::CameraResources>>&
-// through which the list of cameras will be accessed.
-template<typename RetType, typename LCallback>
-RetType DX::DeviceResources::UseHolographicCameraResources(const LCallback& callback)
-{
-   std::lock_guard<std::mutex> guard(m_cameraResourcesLock);
-   return callback(m_cameraResources);
+   // Device-based resources for holographic cameras are stored in a std::map. Access this list by providing a
+   // callback to this function, and the std::map will be guarded from add and remove
+   // events until the callback returns. The callback is processed immediately and must
+   // not contain any nested calls to UseHolographicCameraResources.
+   // The callback takes a parameter of type std::map<UINT32, std::unique_ptr<CameraResources>>&
+   // through which the list of cameras will be accessed.
+   template<typename RetType, typename LCallback>
+   RetType DeviceResources::UseHolographicCameraResources(const LCallback& callback)
+   {
+      std::lock_guard<std::mutex> guard(m_cameraResourcesLock);
+      return callback(m_cameraResources);
+   }
 }
 

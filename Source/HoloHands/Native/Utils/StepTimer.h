@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace DX
+namespace HoloHands
 {
     // Helper class for animation and simulation timing.
     class StepTimer

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DX
+namespace HoloHands
 {
     class DeviceResources;
 
@@ -21,20 +21,20 @@ namespace DX
         CameraResources(Windows::Graphics::Holographic::HolographicCamera^ holographicCamera);
 
         void CreateResourcesForBackBuffer(
-            DX::DeviceResources* pDeviceResources,
+            DeviceResources* pDeviceResources,
             Windows::Graphics::Holographic::HolographicCameraRenderingParameters^ cameraParameters
             );
         void ReleaseResourcesForBackBuffer(
-            DX::DeviceResources* pDeviceResources
+            DeviceResources* pDeviceResources
             );
 
         void UpdateViewProjectionBuffer(
-            std::shared_ptr<DX::DeviceResources> deviceResources,
+            std::shared_ptr<DeviceResources> deviceResources,
             Windows::Graphics::Holographic::HolographicCameraPose^ cameraPose,
             Windows::Perception::Spatial::SpatialCoordinateSystem^ coordinateSystem);
 
         bool AttachViewProjectionBuffer(
-            std::shared_ptr<DX::DeviceResources> deviceResources);
+            std::shared_ptr<DeviceResources> deviceResources);
 
         // Direct3D device resources.
         ID3D11RenderTargetView* GetBackBufferRenderTargetView()     const { return m_d3dRenderTargetView.Get();     }

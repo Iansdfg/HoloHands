@@ -4,10 +4,10 @@
 
 namespace HoloHands
 {
-   class DepthTexture : public DX::Resource
+   class DepthTexture : public Resource
    {
       public:
-         DepthTexture(std::shared_ptr<DX::DeviceResources> deviceResources);
+         DepthTexture(std::shared_ptr<DeviceResources> deviceResources);
 
          void CopyFromBitmap(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap);
 

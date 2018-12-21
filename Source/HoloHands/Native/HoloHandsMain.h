@@ -9,10 +9,10 @@
 
 namespace HoloHands
 {
-    class HoloHandsMain : public DX::IDeviceNotify
+    class HoloHandsMain : public IDeviceNotify
     {
     public:
-        HoloHandsMain(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+        HoloHandsMain(const std::shared_ptr<DeviceResources>& deviceResources);
         ~HoloHandsMain();
 
         // Sets the holographic space. This is our closest analogue to setting a new window
@@ -57,10 +57,10 @@ namespace HoloHands
         std::unique_ptr<QuadRenderer> m_quadRenderer;
 
         // Cached pointer to device resources.
-        std::shared_ptr<DX::DeviceResources> m_deviceResources;
+        std::shared_ptr<DeviceResources> m_deviceResources;
 
         // Render loop timer.
-        DX::StepTimer m_timer;
+        StepTimer m_timer;
 
         // Represents the holographic space around the user.
         Windows::Graphics::Holographic::HolographicSpace^ m_holographicSpace;

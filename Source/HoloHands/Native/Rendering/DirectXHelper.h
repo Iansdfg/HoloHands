@@ -2,7 +2,7 @@
 
 #include <ppltasks.h>    // For create_task
 
-namespace DX
+namespace HoloHands
 {
     inline void ThrowIfFailed(HRESULT hr)
     {

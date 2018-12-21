@@ -14,7 +14,7 @@ using namespace Windows::UI::Input::Spatial;
 using namespace Microsoft::WRL;
 
 QuadRenderer::QuadRenderer(
-   const std::shared_ptr<DX::DeviceResources>& deviceResources,
+   const std::shared_ptr<DeviceResources>& deviceResources,
    const Size& size)
    :
    m_deviceResources(deviceResources),
@@ -37,7 +37,7 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
    }
 }
 
-void QuadRenderer::Update(const DX::StepTimer& timer)
+void QuadRenderer::Update(const StepTimer& timer)
 {
    const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
       XMLoadFloat3(&m_headPosition),
@@ -120,18 +120,18 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
 std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uint32_t& height)
 {
    ComPtr<IWICImagingFactory> wicFactory;
-   DX::ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
+   ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
 
    ComPtr<IWICBitmapDecoder> decoder;
-   DX::ThrowIfFailed(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
+   ThrowIfFailed(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
 
    ComPtr<IWICBitmapFrameDecode> frame;
-   DX::ThrowIfFailed(decoder->GetFrame(0, frame.GetAddressOf()));
+   ThrowIfFailed(decoder->GetFrame(0, frame.GetAddressOf()));
 
-   DX::ThrowIfFailed(frame->GetSize(&width, &height));
+   ThrowIfFailed(frame->GetSize(&width, &height));
 
    WICPixelFormatGUID pixelFormat;
-   DX::ThrowIfFailed(frame->GetPixelFormat(&pixelFormat));
+   ThrowIfFailed(frame->GetPixelFormat(&pixelFormat));
 
    uint32_t rowPitch = width * sizeof(uint32_t);
    uint32_t imageSize = rowPitch * height;
@@ -141,24 +141,24 @@ std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uin
 
    if (memcmp(&pixelFormat, &GUID_WICPixelFormat32bppBGRA, sizeof(GUID)) == 0)
    {
-      DX::ThrowIfFailed(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+      ThrowIfFailed(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
    }
    else
    {
       ComPtr<IWICFormatConverter> formatConverter;
-      DX::ThrowIfFailed(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
+      ThrowIfFailed(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
 
       BOOL canConvert = FALSE;
-      DX::ThrowIfFailed(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
+      ThrowIfFailed(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
       if (!canConvert)
       {
          throw std::exception("CanConvert");
       }
 
-      DX::ThrowIfFailed(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
+      ThrowIfFailed(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
          WICBitmapDitherTypeErrorDiffusion, nullptr, 0, WICBitmapPaletteTypeMedianCut));
 
-      DX::ThrowIfFailed(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+      ThrowIfFailed(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
    }
 
    return image;
@@ -166,12 +166,12 @@ std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uin
 
 void QuadRenderer::CreateDeviceDependentResources()
 {
-   task<std::vector<byte>> loadVSTask = DX::ReadDataAsync(L"ms-appx:///Quad.vs.cso");
-   task<std::vector<byte>> loadPSTask = DX::ReadDataAsync(L"ms-appx:///Quad.ps.cso");
+   task<std::vector<byte>> loadVSTask = ReadDataAsync(L"ms-appx:///Quad.vs.cso");
+   task<std::vector<byte>> loadPSTask = ReadDataAsync(L"ms-appx:///Quad.ps.cso");
 
    task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
    {
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateVertexShader(
             fileData.data(),
             fileData.size(),
@@ -186,7 +186,7 @@ void QuadRenderer::CreateDeviceDependentResources()
           { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
       } };
 
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateInputLayout(
             vertexDesc.data(),
             static_cast<UINT>(vertexDesc.size()),
@@ -199,7 +199,7 @@ void QuadRenderer::CreateDeviceDependentResources()
 
    task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
    {
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreatePixelShader(
             fileData.data(),
             fileData.size(),
@@ -209,7 +209,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       );
 
       const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateBuffer(
             &constantBufferDesc,
             nullptr,
@@ -229,7 +229,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       samplerDesc.MinLOD = 0;
       samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
             m_sampler.ReleaseAndGetAddressOf()));
 /*
@@ -247,11 +247,11 @@ void QuadRenderer::CreateDeviceDependentResources()
       initialData.SysMemPitch = txtDesc.Width * sizeof(uint32_t);
 
       ComPtr<ID3D11Texture2D> tex;
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateTexture2D(&txtDesc, &initialData,
             tex.GetAddressOf()));
 
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateShaderResourceView(tex.Get(),
             nullptr, m_texture.ReleaseAndGetAddressOf()));*/
    });
@@ -282,7 +282,7 @@ void QuadRenderer::CreateDeviceDependentResources()
 
       const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
 
-      DX::ThrowIfFailed(
+      ThrowIfFailed(
          m_deviceResources->GetD3DDevice()->CreateBuffer(
             &vertexBufferDesc,
             &vertexBufferData,

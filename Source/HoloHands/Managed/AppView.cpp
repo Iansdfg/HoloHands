@@ -51,7 +51,7 @@ void AppView::Initialize(CoreApplicationView^ applicationView)
 
     // At this point we have access to the device and we can create device-dependent
     // resources.
-    m_deviceResources = std::make_shared<DX::DeviceResources>();
+    m_deviceResources = std::make_shared<DeviceResources>();
 
     m_main = std::make_unique<HoloHandsMain>(m_deviceResources);
 }

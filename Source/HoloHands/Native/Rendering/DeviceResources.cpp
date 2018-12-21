@@ -6,6 +6,7 @@
 #include <Collection.h>
 #include <windows.graphics.directx.direct3d11.interop.h>
 
+using namespace HoloHands;
 using namespace D2D1;
 using namespace Microsoft::WRL;
 using namespace Windows::Graphics::DirectX::Direct3D11;
@@ -13,13 +14,13 @@ using namespace Windows::Graphics::Display;
 using namespace Windows::Graphics::Holographic;
 
 // Constructor for DeviceResources.
-DX::DeviceResources::DeviceResources()
+DeviceResources::DeviceResources()
 {
     CreateDeviceIndependentResources();
 }
 
 // Configures resources that don't depend on the Direct3D device.
-void DX::DeviceResources::CreateDeviceIndependentResources()
+void DeviceResources::CreateDeviceIndependentResources()
 {
     // Initialize Direct2D resources.
     D2D1_FACTORY_OPTIONS options {};
@@ -30,7 +31,7 @@ void DX::DeviceResources::CreateDeviceIndependentResources()
 #endif
 
     // Initialize the Direct2D Factory.
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         D2D1CreateFactory(
             D2D1_FACTORY_TYPE_SINGLE_THREADED,
             __uuidof(ID2D1Factory2),
@@ -40,7 +41,7 @@ void DX::DeviceResources::CreateDeviceIndependentResources()
         );
 
     // Initialize the DirectWrite Factory.
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         DWriteCreateFactory(
             DWRITE_FACTORY_TYPE_SHARED,
             __uuidof(IDWriteFactory2),
@@ -49,7 +50,7 @@ void DX::DeviceResources::CreateDeviceIndependentResources()
         );
 
     // Initialize the Windows Imaging Component (WIC) Factory.
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         CoCreateInstance(
             CLSID_WICImagingFactory2,
             nullptr,
@@ -59,7 +60,7 @@ void DX::DeviceResources::CreateDeviceIndependentResources()
         );
 }
 
-void DX::DeviceResources::SetHolographicSpace(HolographicSpace^ holographicSpace)
+void DeviceResources::SetHolographicSpace(HolographicSpace^ holographicSpace)
 {
     // Cache the holographic space. Used to re-initalize during device-lost scenarios.
     m_holographicSpace = holographicSpace;
@@ -67,7 +68,7 @@ void DX::DeviceResources::SetHolographicSpace(HolographicSpace^ holographicSpace
     InitializeUsingHolographicSpace();
 }
 
-void DX::DeviceResources::InitializeUsingHolographicSpace()
+void DeviceResources::InitializeUsingHolographicSpace()
 {
     // The holographic space might need to determine which adapter supports
     // holograms, in which case it will specify a non-zero PrimaryAdapterId.
@@ -85,24 +86,24 @@ void DX::DeviceResources::InitializeUsingHolographicSpace()
     {
         UINT createFlags = 0;
 #ifdef DEBUG
-        if (DX::SdkLayersAvailable())
+        if (SdkLayersAvailable())
         {
             createFlags |= DXGI_CREATE_FACTORY_DEBUG;
         }
 #endif
         // Create the DXGI factory.
         ComPtr<IDXGIFactory1> dxgiFactory;
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             CreateDXGIFactory2(
                 createFlags,
                 IID_PPV_ARGS(&dxgiFactory)
                 )
             );
         ComPtr<IDXGIFactory4> dxgiFactory4;
-        DX::ThrowIfFailed(dxgiFactory.As(&dxgiFactory4));
+        ThrowIfFailed(dxgiFactory.As(&dxgiFactory4));
 
         // Retrieve the adapter specified by the holographic space.
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             dxgiFactory4->EnumAdapterByLuid(
                 id,
                 IID_PPV_ARGS(&m_dxgiAdapter)
@@ -120,14 +121,14 @@ void DX::DeviceResources::InitializeUsingHolographicSpace()
 }
 
 // Configures the Direct3D device, and stores handles to it and the device context.
-void DX::DeviceResources::CreateDeviceResources()
+void DeviceResources::CreateDeviceResources()
 {
     // This flag adds support for surfaces with a different color channel ordering
     // than the API default. It is required for compatibility with Direct2D.
     UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
 #if defined(_DEBUG)
-    if (DX::SdkLayersAvailable())
+    if (SdkLayersAvailable())
     {
         // If the project is in a debug build, enable debugging via SDK Layers with this flag.
         creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -167,7 +168,7 @@ void DX::DeviceResources::CreateDeviceResources()
         // If the initialization fails, fall back to the WARP device.
         // For more information on WARP, see:
         // http://go.microsoft.com/fwlink/?LinkId=286690
-        DX::ThrowIfFailed(
+        ThrowIfFailed(
             D3D11CreateDevice(
                 nullptr,              // Use the default DXGI adapter for WARP.
                 D3D_DRIVER_TYPE_WARP, // Create a WARP device instead of a hardware device.
@@ -184,17 +185,17 @@ void DX::DeviceResources::CreateDeviceResources()
     }
 
     // Store pointers to the Direct3D device and immediate context.
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         device.As(&m_d3dDevice)
         );
 
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         context.As(&m_d3dContext)
         );
 
     // Acquire the DXGI interface for the Direct3D device.
     ComPtr<IDXGIDevice3> dxgiDevice;
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         m_d3dDevice.As(&dxgiDevice)
         );
 
@@ -204,10 +205,10 @@ void DX::DeviceResources::CreateDeviceResources()
     // Cache the DXGI adapter.
     // This is for the case of no preferred DXGI adapter, or fallback to WARP.
     ComPtr<IDXGIAdapter> dxgiAdapter;
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         dxgiDevice->GetAdapter(&dxgiAdapter)
         );
-    DX::ThrowIfFailed(
+    ThrowIfFailed(
         dxgiAdapter.As(&m_dxgiAdapter)
         );
 
@@ -242,7 +243,7 @@ void DX::DeviceResources::CreateDeviceResources()
 // Validates the back buffer for each HolographicCamera and recreates
 // resources for back buffers that have changed.
 // Locks the set of holographic camera resources until the function exits.
-void DX::DeviceResources::EnsureCameraResources(
+void DeviceResources::EnsureCameraResources(
     HolographicFrame^ frame,
     HolographicFramePrediction^ prediction)
 {
@@ -260,7 +261,7 @@ void DX::DeviceResources::EnsureCameraResources(
 
 // Prepares to allocate resources and adds resource views for a camera.
 // Locks the set of holographic camera resources until the function exits.
-void DX::DeviceResources::AddHolographicCamera(HolographicCamera^ camera)
+void DeviceResources::AddHolographicCamera(HolographicCamera^ camera)
 {
     UseHolographicCameraResources<void>([this, camera](std::map<UINT32, std::unique_ptr<CameraResources>>& cameraResourceMap)
     {
@@ -270,7 +271,7 @@ void DX::DeviceResources::AddHolographicCamera(HolographicCamera^ camera)
 
 // Deallocates resources for a camera and removes the camera from the set.
 // Locks the set of holographic camera resources until the function exits.
-void DX::DeviceResources::RemoveHolographicCamera(HolographicCamera^ camera)
+void DeviceResources::RemoveHolographicCamera(HolographicCamera^ camera)
 {
     UseHolographicCameraResources<void>([this, camera](std::map<UINT32, std::unique_ptr<CameraResources>>& cameraResourceMap)
     {
@@ -286,7 +287,7 @@ void DX::DeviceResources::RemoveHolographicCamera(HolographicCamera^ camera)
 
 // Recreate all device resources and set them back to the current state.
 // Locks the set of holographic camera resources until the function exits.
-void DX::DeviceResources::HandleDeviceLost()
+void DeviceResources::HandleDeviceLost()
 {
     if (m_deviceNotify != nullptr)
     {
@@ -311,25 +312,25 @@ void DX::DeviceResources::HandleDeviceLost()
 }
 
 // Register our DeviceNotify to be informed on device lost and creation.
-void DX::DeviceResources::RegisterDeviceNotify(DX::IDeviceNotify* deviceNotify)
+void DeviceResources::RegisterDeviceNotify(IDeviceNotify* deviceNotify)
 {
     m_deviceNotify = deviceNotify;
 }
 
 // Call this method when the app suspends. It provides a hint to the driver that the app
 // is entering an idle state and that temporary buffers can be reclaimed for use by other apps.
-void DX::DeviceResources::Trim()
+void DeviceResources::Trim()
 {
     m_d3dContext->ClearState();
 
     ComPtr<IDXGIDevice3> dxgiDevice;
-    DX::ThrowIfFailed(m_d3dDevice.As(&dxgiDevice));
+    ThrowIfFailed(m_d3dDevice.As(&dxgiDevice));
     dxgiDevice->Trim();
 }
 
 // Present the contents of the swap chain to the screen.
 // Locks the set of holographic camera resources until the function exits.
-void DX::DeviceResources::Present(HolographicFrame^ frame)
+void DeviceResources::Present(HolographicFrame^ frame)
 {
     // By default, this API waits for the frame to finish before it returns.
     // Holographic apps should wait for the previous frame to finish before
@@ -343,7 +344,7 @@ void DX::DeviceResources::Present(HolographicFrame^ frame)
         for (auto cameraPose : prediction->CameraPoses)
         {
             // This represents the device-based resources for a HolographicCamera.
-            DX::CameraResources* pCameraResources = cameraResourceMap[cameraPose->HolographicCamera->Id].get();
+            CameraResources* pCameraResources = cameraResourceMap[cameraPose->HolographicCamera->Id].get();
 
             // Discard the contents of the render target.
             // This is a valid operation only when the existing contents will be

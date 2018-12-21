@@ -12,19 +12,19 @@ namespace HoloHands
    {
    public:
       QuadRenderer(
-         const std::shared_ptr<DX::DeviceResources>& deviceResources,
+         const std::shared_ptr<DeviceResources>& deviceResources,
          const Windows::Foundation::Size& size);
 
       void CreateDeviceDependentResources();
       void ReleaseDeviceDependentResources();
       void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
-      void Update(const DX::StepTimer& timer);
+      void Update(const StepTimer& timer);
       void Render(const DepthTexture& depthTexture);
 
       Windows::Foundation::Numerics::float3 GetQuadPosition() { return m_quadPosition; }
 
    private:
-      std::shared_ptr<DX::DeviceResources> m_deviceResources;
+      std::shared_ptr<DeviceResources> m_deviceResources;
 
       Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
       Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;

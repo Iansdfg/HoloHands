@@ -17,7 +17,7 @@ using namespace Windows::Perception::Spatial;
 using namespace Windows::UI::Input::Spatial;
 using namespace std::placeholders;
 
-HoloHandsMain::HoloHandsMain(const std::shared_ptr<DX::DeviceResources>& deviceResources)
+HoloHandsMain::HoloHandsMain(const std::shared_ptr<DeviceResources>& deviceResources)
    :
    m_deviceResources(deviceResources)
 {
@@ -140,7 +140,7 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
    // Lock the set of holographic camera resources, then draw to each camera in this frame.
    return m_deviceResources->UseHolographicCameraResources<bool>(
-      [this, holographicFrame](std::map<UINT32, std::unique_ptr<DX::CameraResources>>& cameraResourceMap)
+      [this, holographicFrame](std::map<UINT32, std::unique_ptr<CameraResources>>& cameraResourceMap)
    {
       holographicFrame->UpdateCurrentPrediction();
       HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
@@ -148,7 +148,7 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
       bool atLeastOneCameraRendered = false;
       for (auto cameraPose : prediction->CameraPoses)
       {
-         DX::CameraResources* pCameraResources = cameraResourceMap[cameraPose->HolographicCamera->Id].get();
+         CameraResources* pCameraResources = cameraResourceMap[cameraPose->HolographicCamera->Id].get();
 
          const auto context = m_deviceResources->GetD3DDeviceContext();
          const auto depthStencilView = pCameraResources->GetDepthStencilView();

@@ -17,9 +17,9 @@ using namespace Microsoft::WRL;
 using namespace Windows::Storage;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-DepthTexture::DepthTexture(std::shared_ptr<DX::DeviceResources> deviceResources)
+DepthTexture::DepthTexture(std::shared_ptr<DeviceResources> deviceResources)
    :
-   DX::Resource(std::move(deviceResources)),
+   Resource(std::move(deviceResources)),
    m_width(1),
    m_height(1)
 {
@@ -103,7 +103,7 @@ void DepthTexture::CreateDeviceDependentResources()
       D3D11_CPU_ACCESS_WRITE      // We only need to write into the texture
    );
 
-   DX::ThrowIfFailed(
+   ThrowIfFailed(
       m_deviceResources->GetD3DDevice()->CreateTexture2D(
          &texDesc,
          nullptr,
@@ -117,7 +117,7 @@ void DepthTexture::CreateDeviceDependentResources()
       DXGI_FORMAT_R16_UNORM);
    //);
 
-   DX::ThrowIfFailed(
+   ThrowIfFailed(
       m_deviceResources->GetD3DDevice()->CreateShaderResourceView(
          m_texture.Get(),
          &viewDesc,
