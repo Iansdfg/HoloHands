@@ -8,15 +8,16 @@ namespace HoloHands
 {
    class DepthTexture;
 
-   class QuadRenderer
+   class QuadRenderer : public Resource
    {
    public:
       QuadRenderer(
          const std::shared_ptr<DeviceResources>& deviceResources,
          const Windows::Foundation::Size& size);
 
-      void CreateDeviceDependentResources();
-      void ReleaseDeviceDependentResources();
+      void CreateDeviceDependentResources() override;
+      void ReleaseDeviceDependentResources() override;
+
       void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
       void Update(const StepTimer& timer);
       void Render(const DepthTexture& depthTexture);
@@ -24,8 +25,6 @@ namespace HoloHands
       Windows::Foundation::Numerics::float3 GetQuadPosition() { return m_quadPosition; }
 
    private:
-      std::shared_ptr<DeviceResources> m_deviceResources;
-
       Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
       Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
       Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;

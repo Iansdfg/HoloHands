@@ -3,7 +3,7 @@
 #include "QuadRenderer.h"
 
 #include "Native/Rendering/DirectXHelper.h"
-#include "Native/DepthTexture.h"
+#include "Native/Rendering/DepthTexture.h"
 
 using namespace HoloHands;
 using namespace Concurrency;
@@ -17,11 +17,132 @@ QuadRenderer::QuadRenderer(
    const std::shared_ptr<DeviceResources>& deviceResources,
    const Size& size)
    :
-   m_deviceResources(deviceResources),
+   Resource(std::move(deviceResources)),
    m_quadPosition({ 0.f, 0.f, -2.f }),
    m_quadSize(size)
 {
    CreateDeviceDependentResources();
+}
+
+void QuadRenderer::CreateDeviceDependentResources()
+{
+   task<std::vector<byte>> loadVSTask = ReadDataAsync(L"ms-appx:///Quad.vs.cso");
+   task<std::vector<byte>> loadPSTask = ReadDataAsync(L"ms-appx:///Quad.ps.cso");
+
+   task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
+   {
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateVertexShader(
+            fileData.data(),
+            fileData.size(),
+            nullptr,
+            &m_vertexShader
+         )
+      );
+
+      constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> vertexDesc =
+      { {
+          { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+          { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      } };
+
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateInputLayout(
+            vertexDesc.data(),
+            static_cast<UINT>(vertexDesc.size()),
+            fileData.data(),
+            static_cast<UINT>(fileData.size()),
+            &m_inputLayout
+         )
+      );
+   });
+
+   task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
+   {
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreatePixelShader(
+            fileData.data(),
+            fileData.size(),
+            nullptr,
+            &m_pixelShader
+         )
+      );
+
+      const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateBuffer(
+            &constantBufferDesc,
+            nullptr,
+            &m_modelConstantBuffer
+         )
+      );
+   });
+
+   task<void> createTexture = concurrency::create_task([this]
+   {
+      D3D11_SAMPLER_DESC samplerDesc = {};
+      samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+      samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+      samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+      samplerDesc.MinLOD = 0;
+      samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
+            m_sampler.ReleaseAndGetAddressOf()));
+   });
+
+   task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;
+   task<void> createQuadTask = shaderTaskGroup.then([this]()
+   {
+      float aspect = m_quadSize.Width / m_quadSize.Height;
+
+      float scale = 0.5f;
+      float halfWidth = aspect * scale * 0.5f;
+      float halfHeight = 1 * scale * 0.5f;
+
+      static const std::array<VertexPositionTextureCoords, 4> quadVertices =
+      { {
+          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT2(0.f, 1.f) },
+          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT2(0.f, 0.f) },
+          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT2(1.f, 1.f) },
+          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT2(1.f, 0.f) },
+      } };
+
+      m_vertexCount = static_cast<unsigned int>(quadVertices.size());
+
+      D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+      vertexBufferData.pSysMem = quadVertices.data();
+      vertexBufferData.SysMemPitch = 0;
+      vertexBufferData.SysMemSlicePitch = 0;
+
+      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
+
+      ThrowIfFailed(
+         m_deviceResources->GetD3DDevice()->CreateBuffer(
+            &vertexBufferDesc,
+            &vertexBufferData,
+            &m_vertexBuffer
+         )
+      );
+   });
+
+   createQuadTask.then([this]()
+   {
+      m_loadingComplete = true;
+   });
+}
+
+void QuadRenderer::ReleaseDeviceDependentResources()
+{
+   m_loadingComplete = false;
+   m_vertexShader.Reset();
+   m_inputLayout.Reset();
+   m_pixelShader.Reset();
+   m_modelConstantBuffer.Reset();
+   m_vertexBuffer.Reset();
 }
 
 void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
@@ -64,7 +185,6 @@ void QuadRenderer::Update(const StepTimer& timer)
       0
    );
 }
-
 
 void QuadRenderer::Render(const DepthTexture& depthTexture)
 {
@@ -162,147 +282,4 @@ std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uin
    }
 
    return image;
-}
-
-void QuadRenderer::CreateDeviceDependentResources()
-{
-   task<std::vector<byte>> loadVSTask = ReadDataAsync(L"ms-appx:///Quad.vs.cso");
-   task<std::vector<byte>> loadPSTask = ReadDataAsync(L"ms-appx:///Quad.ps.cso");
-
-   task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
-   {
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateVertexShader(
-            fileData.data(),
-            fileData.size(),
-            nullptr,
-            &m_vertexShader
-         )
-      );
-
-      constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> vertexDesc =
-      { {
-          { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-          { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      } };
-
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateInputLayout(
-            vertexDesc.data(),
-            static_cast<UINT>(vertexDesc.size()),
-            fileData.data(),
-            static_cast<UINT>(fileData.size()),
-            &m_inputLayout
-         )
-      );
-   });
-
-   task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
-   {
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreatePixelShader(
-            fileData.data(),
-            fileData.size(),
-            nullptr,
-            &m_pixelShader
-         )
-      );
-
-      const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateBuffer(
-            &constantBufferDesc,
-            nullptr,
-            &m_modelConstantBuffer
-         )
-      );
-   });
-
-   task<void> createTexture = concurrency::create_task([this]
-   {
-      D3D11_SAMPLER_DESC samplerDesc = {};
-      samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-      samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-      samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-      samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-      samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-      samplerDesc.MinLOD = 0;
-      samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
-            m_sampler.ReleaseAndGetAddressOf()));
-/*
-      D3D11_TEXTURE2D_DESC txtDesc = {};
-      txtDesc.MipLevels = txtDesc.ArraySize = 1;
-      txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-      txtDesc.SampleDesc.Count = 1;
-      txtDesc.Usage = D3D11_USAGE_IMMUTABLE;
-      txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-
-      auto image = LoadBGRAImage(L"Assets/sunset.jpg", txtDesc.Width, txtDesc.Height);
-
-      D3D11_SUBRESOURCE_DATA initialData = {};
-      initialData.pSysMem = image.data();
-      initialData.SysMemPitch = txtDesc.Width * sizeof(uint32_t);
-
-      ComPtr<ID3D11Texture2D> tex;
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateTexture2D(&txtDesc, &initialData,
-            tex.GetAddressOf()));
-
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateShaderResourceView(tex.Get(),
-            nullptr, m_texture.ReleaseAndGetAddressOf()));*/
-   });
-
-   task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;
-   task<void> createQuadTask = shaderTaskGroup.then([this]()
-   {
-      float aspect = m_quadSize.Width / m_quadSize.Height;
-
-      float scale = 0.5f;
-      float halfWidth = aspect * scale * 0.5f;
-      float halfHeight = 1 * scale * 0.5f;
-
-      static const std::array<VertexPositionTextureCoords, 4> quadVertices =
-      { {
-          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT2(0.f, 1.f) },
-          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT2(0.f, 0.f) },
-          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT2(1.f, 1.f) },
-          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT2(1.f, 0.f) },
-      } };
-
-      m_vertexCount = static_cast<unsigned int>(quadVertices.size());
-
-      D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-      vertexBufferData.pSysMem = quadVertices.data();
-      vertexBufferData.SysMemPitch = 0;
-      vertexBufferData.SysMemSlicePitch = 0;
-
-      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
-
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateBuffer(
-            &vertexBufferDesc,
-            &vertexBufferData,
-            &m_vertexBuffer
-         )
-      );
-   });
-
-   createQuadTask.then([this]()
-   {
-      m_loadingComplete = true;
-   });
-}
-
-void QuadRenderer::ReleaseDeviceDependentResources()
-{
-   m_loadingComplete = false;
-   m_vertexShader.Reset();
-   m_inputLayout.Reset();
-   m_pixelShader.Reset();
-   m_modelConstantBuffer.Reset();
-   m_vertexBuffer.Reset();
 }

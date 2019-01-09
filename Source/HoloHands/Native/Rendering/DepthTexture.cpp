@@ -25,7 +25,6 @@ DepthTexture::DepthTexture(std::shared_ptr<DeviceResources> deviceResources)
 {
 }
 
-
 void DepthTexture::CopyFromBitmap(SoftwareBitmap^ bitmap)
 {
    if (m_texture == nullptr || bitmap == nullptr)
@@ -44,20 +43,6 @@ void DepthTexture::CopyFromBitmap(SoftwareBitmap^ bitmap)
       ReleaseDeviceDependentResources();
       CreateDeviceDependentResources();
    }
-
-   ////DEBUGGING
-   //Windows::Graphics::Imaging::BitmapBuffer^ bitmapBuffer2 =
-   //   bitmap->LockBuffer(
-   //      Windows::Graphics::Imaging::BitmapBufferAccessMode::Read);
-
-   //uint32_t pixelBufferDataLength = 0;
-
-   //uint16_t* pixelBufferData =
-   //   Io::GetTypedPointerToMemoryBuffer<uint16_t>(
-   //      bitmapBuffer2->CreateReference(),
-   //      pixelBufferDataLength);
-
-
 
    auto format = bitmap->BitmapPixelFormat;
 

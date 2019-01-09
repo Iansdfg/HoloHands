@@ -2,8 +2,9 @@
 
 #include "Native/Rendering/DeviceResources.h"
 #include "Native/Rendering/QuadRenderer.h"
+#include "Native/Rendering/DeviceResources.h"
+#include "Native/Rendering/DepthTexture.h"
 #include "Native/Utils/StepTimer.h"
-#include "Native/DepthTexture.h"
 #include "Native/Sensor.h"
 
 namespace HoloHands

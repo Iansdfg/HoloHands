@@ -2,8 +2,6 @@
 
 namespace HoloHands
 {
-   class DepthTexture;
-
    class Sensor
    {
    public:
