@@ -41,6 +41,9 @@
     <Filter Include="Native\Utils">
       <UniqueIdentifier>{b5d9deef-61c8-4838-950f-9328245b8a00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Native\OpenCV">
+      <UniqueIdentifier>{991dd7ed-5e7c-4b30-941a-aab67c21c9b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -64,6 +67,12 @@
     </ClCompile>
     <ClCompile Include="Native\Rendering\DepthTexture.cpp">
       <Filter>Native\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\OpenCV\HandDetector.cpp">
+      <Filter>Native\OpenCV</Filter>
+    </ClCompile>
+    <ClCompile Include="Native\OpenCV\Converter.cpp">
+      <Filter>Native\OpenCV</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,12 +107,19 @@
     <ClInclude Include="Native\Rendering\DepthTexture.h">
       <Filter>Native\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Native\OpenCV\HandDetector.h">
+      <Filter>Native\OpenCV</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\OpenCV\Converter.h">
+      <Filter>Native\OpenCV</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HoloHands_TemporaryKey.pfx" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\sunset.jpg">

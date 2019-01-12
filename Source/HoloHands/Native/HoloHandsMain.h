@@ -4,6 +4,7 @@
 #include "Native/Rendering/QuadRenderer.h"
 #include "Native/Rendering/DeviceResources.h"
 #include "Native/Rendering/DepthTexture.h"
+#include "Native/OpenCV/HandDetector.h"
 #include "Native/Utils/StepTimer.h"
 #include "Native/Sensor.h"
 
@@ -76,7 +77,8 @@ namespace HoloHands
         Windows::Foundation::EventRegistrationToken m_cameraRemovedToken;
         Windows::Foundation::EventRegistrationToken m_locatabilityChangedToken;
 
-        std::unique_ptr<Sensor> m_depthSensor = nullptr;
-        std::unique_ptr<DepthTexture> m_depthTexture = nullptr;
+        std::unique_ptr<Sensor> m_depthSensor;
+        std::unique_ptr<DepthTexture> m_depthTexture;
+        std::unique_ptr<HandDetector> m_handDetector;
     };
 }

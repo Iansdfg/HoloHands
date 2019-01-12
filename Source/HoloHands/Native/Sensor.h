@@ -10,7 +10,7 @@ namespace HoloHands
       Windows::Graphics::Imaging::SoftwareBitmap^ GetBitmap();
       void Lock();
       void Unlock();
-      bool BitmapIsDirty();
+      bool Updated();
 
    private:
       static Platform::String^ GetSensorName(Windows::Media::Capture::Frames::MediaFrameSource^ source);

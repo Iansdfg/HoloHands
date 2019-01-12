@@ -25,7 +25,7 @@ DepthTexture::DepthTexture(std::shared_ptr<DeviceResources> deviceResources)
 {
 }
 
-void DepthTexture::CopyFromBitmap(SoftwareBitmap^ bitmap)
+void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 {
    if (m_texture == nullptr || bitmap == nullptr)
    {
@@ -64,7 +64,6 @@ void DepthTexture::CopyFromBitmap(SoftwareBitmap^ bitmap)
       {
          auto const context = m_deviceResources->GetD3DDeviceContext();
 
-         // Copy the new video frame over.
          D3D11_MAPPED_SUBRESOURCE subResource;
          if (SUCCEEDED(context->Map(m_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
          {
@@ -72,6 +71,18 @@ void DepthTexture::CopyFromBitmap(SoftwareBitmap^ bitmap)
             context->Unmap(m_texture.Get(), 0);
          }
       }
+   }
+}
+
+void DepthTexture::CopyFrom(cv::Mat& matrix)
+{
+   auto const context = m_deviceResources->GetD3DDeviceContext();
+
+   D3D11_MAPPED_SUBRESOURCE subResource;
+   if (SUCCEEDED(context->Map(m_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
+   {
+      std::memcpy(subResource.pData, matrix.data, matrix.total());
+      context->Unmap(m_texture.Get(), 0);
    }
 }
 

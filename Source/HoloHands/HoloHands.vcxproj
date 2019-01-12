@@ -92,6 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Managed\AppView.h" />
+    <ClInclude Include="Native\OpenCV\Converter.h" />
+    <ClInclude Include="Native\OpenCV\HandDetector.h" />
     <ClInclude Include="Native\Rendering\DepthTexture.h" />
     <ClInclude Include="Native\Sensor.h" />
     <ClInclude Include="Native\HoloHandsMain.h" />
@@ -105,6 +107,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Managed\AppView.cpp" />
+    <ClCompile Include="Native\OpenCV\Converter.cpp" />
+    <ClCompile Include="Native\OpenCV\HandDetector.cpp" />
     <ClCompile Include="Native\Rendering\DepthTexture.cpp" />
     <ClCompile Include="Native\Sensor.cpp" />
     <ClCompile Include="Native\HoloHandsMain.cpp" />
@@ -120,6 +124,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="HoloHands_TemporaryKey.pfx" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft\Debugging\Debugging.vcxproj">
@@ -156,6 +161,15 @@
     <Import Project="$(VSINSTALLDIR)\Common7\IDE\Extensions\Microsoft\VsGraphics\ImageContentTask.targets" />
     <Import Project="$(VSINSTALLDIR)\Common7\IDE\Extensions\Microsoft\VsGraphics\MeshContentTask.targets" />
     <Import Project="$(VSINSTALLDIR)\Common7\IDE\Extensions\Microsoft\VsGraphics\ShaderGraphContentTask.targets" />
+    <Import Project="..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets" Condition="Exists('..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets')" />
+    <Import Project="..\packages\OpenCV.Win.FLANN.310.6.1\build\native\opencv.win.flann.targets" Condition="Exists('..\packages\OpenCV.Win.FLANN.310.6.1\build\native\opencv.win.flann.targets')" />
+    <Import Project="..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets" Condition="Exists('..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets')" />
+    <Import Project="..\packages\OpenCV.Win.ImgCodecs.310.6.1\build\native\opencv.win.imgcodecs.targets" Condition="Exists('..\packages\OpenCV.Win.ImgCodecs.310.6.1\build\native\opencv.win.imgcodecs.targets')" />
+    <Import Project="..\packages\OpenCV.Win.VideoIO.310.6.1\build\native\opencv.win.videoio.targets" Condition="Exists('..\packages\OpenCV.Win.VideoIO.310.6.1\build\native\opencv.win.videoio.targets')" />
+    <Import Project="..\packages\OpenCV.Win.HighGUI.310.6.1\build\native\opencv.win.highgui.targets" Condition="Exists('..\packages\OpenCV.Win.HighGUI.310.6.1\build\native\opencv.win.highgui.targets')" />
+    <Import Project="..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets" Condition="Exists('..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets')" />
+    <Import Project="..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets" Condition="Exists('..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets')" />
+    <Import Project="..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets" Condition="Exists('..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets')" />
   </ImportGroup>
   <PropertyGroup>
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
@@ -167,4 +181,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\$(MSBuildProjectName)\</OutDir>
   </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.FLANN.310.6.1\build\native\opencv.win.flann.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.FLANN.310.6.1\build\native\opencv.win.flann.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.ImgCodecs.310.6.1\build\native\opencv.win.imgcodecs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.ImgCodecs.310.6.1\build\native\opencv.win.imgcodecs.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.VideoIO.310.6.1\build\native\opencv.win.videoio.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.VideoIO.310.6.1\build\native\opencv.win.videoio.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.HighGUI.310.6.1\build\native\opencv.win.highgui.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.HighGUI.310.6.1\build\native\opencv.win.highgui.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets'))" />
+  </Target>
 </Project>

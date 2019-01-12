@@ -50,7 +50,7 @@ void Sensor::Unlock()
    m_preventStateChanges.unlock();
 }
 
-bool Sensor::BitmapIsDirty()
+bool Sensor::Updated()
 {
    return m_bitmapIsDirty;
 }

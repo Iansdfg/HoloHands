@@ -9,7 +9,8 @@ namespace HoloHands
       public:
          DepthTexture(std::shared_ptr<DeviceResources> deviceResources);
 
-         void CopyFromBitmap(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap);
+         void CopyFrom(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap);
+         void CopyFrom(cv::Mat& matrix);
 
          void CreateDeviceDependentResources() override;
          void ReleaseDeviceDependentResources() override;

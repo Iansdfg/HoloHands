@@ -33,6 +33,7 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
    m_quadRenderer = std::make_unique<QuadRenderer>(m_deviceResources, Size(1268, 720));
    m_depthTexture = std::make_unique<DepthTexture>(m_deviceResources);
    m_depthSensor = std::make_unique<Sensor>(L"Short Throw ToF Depth");
+   m_handDetector = std::make_unique<HandDetector>();
 
    m_quadRenderer->CreateDeviceDependentResources();
    m_depthTexture->CreateDeviceDependentResources();
@@ -168,12 +169,16 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
          if (cameraActive)
          {
-            if (m_depthSensor->BitmapIsDirty())
+            if (m_depthSensor->Updated())
             {
                m_depthSensor->Lock();
 
                auto bitmap = m_depthSensor->GetBitmap();
-               m_depthTexture->CopyFromBitmap(bitmap);
+
+               cv::Mat handsMatrix;
+               m_handDetector->Process(bitmap, handsMatrix);
+
+               m_depthTexture->CopyFrom(bitmap); //TODO: pass in handsMatrix
 
                m_depthSensor->Unlock();
             }
