@@ -18,9 +18,12 @@ void Converter::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
          bitmapBuffer->CreateReference(),
          pixelBufferDataLength);
 
+   auto format  = bitmap->BitmapPixelFormat;
    outMatrix = cv::Mat(
       bitmap->PixelHeight,
-      bitmap->PixelWidth * 4,
-      CV_8UC1,
+      bitmap->PixelWidth,
+      CV_16UC1,
       pixelBufferData);
+
+   //outMatrix.convertTo(outMatrix, CV_8U);
 }

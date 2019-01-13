@@ -13,6 +13,7 @@ min16float4 main(PixelShaderInput input) : SV_TARGET
    const float max = 0.020;
 
    float depth = quadTexture.Sample(quadSampler, input.texCoord).r;
+   /*
    float color = (depth - min) / (max - min); //normalize to min, max rang.e
    color = 1 - color; //invert.
 
@@ -20,6 +21,8 @@ min16float4 main(PixelShaderInput input) : SV_TARGET
    {
       return min16float4(1, 0, 0, 0); //out of range.
    }
+   */
 
-    return min16float4(color, color, color, 1);
+    //return min16float4(color, color, color, 1);
+    return min16float4(depth, depth, depth, 1);
 }

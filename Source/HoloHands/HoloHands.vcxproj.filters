@@ -74,6 +74,9 @@
     <ClCompile Include="Native\OpenCV\Converter.cpp">
       <Filter>Native\OpenCV</Filter>
     </ClCompile>
+    <ClCompile Include="Native\Utils\IO.cpp">
+      <Filter>Native\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="Native\OpenCV\Converter.h">
       <Filter>Native\OpenCV</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\Utils\IO.h">
+      <Filter>Native\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

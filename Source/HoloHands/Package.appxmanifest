@@ -23,6 +23,8 @@
     </Application>
   </Applications>
   <Capabilities>
+
+     <uap:Capability Name="picturesLibrary" />
     <rescap:Capability Name="perceptionSensorsExperimental" />
     <DeviceCapability Name="webcam" />
   </Capabilities>

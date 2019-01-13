@@ -7,6 +7,7 @@
 #include "Native/OpenCV/HandDetector.h"
 #include "Native/Utils/StepTimer.h"
 #include "Native/Sensor.h"
+#include "Native/Utils/IO.h"
 
 namespace HoloHands
 {
@@ -80,5 +81,7 @@ namespace HoloHands
         std::unique_ptr<Sensor> m_depthSensor;
         std::unique_ptr<DepthTexture> m_depthTexture;
         std::unique_ptr<HandDetector> m_handDetector;
+
+        IO m_io;
     };
 }

@@ -175,10 +175,19 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
                auto bitmap = m_depthSensor->GetBitmap();
 
+               //static int i = 0;
+               //i++;
+               //static bool saved = false;
+               //if (saved == false && i > 50)
+               //{
+               //   saved = true;
+               //   m_io.SaveToFile(bitmap);
+               //}
+
                cv::Mat handsMatrix;
                m_handDetector->Process(bitmap, handsMatrix);
 
-               m_depthTexture->CopyFrom(bitmap); //TODO: pass in handsMatrix
+               m_depthTexture->CopyFrom(handsMatrix); //TODO: pass in handsMatrix
 
                m_depthSensor->Unlock();
             }
