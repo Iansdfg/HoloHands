@@ -38,7 +38,7 @@
          // 
          // img2
          // 
-         this.img2.Location = new System.Drawing.Point(1300, 12);
+         this.img2.Location = new System.Drawing.Point(809, 380);
          this.img2.Name = "img2";
          this.img2.Size = new System.Drawing.Size(800, 600);
          this.img2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -47,7 +47,7 @@
          // 
          // img1
          // 
-         this.img1.Location = new System.Drawing.Point(494, 12);
+         this.img1.Location = new System.Drawing.Point(-6, 380);
          this.img1.Name = "img1";
          this.img1.Size = new System.Drawing.Size(800, 600);
          this.img1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -67,7 +67,7 @@
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(2207, 762);
+         this.ClientSize = new System.Drawing.Size(1622, 1012);
          this.Controls.Add(this.imgOrig);
          this.Controls.Add(this.img1);
          this.Controls.Add(this.img2);

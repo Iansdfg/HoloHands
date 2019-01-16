@@ -96,7 +96,7 @@ task<void> IO::SaveSoftwareBitmapAsync(SoftwareBitmap^ bitmap)
             delete outputStream;
             previousTask.get();
 
-            OutputDebugString(L"--Saved--");
+            OutputDebugString(L"Bitmap saved!");
          });
       });
    });
