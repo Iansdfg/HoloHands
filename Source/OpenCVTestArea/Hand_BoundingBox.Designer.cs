@@ -1,6 +1,6 @@
 ﻿namespace OpenCVTestArea
 {
-   partial class Form1
+   partial class Hand_BoundingBox
    {
       /// <summary>
       /// Required designer variable.

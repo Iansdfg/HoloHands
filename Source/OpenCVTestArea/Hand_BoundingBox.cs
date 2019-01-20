@@ -12,9 +12,9 @@ using OpenCvSharp;
 
 namespace OpenCVTestArea
 {
-   public partial class Form1 : Form
+   public partial class Hand_BoundingBox : Form
    {
-      public Form1()
+      public Hand_BoundingBox()
       {
          InitializeComponent();
       }
@@ -30,6 +30,10 @@ namespace OpenCVTestArea
 
          Mat hands = new Mat();
          m.CopyTo(hands, mask);
+
+         //Saving image
+         Image img = new Bitmap(hands.ToMemoryStream());
+         img.Save("hand_masked.jpg");
 
          Mat canny = hands.Canny(200, 250);
 
