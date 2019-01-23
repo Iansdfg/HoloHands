@@ -27,3 +27,21 @@ void Converter::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
 
    //outMatrix.convertTo(outMatrix, CV_8U);
 }
+
+void Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)
+{
+   BitmapBuffer^ bitmapBuffer = outBitmap->LockBuffer(BitmapBufferAccessMode::ReadWrite);
+
+   uint32_t byteCount = 0;
+   uint16_t* pixelBufferData = Io::GetTypedPointerToMemoryBuffer<uint16_t>(
+      bitmapBuffer->CreateReference(),
+      byteCount);
+
+   int pixelCount = byteCount / 2;
+
+   for (size_t i = 0; i < pixelCount; i++)
+   {
+      //Normalize uint8 to uint16 range.
+      pixelBufferData[i] = (matrix.data[i] / 256.0) * 65536.0;
+   }
+}
