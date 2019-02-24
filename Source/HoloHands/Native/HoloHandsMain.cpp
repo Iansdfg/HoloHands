@@ -35,6 +35,8 @@ void HoloHandsMain::SetHolographicSpace(HolographicSpace^ holographicSpace)
    m_depthSensor = std::make_unique<Sensor>(L"Short Throw ToF Depth");
    m_handDetector = std::make_unique<HandDetector>();
 
+   m_spatialInputHandler = std::make_unique<SpatialInputHandler>();
+
    m_quadRenderer->CreateDeviceDependentResources();
    m_depthTexture->CreateDeviceDependentResources();
 
@@ -103,13 +105,34 @@ HolographicFrame^ HoloHandsMain::Update()
    m_deviceResources->EnsureCameraResources(holographicFrame, prediction);
 
    SpatialCoordinateSystem^ attachedCoordinateSystem = m_attachedReferenceFrame->GetStationaryCoordinateSystemAtTimestamp(prediction->Timestamp);
-   
+
    m_timer.Tick([&]()
    {
       SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(attachedCoordinateSystem, prediction->Timestamp);
 
       m_quadRenderer->UpdatePosition(pose);
       m_quadRenderer->Update(m_timer);
+
+      //Update air tap state.
+      SpatialInteractionSourceState^ pointerState = m_spatialInputHandler->CheckForInput();
+      if (pointerState != nullptr)
+      {
+         m_handDetector->IsClosed(pointerState->IsPressed);
+      }
+
+      //Update hand tracking.
+      if (m_depthSensor->Updated())
+      {
+         m_depthSensor->Lock();
+
+         auto bitmap = m_depthSensor->GetBitmap();
+
+         m_handDetector->Process(bitmap);
+
+         m_depthTexture->CopyFrom(m_handDetector->GetImage());
+
+         m_depthSensor->Unlock();
+      }
    });
 
    for (auto cameraPose : prediction->CameraPoses)
@@ -169,29 +192,6 @@ bool HoloHandsMain::Render(Windows::Graphics::Holographic::HolographicFrame^ hol
 
          if (cameraActive)
          {
-            if (m_depthSensor->Updated())
-            {
-               m_depthSensor->Lock();
-
-               auto bitmap = m_depthSensor->GetBitmap();
-
-               //static int i = 0;
-               //i++;
-               //static bool saved = false;
-               //if (saved == false && i > 50)
-               //{
-               //   saved = true;
-               //   m_io.SaveToFile(bitmap);
-               //}
-
-               cv::Mat handsMatrix;
-               m_handDetector->Process(bitmap, handsMatrix);
-
-               m_depthTexture->CopyFrom(handsMatrix); //TODO: pass in handsMatrix
-
-               m_depthSensor->Unlock();
-            }
-
             m_quadRenderer->Render(*m_depthTexture);
          }
 

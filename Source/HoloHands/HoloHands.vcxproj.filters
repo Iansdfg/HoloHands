@@ -77,6 +77,9 @@
     <ClCompile Include="Native\Utils\IO.cpp">
       <Filter>Native\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Native\SpatialInputHandler.cpp">
+      <Filter>Native</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -118,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="Native\Utils\IO.h">
       <Filter>Native\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Native\SpatialInputHandler.h">
+      <Filter>Native</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

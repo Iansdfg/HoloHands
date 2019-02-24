@@ -7,6 +7,7 @@
 #include "Native/OpenCV/HandDetector.h"
 #include "Native/Utils/StepTimer.h"
 #include "Native/Sensor.h"
+#include "Native/SpatialInputHandler.h"
 #include "Native/Utils/IO.h"
 
 namespace HoloHands
@@ -69,6 +70,8 @@ namespace HoloHands
 
         // SpatialLocator that is attached to the primary camera.
         Windows::Perception::Spatial::SpatialLocator^ m_locator;
+
+		std::shared_ptr<SpatialInputHandler> m_spatialInputHandler;
 
         Windows::Perception::Spatial::SpatialStationaryFrameOfReference^ m_referenceFrame;
         Windows::Perception::Spatial::SpatialLocatorAttachedFrameOfReference^ m_attachedReferenceFrame;
