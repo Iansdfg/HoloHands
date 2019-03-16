@@ -10,51 +10,51 @@ using namespace std::placeholders;
 
 SpatialInputHandler::SpatialInputHandler()
 {
-   m_interactionManager = SpatialInteractionManager::GetForCurrentView();
+   _interactionManager = SpatialInteractionManager::GetForCurrentView();
 
-   m_sourcePressedEventToken =
-      m_interactionManager->SourcePressed +=
+   _sourcePressedEventToken =
+      _interactionManager->SourcePressed +=
       ref new TypedEventHandler<SpatialInteractionManager^, SpatialInteractionSourceEventArgs^>(
          bind(&SpatialInputHandler::OnSourceChanged, this, _1, _2));
 
-   m_sourceReleasedEventToken =
-      m_interactionManager->SourceReleased +=
+   _sourceReleasedEventToken =
+      _interactionManager->SourceReleased +=
       ref new TypedEventHandler<SpatialInteractionManager^, SpatialInteractionSourceEventArgs^>(
          bind(&SpatialInputHandler::OnSourceChanged, this, _1, _2));
 
-   m_sourceUpdatedEventToken =
-      m_interactionManager->SourceUpdated +=
+   _sourceUpdatedEventToken =
+      _interactionManager->SourceUpdated +=
       ref new TypedEventHandler<SpatialInteractionManager^, SpatialInteractionSourceEventArgs^>(
          bind(&SpatialInputHandler::OnSourceChanged, this, _1, _2));
 
-   m_sourceLostEventToken =
-      m_interactionManager->SourceLost +=
+   _sourceLostEventToken =
+      _interactionManager->SourceLost +=
       ref new TypedEventHandler<SpatialInteractionManager^, SpatialInteractionSourceEventArgs^>(
          bind(&SpatialInputHandler::OnSourceChanged, this, _1, _2));
 
-   m_sourceDetectedEventToken =
-      m_interactionManager->SourceDetected +=
+   _sourceDetectedEventToken =
+      _interactionManager->SourceDetected +=
       ref new TypedEventHandler<SpatialInteractionManager^, SpatialInteractionSourceEventArgs^>(
          bind(&SpatialInputHandler::OnSourceChanged, this, _1, _2));
 }
 
 SpatialInputHandler::~SpatialInputHandler()
 {
-   m_interactionManager->SourcePressed -= m_sourcePressedEventToken;
-   m_interactionManager->SourceReleased -= m_sourceReleasedEventToken;
-   m_interactionManager->SourceUpdated -= m_sourceUpdatedEventToken;
-   m_interactionManager->SourceLost -= m_sourceLostEventToken;
-   m_interactionManager->SourceDetected -= m_sourceDetectedEventToken;
+   _interactionManager->SourcePressed -= _sourcePressedEventToken;
+   _interactionManager->SourceReleased -= _sourceReleasedEventToken;
+   _interactionManager->SourceUpdated -= _sourceUpdatedEventToken;
+   _interactionManager->SourceLost -= _sourceLostEventToken;
+   _interactionManager->SourceDetected -= _sourceDetectedEventToken;
 }
 
 SpatialInteractionSourceState^ SpatialInputHandler::CheckForInput()
 {
-   SpatialInteractionSourceState^ sourceState = m_sourceState;
-   m_sourceState = nullptr;
+   SpatialInteractionSourceState^ sourceState = _sourceState;
+   _sourceState = nullptr;
    return sourceState;
 }
 
 void SpatialInputHandler::OnSourceChanged(SpatialInteractionManager^ sender, SpatialInteractionSourceEventArgs^ args)
 {
-   m_sourceState = args->State;
+   _sourceState = args->State;
 }

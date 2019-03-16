@@ -1,13 +1,13 @@
 #include "pch.h"
 
-#include "Converter.h"
+#include "ImageUtils.h"
 
 #include "Io/BufferHelpers.h"
 
 using namespace HoloHands;
 using namespace Windows::Graphics::Imaging;
 
-void Converter::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
+void ImageUtils::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
 {
    BitmapBuffer^ bitmapBuffer = bitmap->LockBuffer(BitmapBufferAccessMode::Read);
 
@@ -24,8 +24,6 @@ void Converter::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
       bitmap->PixelWidth,
       CV_16UC1,
       pixelBufferData);
-
-   //outMatrix.convertTo(outMatrix, CV_8U);
 }
 
 void Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)

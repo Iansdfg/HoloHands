@@ -38,21 +38,21 @@ namespace HoloHands
       RetType                 UseHolographicCameraResources(const LCallback& callback);
 
       Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice^
-         GetD3DInteropDevice() const { return m_d3dInteropDevice; }
+         GetD3DInteropDevice() const { return _d3dInteropDevice; }
 
       // D3D accessors.
-      ID3D11Device4*          GetD3DDevice() const { return m_d3dDevice.Get(); }
-      ID3D11DeviceContext3*   GetD3DDeviceContext() const { return m_d3dContext.Get(); }
-      D3D_FEATURE_LEVEL       GetDeviceFeatureLevel() const { return m_d3dFeatureLevel; }
-      bool                    GetDeviceSupportsVprt() const { return m_supportsVprt; }
+      ID3D11Device4*          GetD3DDevice() const { return _d3dDevice.Get(); }
+      ID3D11DeviceContext3*   GetD3DDeviceContext() const { return _d3dContext.Get(); }
+      D3D_FEATURE_LEVEL       GetDeviceFeatureLevel() const { return _d3dFeatureLevel; }
+      bool                    GetDeviceSupportsVprt() const { return _supportsVprt; }
 
       // DXGI acessors.
-      IDXGIAdapter3*          GetDXGIAdapter() const { return m_dxgiAdapter.Get(); }
+      IDXGIAdapter3*          GetDXGIAdapter() const { return _dxgiAdapter.Get(); }
 
       // D2D accessors.
-      ID2D1Factory2*          GetD2DFactory() const { return m_d2dFactory.Get(); }
-      IDWriteFactory2*        GetDWriteFactory() const { return m_dwriteFactory.Get(); }
-      IWICImagingFactory2*    GetWicImagingFactory() const { return m_wicFactory.Get(); }
+      ID2D1Factory2*          GetD2DFactory() const { return _d2dFactory.Get(); }
+      IDWriteFactory2*        GetDWriteFactory() const { return _dwriteFactory.Get(); }
+      IWICImagingFactory2*    GetWicImagingFactory() const { return _wicFactory.Get(); }
 
    private:
       // Private methods related to the Direct3D device, and resources based on that device.
@@ -61,34 +61,34 @@ namespace HoloHands
       void CreateDeviceResources();
 
       // Direct3D objects.
-      Microsoft::WRL::ComPtr<ID3D11Device4>                   m_d3dDevice;
-      Microsoft::WRL::ComPtr<ID3D11DeviceContext3>            m_d3dContext;
-      Microsoft::WRL::ComPtr<IDXGIAdapter3>                   m_dxgiAdapter;
+      Microsoft::WRL::ComPtr<ID3D11Device4>                   _d3dDevice;
+      Microsoft::WRL::ComPtr<ID3D11DeviceContext3>            _d3dContext;
+      Microsoft::WRL::ComPtr<IDXGIAdapter3>                   _dxgiAdapter;
 
       // Direct3D interop objects.
-      Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice^ m_d3dInteropDevice;
+      Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice^ _d3dInteropDevice;
 
       // Direct2D factories.
-      Microsoft::WRL::ComPtr<ID2D1Factory2>                   m_d2dFactory;
-      Microsoft::WRL::ComPtr<IDWriteFactory2>                 m_dwriteFactory;
-      Microsoft::WRL::ComPtr<IWICImagingFactory2>             m_wicFactory;
+      Microsoft::WRL::ComPtr<ID2D1Factory2>                   _d2dFactory;
+      Microsoft::WRL::ComPtr<IDWriteFactory2>                 _dwriteFactory;
+      Microsoft::WRL::ComPtr<IWICImagingFactory2>             _wicFactory;
 
       // The holographic space provides a preferred DXGI adapter ID.
-      Windows::Graphics::Holographic::HolographicSpace^       m_holographicSpace = nullptr;
+      Windows::Graphics::Holographic::HolographicSpace^       _holographicSpace = nullptr;
 
       // Properties of the Direct3D device currently in use.
-      D3D_FEATURE_LEVEL                                       m_d3dFeatureLevel = D3D_FEATURE_LEVEL_11_1;
+      D3D_FEATURE_LEVEL                                       _d3dFeatureLevel = D3D_FEATURE_LEVEL_11_1;
 
       // The IDeviceNotify can be held directly as it owns the DeviceResources.
-      IDeviceNotify*                                          m_deviceNotify = nullptr;
+      IDeviceNotify*                                          _deviceNotify = nullptr;
 
       // Whether or not the current Direct3D device supports the optional feature 
       // for setting the render target array index from the vertex shader stage.
-      bool                                                    m_supportsVprt = false;
+      bool                                                    _supportsVprt = false;
 
       // Back buffer resources, etc. for attached holographic cameras.
-      std::map<UINT32, std::unique_ptr<CameraResources>>      m_cameraResources;
-      std::mutex                                              m_cameraResourcesLock;
+      std::map<UINT32, std::unique_ptr<CameraResources>>      _cameraResources;
+      std::mutex                                              _cameraResourcesLock;
    };
 
    class Resource
@@ -96,7 +96,7 @@ namespace HoloHands
    public:
       Resource(std::shared_ptr<DeviceResources> deviceResources)
          :
-         m_deviceResources(std::move(deviceResources))
+         _deviceResources(std::move(deviceResources))
       {}
 
       virtual ~Resource() = default;
@@ -105,7 +105,7 @@ namespace HoloHands
       virtual void ReleaseDeviceDependentResources() = 0;
 
    protected:
-      std::shared_ptr<DeviceResources> m_deviceResources;
+      std::shared_ptr<DeviceResources> _deviceResources;
    };
 
    // Device-based resources for holographic cameras are stored in a std::map. Access this list by providing a
@@ -117,8 +117,8 @@ namespace HoloHands
    template<typename RetType, typename LCallback>
    RetType DeviceResources::UseHolographicCameraResources(const LCallback& callback)
    {
-      std::lock_guard<std::mutex> guard(m_cameraResourcesLock);
-      return callback(m_cameraResources);
+      std::lock_guard<std::mutex> guard(_cameraResourcesLock);
+      return callback(_cameraResources);
    }
 }
 

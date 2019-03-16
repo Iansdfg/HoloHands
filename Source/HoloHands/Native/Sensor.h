@@ -39,13 +39,13 @@ namespace HoloHands
          Windows::Media::Capture::Frames::MediaFrameReader^ sender,
          Windows::Media::Capture::Frames::MediaFrameArrivedEventArgs^ args);
 
-      Platform::Agile<Windows::Media::Capture::MediaCapture> m_mediaCapture;
-      Windows::Media::Capture::Frames::MediaFrameReader^ m_frameReader;
-      Windows::Foundation::EventRegistrationToken m_frameArrivedToken;
+      Platform::Agile<Windows::Media::Capture::MediaCapture> _mediaCapture;
+      Windows::Media::Capture::Frames::MediaFrameReader^ _frameReader;
+      Windows::Foundation::EventRegistrationToken _frameArrivedToken;
 
-      Windows::Graphics::Imaging::SoftwareBitmap^ m_bitmap;
-      std::wstring m_sensorName;
-      bool m_bitmapIsDirty;
-      std::mutex m_preventStateChanges;
+      Windows::Graphics::Imaging::SoftwareBitmap^ _bitmap;
+      std::wstring _sensorName;
+      bool _bitmapIsDirty;
+      std::mutex _preventStateChanges;
    };
 }

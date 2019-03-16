@@ -16,25 +16,19 @@ namespace HoloHands
     class CubeRenderer
     {
     public:
-       CubeRenderer(
-            _In_ const Graphics::DeviceResourcesPtr& deviceResources);
+       CubeRenderer(const Graphics::DeviceResourcesPtr& deviceResources);
 
         void CreateDeviceDependentResources();
 
         void ReleaseDeviceDependentResources();
 
-        void Update(
-            _In_ const Graphics::StepTimer& timer);
+        void Update(const Graphics::StepTimer& timer);
 
         void Render();
 
-        // Repositions the sample hologram.
-        void PositionHologram(
-            Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
+        void PositionHologram(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
 
-        // Property accessors.
-        void SetPosition(
-            Windows::Foundation::Numerics::float3 pos)
+        void SetPosition(Windows::Foundation::Numerics::float3 pos)
         {
             _position = pos;
         }
@@ -45,22 +39,17 @@ namespace HoloHands
         }
 
     private:
-        // Cached pointer to device resources.
         Graphics::DeviceResourcesPtr _deviceResources;
 
-        // The material we'll use to render this slate.
         std::unique_ptr<Rendering::SlateMaterial> _slateMaterial;
 
-        // Direct3D resources for the slate geometry.
         Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> _modelConstantBuffer;
 
-        // System resources for the slate geometry.
         Rendering::SlateModelConstantBuffer _modelConstantBufferData;
         uint32 _indexCount = 0;
 
-        // Variables used with the rendering loop.
         bool _loadingComplete = false;
 
         Windows::Foundation::Numerics::float3 _position = { 0.f, 0.f, 0.f };

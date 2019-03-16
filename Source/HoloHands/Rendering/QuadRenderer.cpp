@@ -2,8 +2,7 @@
 
 #include "QuadRenderer.h"
 
-#include "Native/Rendering/DirectXHelper.h"
-#include "Native/Rendering/DepthTexture.h"
+#include "Rendering/DepthTexture.h"
 
 using namespace HoloHands;
 using namespace Concurrency;
@@ -18,25 +17,25 @@ QuadRenderer::QuadRenderer(
    const Size& size)
    :
    Resource(std::move(deviceResources)),
-   m_quadPosition({ 0.f, 0.f, -2.f }),
-   m_quadSize(size)
+   _quadPosition({ 0.f, 0.f, -2.f }),
+   _quadSize(size)
 {
    CreateDeviceDependentResources();
 }
 
 void QuadRenderer::CreateDeviceDependentResources()
 {
-   task<std::vector<byte>> loadVSTask = ReadDataAsync(L"ms-appx:///Quad.vs.cso");
-   task<std::vector<byte>> loadPSTask = ReadDataAsync(L"ms-appx:///Quad.ps.cso");
+   task<std::vector<byte>> loadVSTask = Io::ReadDataAsync(L"ms-appx:///Quad.vs.cso");
+   task<std::vector<byte>> loadPSTask = Io::ReadDataAsync(L"ms-appx:///Quad.ps.cso");
 
    task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
    {
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateVertexShader(
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateVertexShader(
             fileData.data(),
             fileData.size(),
             nullptr,
-            &m_vertexShader
+            &_vertexShader
          )
       );
 
@@ -46,34 +45,34 @@ void QuadRenderer::CreateDeviceDependentResources()
           { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
       } };
 
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateInputLayout(
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateInputLayout(
             vertexDesc.data(),
             static_cast<UINT>(vertexDesc.size()),
             fileData.data(),
             static_cast<UINT>(fileData.size()),
-            &m_inputLayout
+            &_inputLayout
          )
       );
    });
 
    task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
    {
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreatePixelShader(
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreatePixelShader(
             fileData.data(),
             fileData.size(),
             nullptr,
-            &m_pixelShader
+            &_pixelShader
          )
       );
 
       const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateBuffer(
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
             &constantBufferDesc,
             nullptr,
-            &m_modelConstantBuffer
+            &_modelConstantBuffer
          )
       );
    });
@@ -89,15 +88,15 @@ void QuadRenderer::CreateDeviceDependentResources()
       samplerDesc.MinLOD = 0;
       samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
-            m_sampler.ReleaseAndGetAddressOf()));
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc,
+            _sampler.ReleaseAndGetAddressOf()));
    });
 
    task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;
    task<void> createQuadTask = shaderTaskGroup.then([this]()
    {
-      float aspect = m_quadSize.Width / m_quadSize.Height;
+      float aspect = _quadSize.Width / _quadSize.Height;
 
       float scale = 0.5f;
       float halfWidth = aspect * scale * 0.5f;
@@ -111,7 +110,7 @@ void QuadRenderer::CreateDeviceDependentResources()
           { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT2(1.f, 0.f) },
       } };
 
-      m_vertexCount = static_cast<unsigned int>(quadVertices.size());
+      _vertexCount = static_cast<unsigned int>(quadVertices.size());
 
       D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
       vertexBufferData.pSysMem = quadVertices.data();
@@ -120,67 +119,67 @@ void QuadRenderer::CreateDeviceDependentResources()
 
       const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
 
-      ThrowIfFailed(
-         m_deviceResources->GetD3DDevice()->CreateBuffer(
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
             &vertexBufferDesc,
             &vertexBufferData,
-            &m_vertexBuffer
+            &_vertexBuffer
          )
       );
    });
 
    createQuadTask.then([this]()
    {
-      m_loadingComplete = true;
+      _loadingComplete = true;
    });
 }
 
 void QuadRenderer::ReleaseDeviceDependentResources()
 {
-   m_loadingComplete = false;
-   m_vertexShader.Reset();
-   m_inputLayout.Reset();
-   m_pixelShader.Reset();
-   m_modelConstantBuffer.Reset();
-   m_vertexBuffer.Reset();
+   _loadingComplete = false;
+   _vertexShader.Reset();
+   _inputLayout.Reset();
+   _pixelShader.Reset();
+   _modelConstantBuffer.Reset();
+   _vertexBuffer.Reset();
 }
 
 void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
 {
    if (pointerPose != nullptr)
    {
-      m_headPosition = pointerPose->Head->Position;
-      m_headForwardDirection = pointerPose->Head->ForwardDirection;
-      m_headUpDirection = pointerPose->Head->UpDirection;
+      _headPosition = pointerPose->Head->Position;
+      _headForwardDirection = pointerPose->Head->ForwardDirection;
+      _headUpDirection = pointerPose->Head->UpDirection;
 
       float distance = 2;
-      m_quadPosition = m_headPosition + m_headForwardDirection * distance;
+      _quadPosition = _headPosition + _headForwardDirection * distance;
    }
 }
 
 void QuadRenderer::Update(const StepTimer& timer)
 {
    const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
-      XMLoadFloat3(&m_headPosition),
-      XMLoadFloat3(&m_quadPosition),
-      XMLoadFloat3(&m_headUpDirection)));
+      XMLoadFloat3(&_headPosition),
+      XMLoadFloat3(&_quadPosition),
+      XMLoadFloat3(&_headUpDirection)));
 
-   const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&m_quadPosition));
+   const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&_quadPosition));
 
-   XMStoreFloat4x4(&m_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
+   XMStoreFloat4x4(&_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
 
-   if (!m_loadingComplete)
+   if (!_loadingComplete)
    {
       return;
    }
 
-   const auto context = m_deviceResources->GetD3DDeviceContext();
+   const auto context = _deviceResources->GetD3DDeviceContext();
 
    context->UpdateSubresource(
-      m_modelConstantBuffer.Get(),
+      _modelConstantBuffer.Get(),
       0,
       nullptr,
-      &m_modelConstantBufferData,
+      &_modelConstantBufferData,
       0,
       0
    );
@@ -188,28 +187,28 @@ void QuadRenderer::Update(const StepTimer& timer)
 
 void QuadRenderer::Render(const DepthTexture& depthTexture)
 {
-   if (!m_loadingComplete)
+   if (!_loadingComplete)
    {
       return;
    }
 
-   const auto context = m_deviceResources->GetD3DDeviceContext();
+   const auto context = _deviceResources->GetD3DDeviceContext();
 
    const UINT stride = sizeof(VertexPositionTextureCoords);
    const UINT offset = 0;
    context->IASetVertexBuffers(
       0,
       1,
-      m_vertexBuffer.GetAddressOf(),
+      _vertexBuffer.GetAddressOf(),
       &stride,
       &offset
    );
 
    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-   context->IASetInputLayout(m_inputLayout.Get());
+   context->IASetInputLayout(_inputLayout.Get());
 
    context->VSSetShader(
-      m_vertexShader.Get(),
+      _vertexShader.Get(),
       nullptr,
       0
    );
@@ -217,16 +216,16 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
    context->VSSetConstantBuffers(
       0,
       1,
-      m_modelConstantBuffer.GetAddressOf()
+      _modelConstantBuffer.GetAddressOf()
    );
 
    context->PSSetShader(
-      m_pixelShader.Get(),
+      _pixelShader.Get(),
       nullptr,
       0
    );
 
-   context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+   context->PSSetSamplers(0, 1, _sampler.GetAddressOf());
 
    auto texture = depthTexture.GetTextureView();
    if (texture != nullptr)
@@ -234,24 +233,24 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
       context->PSSetShaderResources(0, 1, &texture);
    }
 
-   context->DrawInstanced(m_vertexCount, 2, 0, 0);
+   context->DrawInstanced(_vertexCount, 2, 0, 0);
 }
 
 std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uint32_t& height)
 {
    ComPtr<IWICImagingFactory> wicFactory;
-   ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
+   ASSERT_SUCCEEDED(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
 
    ComPtr<IWICBitmapDecoder> decoder;
-   ThrowIfFailed(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
+   ASSERT_SUCCEEDED(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
 
    ComPtr<IWICBitmapFrameDecode> frame;
-   ThrowIfFailed(decoder->GetFrame(0, frame.GetAddressOf()));
+   ASSERT_SUCCEEDED(decoder->GetFrame(0, frame.GetAddressOf()));
 
-   ThrowIfFailed(frame->GetSize(&width, &height));
+   ASSERT_SUCCEEDED(frame->GetSize(&width, &height));
 
    WICPixelFormatGUID pixelFormat;
-   ThrowIfFailed(frame->GetPixelFormat(&pixelFormat));
+   ASSERT_SUCCEEDED(frame->GetPixelFormat(&pixelFormat));
 
    uint32_t rowPitch = width * sizeof(uint32_t);
    uint32_t imageSize = rowPitch * height;
@@ -261,24 +260,24 @@ std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uin
 
    if (memcmp(&pixelFormat, &GUID_WICPixelFormat32bppBGRA, sizeof(GUID)) == 0)
    {
-      ThrowIfFailed(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+      ASSERT_SUCCEEDED(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
    }
    else
    {
       ComPtr<IWICFormatConverter> formatConverter;
-      ThrowIfFailed(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
+      ASSERT_SUCCEEDED(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
 
       BOOL canConvert = FALSE;
-      ThrowIfFailed(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
+      ASSERT_SUCCEEDED(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
       if (!canConvert)
       {
          throw std::exception("CanConvert");
       }
 
-      ThrowIfFailed(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
+      ASSERT_SUCCEEDED(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
          WICBitmapDitherTypeErrorDiffusion, nullptr, 0, WICBitmapPaletteTypeMedianCut));
 
-      ThrowIfFailed(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
+      ASSERT_SUCCEEDED(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
    }
 
    return image;

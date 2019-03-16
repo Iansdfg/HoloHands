@@ -37,40 +37,40 @@ namespace HoloHands
             std::shared_ptr<DeviceResources> deviceResources);
 
         // Direct3D device resources.
-        ID3D11RenderTargetView* GetBackBufferRenderTargetView()     const { return m_d3dRenderTargetView.Get();     }
-        ID3D11DepthStencilView* GetDepthStencilView()               const { return m_d3dDepthStencilView.Get();     }
-        ID3D11Texture2D*        GetBackBufferTexture2D()            const { return m_d3dBackBuffer.Get();           }
-        D3D11_VIEWPORT          GetViewport()                       const { return m_d3dViewport;                   }
-        DXGI_FORMAT             GetBackBufferDXGIFormat()           const { return m_dxgiFormat;                    }
+        ID3D11RenderTargetView* GetBackBufferRenderTargetView()     const { return _d3dRenderTargetView.Get();     }
+        ID3D11DepthStencilView* GetDepthStencilView()               const { return _d3dDepthStencilView.Get();     }
+        ID3D11Texture2D*        GetBackBufferTexture2D()            const { return _d3dBackBuffer.Get();           }
+        D3D11_VIEWPORT          GetViewport()                       const { return _d3dViewport;                   }
+        DXGI_FORMAT             GetBackBufferDXGIFormat()           const { return _dxgiFormat;                    }
 
         // Render target properties.
-        Windows::Foundation::Size GetRenderTargetSize()             const { return m_d3dRenderTargetSize;           }
-        bool                    IsRenderingStereoscopic()           const { return m_isStereo;                      }
+        Windows::Foundation::Size GetRenderTargetSize()             const { return _d3dRenderTargetSize;           }
+        bool                    IsRenderingStereoscopic()           const { return _isStereo;                      }
 
         // The holographic camera these resources are for.
-        Windows::Graphics::Holographic::HolographicCamera^ GetHolographicCamera() const { return m_holographicCamera; }
+        Windows::Graphics::Holographic::HolographicCamera^ GetHolographicCamera() const { return _holographicCamera; }
 
     private:
         // Direct3D rendering objects. Required for 3D.
-        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>      m_d3dRenderTargetView;
-        Microsoft::WRL::ComPtr<ID3D11DepthStencilView>      m_d3dDepthStencilView;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D>             m_d3dBackBuffer;
+        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>      _d3dRenderTargetView;
+        Microsoft::WRL::ComPtr<ID3D11DepthStencilView>      _d3dDepthStencilView;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D>             _d3dBackBuffer;
 
         // Device resource to store view and projection matrices.
-        Microsoft::WRL::ComPtr<ID3D11Buffer>                m_viewProjectionConstantBuffer;
+        Microsoft::WRL::ComPtr<ID3D11Buffer>                _viewProjectionConstantBuffer;
 
         // Direct3D rendering properties.
-        DXGI_FORMAT                                         m_dxgiFormat;
-        Windows::Foundation::Size                           m_d3dRenderTargetSize;
-        D3D11_VIEWPORT                                      m_d3dViewport;
+        DXGI_FORMAT                                         _dxgiFormat;
+        Windows::Foundation::Size                           _d3dRenderTargetSize;
+        D3D11_VIEWPORT                                      _d3dViewport;
 
         // Indicates whether the camera supports stereoscopic rendering.
-        bool                                                m_isStereo = false;
+        bool                                                _isStereo = false;
 
         // Indicates whether this camera has a pending frame.
-        bool                                                m_framePending = false;
+        bool                                                _framePending = false;
 
         // Pointer to the holographic camera these resources are for.
-        Windows::Graphics::Holographic::HolographicCamera^  m_holographicCamera = nullptr;
+        Windows::Graphics::Holographic::HolographicCamera^  _holographicCamera = nullptr;
     };
 }

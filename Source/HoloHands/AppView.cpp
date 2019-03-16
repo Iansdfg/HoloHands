@@ -1,30 +1,14 @@
-﻿//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// This code is licensed under the MIT License (MIT).
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
-
-#include "pch.h"
+﻿#include "pch.h"
 
 #include "AppMain.h"
 #include "AppView.h"
 
-// The main function is only used to initialize our IFrameworkView class.
-// Under most circumstances, you should not need to modify this function.
 [Platform::MTAThread]
-int main(
-    Platform::Array<Platform::String^>^)
+int main(Platform::Array<Platform::String^>^)
 {
-    HoloHands::AppViewSource^ appViewSource =
-        ref new HoloHands::AppViewSource();
+    HoloHands::AppViewSource^ appViewSource = ref new HoloHands::AppViewSource();
 
-    Windows::ApplicationModel::Core::CoreApplication::Run(
-        appViewSource);
+    Windows::ApplicationModel::Core::CoreApplication::Run(appViewSource);
 
     return 0;
 }
@@ -42,7 +26,6 @@ namespace HoloHands
 
     std::shared_ptr<Holographic::AppMainBase> AppView::InitializeCore()
     {
-        return std::make_shared<AppMain>(
-            _deviceResources);
+        return std::make_shared<AppMain>(_deviceResources);
     }
 }

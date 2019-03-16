@@ -15,14 +15,14 @@ namespace HoloHands
             Windows::UI::Input::Spatial::SpatialInteractionManager^ sender,
             Windows::UI::Input::Spatial::SpatialInteractionSourceEventArgs^ args);
 
-        Windows::UI::Input::Spatial::SpatialInteractionManager^     m_interactionManager;
+        Windows::UI::Input::Spatial::SpatialInteractionManager^     _interactionManager;
 
-        Windows::Foundation::EventRegistrationToken m_sourcePressedEventToken;
-        Windows::Foundation::EventRegistrationToken m_sourceReleasedEventToken;
-        Windows::Foundation::EventRegistrationToken m_sourceUpdatedEventToken;
-        Windows::Foundation::EventRegistrationToken m_sourceLostEventToken;
-        Windows::Foundation::EventRegistrationToken m_sourceDetectedEventToken;
+        Windows::Foundation::EventRegistrationToken _sourcePressedEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceReleasedEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceUpdatedEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceLostEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceDetectedEventToken;
 
-        Windows::UI::Input::Spatial::SpatialInteractionSourceState^ m_sourceState = nullptr;
+        Windows::UI::Input::Spatial::SpatialInteractionSourceState^ _sourceState = nullptr;
     };
 }

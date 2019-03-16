@@ -19,10 +19,10 @@ namespace HoloHands
          ID3D11ShaderResourceView* GetTextureView(void) const;
 
       private:
-         Microsoft::WRL::ComPtr<ID3D11Texture2D> m_texture;
-         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
+         Microsoft::WRL::ComPtr<ID3D11Texture2D> _texture;
+         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _textureView;
 
-         int m_width;
-         int m_height;
+         int _width;
+         int _height;
    };
 }

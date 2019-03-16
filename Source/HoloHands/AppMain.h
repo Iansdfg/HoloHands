@@ -11,70 +11,53 @@
 
 #pragma once
 
-#include "HandDetector.h"
-#include "AxisRenderer.h"
-#include "CubeRenderer.h"
+#include "CV/HandDetector.h"
+#include "Rendering/AxisRenderer.h"
+#include "Rendering/CubeRenderer.h"
+#include "Rendering/QuadRenderer.h"
 
 namespace HoloHands
 {
-    class AppMain : public Holographic::AppMainBase
-    {
-    public:
-        AppMain(
-            const std::shared_ptr<Graphics::DeviceResources>& deviceResources);
+   class AppMain : public Holographic::AppMainBase
+   {
+   public:
+      AppMain(const std::shared_ptr<Graphics::DeviceResources>& deviceResources);
 
-        // IDeviceNotify
-        virtual void OnDeviceLost() override;
+      virtual void OnDeviceLost() override;
 
-        virtual void OnDeviceRestored() override;
+      virtual void OnDeviceRestored() override;
 
-        // IAppMain
-        virtual void OnHolographicSpaceChanged(
-            _In_ Windows::Graphics::Holographic::HolographicSpace^ holographicSpace) override;
+      virtual void OnHolographicSpaceChanged(
+         Windows::Graphics::Holographic::HolographicSpace^ holographicSpace) override;
 
-        virtual void OnSpatialInput(
-            _In_ Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState) override;
+      virtual void OnSpatialInput(
+         Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState) override;
 
-        virtual void OnUpdate(
-            _In_ Windows::Graphics::Holographic::HolographicFrame^ holographicFrame,
-            _In_ const Graphics::StepTimer& stepTimer) override;
+      virtual void OnUpdate(
+         Windows::Graphics::Holographic::HolographicFrame^ holographicFrame,
+         const Graphics::StepTimer& stepTimer) override;
 
-        virtual void OnPreRender() override;
+      virtual void OnPreRender() override;
 
-        virtual void OnRender() override;
+      virtual void OnRender() override;
 
-    private:
-        // Initializes access to HoloLens sensors.
-        void StartHoloLensMediaFrameSourceGroup();
+   private:
+      void StartHoloLensMediaFrameSourceGroup();
 
-    private:
-        std::shared_ptr<CubeRenderer> _renderer;
-        std::unique_ptr<HandDetector> _handDetector;
-        std::unique_ptr<AxisRenderer> _worldCSRenderer;
-        std::unique_ptr<AxisRenderer> _debugCSRenderer;
+   private:
+      std::unique_ptr<CubeRenderer> _cubeRenderer;
+      std::unique_ptr<AxisRenderer> _axisRenderer;
+      std::unique_ptr<QuadRenderer> _quadRenderer;
+      std::unique_ptr<HandDetector> _handDetector;
 
-        // Selected HoloLens media frame source group
-        HoloLensForCV::MediaFrameSourceGroupType _selectedHoloLensMediaFrameSourceGroupType;
-        HoloLensForCV::MediaFrameSourceGroup^ _holoLensMediaFrameSourceGroup;
-        bool _holoLensMediaFrameSourceGroupStarted;
+      HoloLensForCV::MediaFrameSourceGroupType _selectedHoloLensMediaFrameSourceGroupType;
+      HoloLensForCV::MediaFrameSourceGroup^ _holoLensMediaFrameSourceGroup;
+      bool _holoLensMediaFrameSourceGroupStarted;
 
-        // HoloLens media frame server manager
-        HoloLensForCV::SensorFrameStreamer^ _sensorFrameStreamer;
+      HoloLensForCV::SensorFrameStreamer^ _sensorFrameStreamer;
 
-        Windows::Foundation::DateTime _latestSelectedCameraTimestamp;
+      Windows::Foundation::DateTime _latestSelectedCameraTimestamp;
 
-        cv::Mat _undistortMap1;
-        cv::Mat _undistortMap2;
-        bool _undistortMapsInitialized;
-
-        cv::Mat _undistortedPVCameraImage;
-        cv::Mat _resizedPVCameraImage;
-        cv::Mat _blurredPVCameraImage;
-        cv::Mat _cannyPVCameraImage;
-
-        std::vector<Rendering::Texture2DPtr> _visualizationTextureList;
-        Rendering::Texture2DPtr _currentVisualizationTexture;
-
-        bool _paused = false;
-    };
+      bool _debugView;
+   };
 }

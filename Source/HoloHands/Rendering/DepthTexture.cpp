@@ -2,8 +2,6 @@
 
 #include "DepthTexture.h"
 
-#include "Native/Rendering/DirectXHelper.h"
-
 #include <MemoryBuffer.h>
 
 using namespace HoloHands;
@@ -19,14 +17,14 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 DepthTexture::DepthTexture(std::shared_ptr<DeviceResources> deviceResources)
    :
    Resource(std::move(deviceResources)),
-   m_width(1),
-   m_height(1)
+   _width(1),
+   _height(1)
 {
 }
 
 void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 {
-   if (m_texture == nullptr || bitmap == nullptr)
+   if (_texture == nullptr || bitmap == nullptr)
    {
       return;
    }
@@ -34,10 +32,10 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
    int width = bitmap->PixelWidth;
    int height = bitmap->PixelHeight;
 
-   if (width != m_width || height != m_height)
+   if (width != _width || height != _height)
    {
-      m_width = width;
-      m_height = height;
+      _width = width;
+      _height = height;
 
       ReleaseDeviceDependentResources();
       CreateDeviceDependentResources();
@@ -61,13 +59,13 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
       UINT32 sourceCapacity = 0;
       if (SUCCEEDED(memoryBufferByteAccess->GetBuffer(&pSourceBuffer, &sourceCapacity)) && pSourceBuffer)
       {
-         auto const context = m_deviceResources->GetD3DDeviceContext();
+         auto const context = _deviceResources->GetD3DDeviceContext();
 
          D3D11_MAPPED_SUBRESOURCE subResource;
-         if (SUCCEEDED(context->Map(m_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
+         if (SUCCEEDED(context->Map(_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
          {
             std::memcpy(subResource.pData, pSourceBuffer, sourceCapacity);
-            context->Unmap(m_texture.Get(), 0);
+            context->Unmap(_texture.Get(), 0);
          }
       }
    }
@@ -75,7 +73,7 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 
 void DepthTexture::CopyFrom(cv::Mat& matrix)
 {
-   if (m_texture == nullptr)
+   if (_texture == nullptr)
    {
       return;
    }
@@ -83,22 +81,22 @@ void DepthTexture::CopyFrom(cv::Mat& matrix)
    int width = matrix.cols;
    int height = matrix.rows;
 
-   if (width != m_width || height != m_height)
+   if (width != _width || height != _height)
    {
-      m_width = width;
-      m_height = height;
+      _width = width;
+      _height = height;
 
       ReleaseDeviceDependentResources();
       CreateDeviceDependentResources();
    }
 
-   auto const context = m_deviceResources->GetD3DDeviceContext();
+   auto const context = _deviceResources->GetD3DDeviceContext();
 
    D3D11_MAPPED_SUBRESOURCE subResource;
-   if (SUCCEEDED(context->Map(m_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
+   if (SUCCEEDED(context->Map(_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
    {
       std::memcpy(subResource.pData, matrix.data, matrix.total() * matrix.elemSize());
-      context->Unmap(m_texture.Get(), 0);
+      context->Unmap(_texture.Get(), 0);
    }
 }
 
@@ -106,8 +104,8 @@ void DepthTexture::CreateDeviceDependentResources()
 {
    D3D11_TEXTURE2D_DESC const texDesc = CD3D11_TEXTURE2D_DESC(
       DXGI_FORMAT_R8_UNORM, //DXGI_FORMAT_R16_UNORM
-      m_width,                    // Width of the video frames
-      m_height,                   // Height of the video frames
+      _width,                    // Width of the video frames
+      _height,                   // Height of the video frames
       1,                          // Number of textures in the array
       1,                          // Number of miplevels in each texture
       D3D11_BIND_SHADER_RESOURCE, // We read from this texture in the shader
@@ -115,41 +113,41 @@ void DepthTexture::CreateDeviceDependentResources()
       D3D11_CPU_ACCESS_WRITE      // We only need to write into the texture
    );
 
-   ThrowIfFailed(
-      m_deviceResources->GetD3DDevice()->CreateTexture2D(
+   ASSERT_SUCCEEDED(
+      _deviceResources->GetD3DDevice()->CreateTexture2D(
          &texDesc,
          nullptr,
-         &m_texture
+         &_texture
       )
    );
 
    D3D11_SHADER_RESOURCE_VIEW_DESC const viewDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(
-      m_texture.Get(),
+      _texture.Get(),
       D3D11_SRV_DIMENSION_TEXTURE2D,
       DXGI_FORMAT_R8_UNORM); //DXGI_FORMAT_R16_UNORM
 
-   ThrowIfFailed(
-      m_deviceResources->GetD3DDevice()->CreateShaderResourceView(
-         m_texture.Get(),
+   ASSERT_SUCCEEDED(
+      _deviceResources->GetD3DDevice()->CreateShaderResourceView(
+         _texture.Get(),
          &viewDesc,
-         m_textureView.ReleaseAndGetAddressOf()));
+         _textureView.ReleaseAndGetAddressOf()));
 }
 
 void DepthTexture::ReleaseDeviceDependentResources()
 {
-   if (m_texture != nullptr)
+   if (_texture != nullptr)
    {
-      m_texture.Reset();
+      _texture.Reset();
    }
 }
 
 ID3D11Texture2D* DepthTexture::GetTexture(void) const
 {
-   return m_texture.Get();
+   return _texture.Get();
 }
 
 ID3D11ShaderResourceView* DepthTexture::GetTextureView(void) const
 {
-   return m_textureView.Get();
+   return _textureView.Get();
 }
 

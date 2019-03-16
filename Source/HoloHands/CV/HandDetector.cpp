@@ -8,7 +8,7 @@ using namespace cv;
 
 HoloHands::HandDetector::HandDetector()
    :
-   m_isClosedHand(false)
+   _isClosedHand(false)
 {
 }
 
@@ -135,11 +135,11 @@ void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Mat&
       
       //Calculate COM
       auto moment = cv::moments(contour);
-      m_leftCenter = cv::Point(moment.m10 / moment.m00, moment.m01 / moment.m00);
+      _leftCenter = cv::Point(moment.m10 / moment.m00, moment.m01 / moment.m00);
 
       //Calculate direction to position.
-      direction = midPoint - m_leftCenter;
-      line(mat, midPoint, m_leftCenter, Scalar(100));
+      direction = midPoint - _leftCenter;
+      line(mat, midPoint, _leftCenter, Scalar(100));
    }
 }
 
@@ -162,12 +162,12 @@ Mat HandDetector::ProcessOpenHand(const Mat& hands)
 
    Point position;
    Point direction;
-   CalculateHandPosition(m_contour, hullMat, position, direction);
+   CalculateHandPosition(_contour, hullMat, position, direction);
 
-   m_leftPosition = position; //TODO: largest should not == left.
-   m_leftDirection = direction;
+   _leftPosition = position; //TODO: largest should not == left.
+   _leftDirection = direction;
 
-   if (m_leftPosition != Point(0, 0))
+   if (_leftPosition != Point(0, 0))
    {
       OutputDebugString(L"hand found\n");
    }
@@ -185,12 +185,12 @@ Mat HandDetector::ProcessOpenHand(const Mat& hands)
 //TODO; support both hands.
 Mat HandDetector::ProcessClosedHand(const Mat& hands)
 {
-   line(hands, m_leftPosition, m_leftPosition - m_leftDirection, Scalar(200));
+   line(hands, _leftPosition, _leftPosition - _leftDirection, Scalar(200));
 
-   if (m_contour.size() > 0)
+   if (_contour.size() > 0)
    {
-     auto leftMostPoint = m_contour.front();
-      for (auto& p : m_contour)
+     auto leftMostPoint = _contour.front();
+      for (auto& p : _contour)
       {
          if (p.x < leftMostPoint.x)
          {
@@ -241,7 +241,7 @@ void HandDetector::Process(cv::Mat& input)
    //Check contours found.
    if (filteredContours.size() == 0)
    {
-      m_image = hands;
+      _image = hands;
       return;
    }
 
@@ -249,15 +249,15 @@ void HandDetector::Process(cv::Mat& input)
    int largestIndex = FindLargestContour(filteredContours, filteredBounds);
    auto& largestContour = filteredContours[largestIndex];
 
-   m_contour = largestContour;
+   _contour = largestContour;
 
 
-   if (m_isClosedHand)
+   if (_isClosedHand)
    {
-      m_image = ProcessClosedHand(hands);
+      _image = ProcessClosedHand(hands);
    }
    else
    {
-      m_image = ProcessOpenHand(hands);
+      _image = ProcessOpenHand(hands);
    }
 }

@@ -25,8 +25,8 @@ EXTERN_GUID(MF_MT_USER_DATA, 0xb6bc765f, 0x4c3b, 0x40a4, 0xbd, 0x51, 0x25, 0x35,
 
 Sensor::Sensor(const std::wstring& sensorName)
    :
-   m_sensorName(sensorName),
-   m_bitmapIsDirty(false)
+   _sensorName(sensorName),
+   _bitmapIsDirty(false)
 {
    LoadMediaSourceWorkerAsync()
       .then([this]()
@@ -36,23 +36,23 @@ Sensor::Sensor(const std::wstring& sensorName)
 
 SoftwareBitmap^ Sensor::GetBitmap()
 {
-   m_bitmapIsDirty = false;
-   return m_bitmap;
+   _bitmapIsDirty = false;
+   return _bitmap;
 }
 
 void Sensor::Lock()
 {
-   m_preventStateChanges.lock();
+   _preventStateChanges.lock();
 }
 
 void Sensor::Unlock()
 {
-   m_preventStateChanges.unlock();
+   _preventStateChanges.unlock();
 }
 
 bool Sensor::Updated()
 {
-   return m_bitmapIsDirty;
+   return _bitmapIsDirty;
 }
 
 String^ Sensor::GetSensorName(Windows::Media::Capture::Frames::MediaFrameSource^ source)
@@ -183,7 +183,7 @@ task<void> Sensor::LoadMediaSourceWorkerAsync()
             return CleanupMediaCaptureAsync();
          }
 
-         MediaFrameSource^ source = GetMediaFrameSourceFromMap(m_mediaCapture->FrameSources, m_sensorName);
+         MediaFrameSource^ source = GetMediaFrameSourceFromMap(_mediaCapture->FrameSources, _sensorName);
 
          return create_task([this, source]()
          {
@@ -194,17 +194,17 @@ task<void> Sensor::LoadMediaSourceWorkerAsync()
             {
                String^ subtype = GetSubtypeForFormat(source->Info->SourceKind, format);
 
-               return create_task(m_mediaCapture->CreateFrameReaderAsync(source, subtype));
+               return create_task(_mediaCapture->CreateFrameReaderAsync(source, subtype));
             }, CURRENT_CONTEXT)
                .then([this, source](MediaFrameReader^ frameReader)
             {
-               std::lock_guard<std::mutex> lockGuard(m_preventStateChanges);
+               std::lock_guard<std::mutex> lockGuard(_preventStateChanges);
 
-               m_frameArrivedToken = frameReader->FrameArrived +=
+               _frameArrivedToken = frameReader->FrameArrived +=
                   ref new TypedEventHandler<MediaFrameReader^, MediaFrameArrivedEventArgs^>(
                      std::bind(&Sensor::FrameReader_FrameArrived, this, _1, _2));
 
-               m_frameReader = frameReader;
+               _frameReader = frameReader;
 
                OutputDebugString(L"Reader created.");
 
@@ -228,13 +228,13 @@ task<void> Sensor::LoadMediaSourceWorkerAsync()
 
 task<bool> Sensor::TryInitializeMediaCaptureAsync(MediaFrameSourceGroup^ group)
 {
-   if (m_mediaCapture != nullptr)
+   if (_mediaCapture != nullptr)
    {
       // Already initialized.
       return task_from_result(true);
    }
 
-   m_mediaCapture = ref new MediaCapture();
+   _mediaCapture = ref new MediaCapture();
 
    auto settings = ref new MediaCaptureInitializationSettings();
    settings->SourceGroup = group;
@@ -243,7 +243,7 @@ task<bool> Sensor::TryInitializeMediaCaptureAsync(MediaFrameSourceGroup^ group)
    settings->MemoryPreference = MediaCaptureMemoryPreference::Cpu;
    settings->StreamingCaptureMode = StreamingCaptureMode::Video;
 
-   return create_task(m_mediaCapture->InitializeAsync(settings))
+   return create_task(_mediaCapture->InitializeAsync(settings))
       .then([this](task<void> initializeMediaCaptureTask)
    {
       try
@@ -264,14 +264,14 @@ task<void> Sensor::CleanupMediaCaptureAsync()
 {
    task<void> cleanupTask = task_from_result();
 
-   if (m_mediaCapture != nullptr)
+   if (_mediaCapture != nullptr)
    {
-      m_frameReader->FrameArrived -= m_frameArrivedToken;
-      cleanupTask = cleanupTask && create_task(m_frameReader->StopAsync());
+      _frameReader->FrameArrived -= _frameArrivedToken;
+      cleanupTask = cleanupTask && create_task(_frameReader->StopAsync());
 
       cleanupTask = cleanupTask.then([this] {
          OutputDebugString(L"Cleaning up MediaCapture...\n");
-         m_mediaCapture = nullptr;
+         _mediaCapture = nullptr;
       });
    }
    return cleanupTask;
@@ -288,10 +288,10 @@ void Sensor::FrameReader_FrameArrived(MediaFrameReader^ sender, MediaFrameArrive
    {
       if (frame != nullptr)
       {
-         std::lock_guard<std::mutex> lockGuard(m_preventStateChanges);
+         std::lock_guard<std::mutex> lockGuard(_preventStateChanges);
 
-         m_bitmap = frame->VideoMediaFrame->SoftwareBitmap;
-         m_bitmapIsDirty = true;
+         _bitmap = frame->VideoMediaFrame->SoftwareBitmap;
+         _bitmapIsDirty = true;
       }
    }
 }
