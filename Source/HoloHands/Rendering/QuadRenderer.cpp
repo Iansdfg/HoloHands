@@ -16,8 +16,9 @@ QuadRenderer::QuadRenderer(
    const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
    :
    _deviceResources(deviceResources),
-   _quadPosition({ 0.f, 0.f, -2.f }),
-   _quadSize(Windows::Foundation::Size(1.4, 1))
+   _quadPosition({ 0.f, 0.f, 0.f }),
+   _quadSize(Windows::Foundation::Size(1.4, 1)),
+   _quadOffset({-0.6f, 0.3f})
 {
    CreateDeviceDependentResources();
 }
@@ -103,10 +104,10 @@ void QuadRenderer::CreateDeviceDependentResources()
 
       static const std::array<VertexPositionTextureCoords, 4> quadVertices =
       { {
-          { XMFLOAT3(-halfWidth, -halfHeight, 0.f), XMFLOAT2(0.f, 1.f) },
-          { XMFLOAT3(-halfWidth, +halfHeight, 0.f), XMFLOAT2(0.f, 0.f) },
-          { XMFLOAT3(+halfWidth, -halfHeight, 0.f), XMFLOAT2(1.f, 1.f) },
-          { XMFLOAT3(+halfWidth, +halfHeight, 0.f), XMFLOAT2(1.f, 0.f) },
+          { XMFLOAT3(-halfWidth + _quadOffset.x, -halfHeight + _quadOffset.y, 0.f), XMFLOAT2(0.f, 1.f) },
+          { XMFLOAT3(-halfWidth + _quadOffset.x, +halfHeight + _quadOffset.y, 0.f), XMFLOAT2(0.f, 0.f) },
+          { XMFLOAT3(+halfWidth + _quadOffset.x, -halfHeight + _quadOffset.y, 0.f), XMFLOAT2(1.f, 1.f) },
+          { XMFLOAT3(+halfWidth + _quadOffset.x, +halfHeight + _quadOffset.y, 0.f), XMFLOAT2(1.f, 0.f) },
       } };
 
       _vertexCount = static_cast<unsigned int>(quadVertices.size());
@@ -151,10 +152,7 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
       _headForwardDirection = pointerPose->Head->ForwardDirection;
       _headUpDirection = pointerPose->Head->UpDirection;
 
-      float distance = 4.f;
-      float3 yOffset = _headUpDirection * 0.33f;
-      float3 xOffset = normalize(cross(_headForwardDirection, _headUpDirection)) * -0.63f;
-      _quadPosition = _headPosition + _headForwardDirection * distance + yOffset + xOffset;
+      _quadPosition = _headPosition + _headForwardDirection * 4.f;
    }
 }
 

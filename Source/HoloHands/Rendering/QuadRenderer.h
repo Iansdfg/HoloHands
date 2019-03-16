@@ -33,7 +33,8 @@ namespace HoloHands
 
       bool _loadingComplete = false;
 
-      Windows::Foundation::Size _quadSize;
+      Windows::Foundation::Size _quadSize;;
+      Windows::Foundation::Numerics::float2 _quadOffset;
       Windows::Foundation::Numerics::float3 _quadPosition;
       Windows::Foundation::Numerics::float3 _headPosition;
       Windows::Foundation::Numerics::float3 _headForwardDirection;
