@@ -12,15 +12,16 @@ HoloHands::HandDetector::HandDetector()
 {
 }
 
-void HandDetector::Process(cv::Mat& input)
+bool HandDetector::Process(cv::Mat& input)
 {
-   _defectExtractor.SetImageSize(Size(input.size()));
+   _imageSize = Size(input.size());
+   _defectExtractor.SetImageSize(_imageSize);
 
    Mat scaled = input / MAX_IMAGE_DEPTH * 255.0; //Scale to within 8bit range.
    scaled.convertTo(scaled, CV_8UC1); //Make correct format for OpenCV.
 
    Mat mask;
-   threshold(scaled, mask, 90, 255, CV_THRESH_BINARY);
+   threshold(scaled, mask, MAX_DETECTION_THRESHOLD, 255, CV_THRESH_BINARY);
    mask = 255 - mask; //Invert.
 
    Mat hands;
@@ -35,40 +36,40 @@ void HandDetector::Process(cv::Mat& input)
    std::vector<std::vector<Point>> contours;
    findContours(cannyMat, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-   //Get rectangular bounds for contours.
+   //Get rectangular bounds for all the contours.
    std::vector<Rect> bounds;
    CalculateBounds(contours, bounds);
 
-   //Filter contours
-   std::vector<std::vector<Point>> filteredContours;
-   std::vector<Rect> filteredBounds;
-   FilterContours(contours, bounds, filteredContours, filteredBounds);
-
-   _debugImage = hands;
-
-   //Check contours found.
-   if (filteredContours.size() == 0)
+   if (_showDebugInfo)
    {
-      return;
+      //Save debug image.
+      _debugImage = hands;
    }
 
-   //Find largest contour
-   int largestIndex = FindLargestContour(filteredContours, filteredBounds);
-   auto& largestContour = filteredContours[largestIndex];
+   //Select best contour.
+   std::vector<Point> finalContour = FindBestContour(contours, bounds);
 
-   _contour = largestContour;
+   //Check best contour.
+   if (finalContour.size() == 0)
+   {
+      return false;
+   }
+
+   //Check best contour size.
 
    if (_isClosedHand)
    {
-      ProcessClosedHand();
+      ProcessClosedHand(finalContour);
    }
    else
    {
-      ProcessOpenHand();
+      ProcessOpenHand(finalContour);
    }
+
+   return true;
 }
 
-void HoloHands::HandDetector::ShowDebugInfo(bool enabled)
+void HandDetector::ShowDebugInfo(bool enabled)
 {
    _showDebugInfo = enabled;
    _defectExtractor.ShowDebugInfo(enabled);
@@ -97,6 +98,7 @@ void HandDetector::FilterContour(
    //Ignore small contours.
    if (newBounds.width > MIN_CONTOUR_SIZE && newBounds.height > MIN_CONTOUR_SIZE)
    {
+      //Check if new contour overlaps with existing contours.
       size_t overlappingIndex = -1;
       for (size_t i = 0; i < filteredContours.size(); i++)
       {
@@ -127,51 +129,86 @@ void HandDetector::FilterContour(
    }
 }
 
-void HandDetector::FilterContours(
+std::vector<Point> HandDetector::FindBestContour(
    const std::vector<std::vector<Point>>& rawCountours,
-   const std::vector<Rect>& rawBounds,
-   std::vector<std::vector<Point>>& filteredContours,
-   std::vector<Rect>& filteredBounds)
+   const std::vector<Rect>& rawBounds)
 {
-   filteredContours.clear();
-   filteredBounds.clear();
+   std::vector<std::vector<Point>> filteredContours;
+   std::vector<Rect> filteredBounds;
 
-   //Filter
    for (size_t i = 0; i < rawCountours.size(); i++)
    {
+      //Remove small and merge overlapping contours.
       FilterContour(rawCountours[i], rawBounds[i], filteredContours, filteredBounds);
    }
-}
 
-int HandDetector::FindLargestContour(
-   const std::vector<std::vector<Point>>& contours,
-   const std::vector<Rect>& bounds)
-{
-   int largest = 0;
+   int contourCandidateIndex = -1;
+   double contourCandiadateScore = 0;
 
-   for (size_t i = 0; i < contours.size(); i++)
+   //Find contour with the highest score.
+   for (size_t i = 0; i < filteredContours.size(); i++)
    {
-      if (bounds[i].area() > bounds[largest].area())
+      double score = CalculateContourScore(filteredContours[i], filteredBounds[i]);
+
+      if (score > contourCandiadateScore)
       {
-         largest = i;
+         contourCandiadateScore = score;
+         contourCandidateIndex = i;
       }
    }
 
-   return largest;
+   if (_showDebugInfo)
+   {
+      if (contourCandidateIndex != -1)
+      {
+         for (size_t i = 0; i < filteredContours.size(); i++)
+         {
+            drawContours(_debugImage, filteredContours, i, Scalar(255));
+            rectangle(_debugImage, filteredBounds[i], Scalar(100));
+         }
+         drawContours(_debugImage, filteredContours, contourCandidateIndex, Scalar(255), 3);
+         rectangle(_debugImage, filteredBounds[contourCandidateIndex], Scalar(100), 3);
+      }
+   }
+
+   if (contourCandidateIndex >= 0)
+   {
+      return filteredContours[contourCandidateIndex];
+   }
+   return {};
+
 }
 
-void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Point& position, Point& direction)
+double HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour, const cv::Rect& bound)
 {
+   Point imageCenter = Point(_imageSize.width / 2, _imageSize.height / 2);
+   Point boundsCenter = (bound.br() + bound.tl()) * 0.5;
+
+   double centrality = (_imageSize.width / 2) - cv::norm(imageCenter - boundsCenter);
+   double area = bound.area();
+
+   return
+      centrality * CONTOUR_CENTRALITY_BIAS +
+      area * CONTOUR_AREA_BIAS;
+}
+
+void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
+{
+   Point position;
+   Point direction;
+
    Defect defect;
    if (_defectExtractor.FindDefect(contour, defect))
    {
       //Draw hull defects.
       Point midPoint = (defect.Start + defect.End) / 2.0;
       position = midPoint;
-      
+
       //Calculate COM
       auto moment = cv::moments(contour);
-      _handCenter = cv::Point(moment.m10 / moment.m00, moment.m01 / moment.m00);
+      _handCenter = cv::Point(
+         static_cast<int>(moment.m10 / moment.m00),
+         static_cast<int>(moment.m01 / moment.m00));
 
       //Calculate direction to position.
       direction = midPoint - _handCenter;
@@ -187,30 +224,17 @@ void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Poin
          line(_debugImage, midPoint, _handCenter, Scalar(100));
       }
    }
-}
-
-void HandDetector::ProcessOpenHand()
-{
-   Point position;
-   Point direction;
-   CalculateHandPosition(_contour, position, direction);
 
    _handPosition = position;
    _leftDirection = direction;
-
-
-   //if (_showDebugInfo)
-   //{
-   //   drawContours(_debugImage, _contour, 0, Scalar(255));
-   //}
 }
 
-void HandDetector::ProcessClosedHand()
+void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
 {
-   if (_contour.size() > 0)
+   if (contour.size() > 0)
    {
-     auto leftMostPoint = _contour.front();
-      for (auto& p : _contour)
+      auto leftMostPoint = contour.front();
+      for (auto& p : contour)
       {
          if (p.x < leftMostPoint.x)
          {

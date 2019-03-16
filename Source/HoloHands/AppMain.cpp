@@ -70,10 +70,11 @@ namespace HoloHands
          latestFrame,
          image);
 
-      _handDetector->Process(image);
+      bool handFound = _handDetector->Process(image);
+
       auto imagePos = _handDetector->GetHandPosition();
 
-      float depth = static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter()));
+      float depth = 500;// static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter())); //TODO:
 
       //if (depth < 200 || depth > 1000)
       //{
@@ -116,9 +117,12 @@ namespace HoloHands
          worldPosition.y(),
          worldPosition.z());
 
-      _cubeRenderer->SetPosition(p);
+      if (handFound)
+      {
+         _cubeRenderer->SetPosition(p);
 
-      _cubeRenderer->Update();
+         _cubeRenderer->Update();
+      }
 
       if (_showDebugInfo)
       {
@@ -148,7 +152,7 @@ namespace HoloHands
       if (_showDebugInfo)
       {
          _axisRenderer->Render();
-         
+
          _quadRenderer->Render(*_depthTexture);
       }
    }
