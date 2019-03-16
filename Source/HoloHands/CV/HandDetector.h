@@ -23,12 +23,9 @@ namespace HoloHands
 
       void IsClosed(bool isClosed) { _isClosedHand = isClosed; }
       cv::Mat& GetDebugImage() { return _debugImage; }
-      cv::Point GetLeftHandPosition() { return _leftPosition; }
-      cv::Point GetLeftHandCenter() { return _leftCenter; }
-
-      void LockDebugImage();
-      void UnlockDebugImage();
-      std::mutex _debugImageLock;
+      cv::Point GetHandPosition() { return _handPosition; }
+      cv::Point GetHandCenter() { return _handCenter; }
+      void ShowDebugInfo(bool enabled) { _showDebugInfo = enabled; }
 
    private:
       const double MAX_IMAGE_DEPTH = 1000;
@@ -36,18 +33,23 @@ namespace HoloHands
       const double MIN_DEFECT_DEPTH = 20;
 
       bool _isClosedHand;
-      cv::Point _leftPosition;
+      cv::Point _handPosition;
       cv::Point _leftDirection;
-      cv::Point _leftCenter;
+      cv::Point _handCenter;
       std::vector<cv::Point> _contour;
       cv::Mat _debugImage;
+      bool _showDebugInfo;
 
-      cv::Mat ProcessOpenHand(const cv::Mat& hands);
-      cv::Mat ProcessClosedHand(const cv::Mat& hands);
+      void ProcessOpenHand();
+      void ProcessClosedHand();
 
-      void CalculateBounds(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& bounds);
+      static void CalculateBounds(
+         const std::vector<std::vector<cv::Point>>& contours,
+         std::vector<cv::Rect>& bounds);
 
-      bool Intersects(const cv::Rect& a, cv::Rect& b);
+      static bool Intersects(
+         const cv::Rect& a,
+         const cv::Rect& b);
 
       void FilterContour(
          const std::vector<cv::Point>& newContour,
@@ -61,14 +63,17 @@ namespace HoloHands
          std::vector<std::vector<cv::Point>>& filteredContours,
          std::vector<cv::Rect>& filteredBounds);
 
-      Defect ExtractDefect(const std::vector<cv::Point>& contour, const cv::Vec4i& defectIndices);
+      Defect ExtractDefect(
+         const std::vector<cv::Point>& contour,
+         const cv::Vec4i& defectIndices);
 
       int FindLargestContour(
          const std::vector<std::vector<cv::Point>>& contours,
          const std::vector<cv::Rect>& bounds);
 
-      void CalculateHandPosition(const std::vector<cv::Point>& contour, cv::Mat& mat, cv::Point& position, cv::Point& direction);
-
-      void SetDebugImage(const cv::Mat& image);
+      void CalculateHandPosition(
+         const std::vector<cv::Point>& contour,
+         cv::Point& position,
+         cv::Point& direction);
    };
 }

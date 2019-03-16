@@ -152,8 +152,8 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
       _headUpDirection = pointerPose->Head->UpDirection;
 
       float distance = 4.f;
-      float3 yOffset = _headUpDirection * 0.33;
-      float3 xOffset = normalize(cross(_headForwardDirection, _headUpDirection)) * -0.63;
+      float3 yOffset = _headUpDirection * 0.33f;
+      float3 xOffset = normalize(cross(_headForwardDirection, _headUpDirection)) * -0.63f;
       _quadPosition = _headPosition + _headForwardDirection * distance + yOffset + xOffset;
    }
 }

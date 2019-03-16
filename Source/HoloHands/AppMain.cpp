@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "AppMain.h"
+#include "Utils/MathsUtils.h"
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
@@ -20,7 +21,7 @@ namespace HoloHands
       Holographic::AppMainBase(deviceResources),
       _selectedHoloLensMediaFrameSourceGroupType(HoloLensForCV::MediaFrameSourceGroupType::HoloLensResearchModeSensors),
       _holoLensMediaFrameSourceGroupStarted(false),
-      _debugView(true)
+      _showDebugInfo(true)
    {
    }
 
@@ -34,6 +35,8 @@ namespace HoloHands
       _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources);
       _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
       _depthTexture = std::make_unique<DepthTexture>(_deviceResources);
+
+      _handDetector->ShowDebugInfo(_showDebugInfo);
    }
 
    void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
@@ -68,9 +71,9 @@ namespace HoloHands
          image);
 
       _handDetector->Process(image);
-      auto imagePos = _handDetector->GetLeftHandPosition();
+      auto imagePos = _handDetector->GetHandPosition();
 
-      float depth = static_cast<float>(image.at<unsigned short>(_handDetector->GetLeftHandCenter()));
+      float depth = static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter()));
 
       //if (depth < 200 || depth > 1000)
       //{
@@ -84,18 +87,6 @@ namespace HoloHands
 
       float4x4 camToOrigin = camToRef * latestFrame->FrameToOrigin;
       Eigen::Vector3f camPinhole(camToOrigin.m41, camToOrigin.m42, camToOrigin.m43);
-
-      Eigen::Matrix3f camToOriginR;
-
-      camToOriginR(0, 0) = camToOrigin.m11;
-      camToOriginR(0, 1) = camToOrigin.m12;
-      camToOriginR(0, 2) = camToOrigin.m13;
-      camToOriginR(1, 0) = camToOrigin.m21;
-      camToOriginR(1, 1) = camToOrigin.m22;
-      camToOriginR(1, 2) = camToOrigin.m23;
-      camToOriginR(2, 0) = camToOrigin.m31;
-      camToOriginR(2, 1) = camToOrigin.m32;
-      camToOriginR(2, 2) = camToOrigin.m33;
 
       Windows::Foundation::Point uv;
 
@@ -115,7 +106,7 @@ namespace HoloHands
       dirCam.normalize();
       dirCam *= depth * 0.001f;
 
-      Eigen::Matrix3f finalTransform = camToOriginR.transpose();
+      Eigen::Matrix3f finalTransform = MathsUtils::Convert(camToOrigin).transpose();
       Eigen::Vector3f dir = finalTransform * dirCam;
 
       Eigen::Vector3f worldPosition = camPinhole + dir;
@@ -129,7 +120,7 @@ namespace HoloHands
 
       _cubeRenderer->Update();
 
-      if (_debugView)
+      if (_showDebugInfo)
       {
          auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
          HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
@@ -154,7 +145,7 @@ namespace HoloHands
    {
       _cubeRenderer->Render();
 
-      if (_debugView)
+      if (_showDebugInfo)
       {
          _axisRenderer->Render();
          
@@ -187,8 +178,6 @@ namespace HoloHands
    {
       _sensorFrameStreamer =
          ref new HoloLensForCV::SensorFrameStreamer();
-
-      _sensorFrameStreamer->EnableAll();
 
       _holoLensMediaFrameSourceGroup =
          ref new HoloLensForCV::MediaFrameSourceGroup(

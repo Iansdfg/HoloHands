@@ -60,6 +60,6 @@ namespace HoloHands
 
       Windows::Foundation::DateTime _latestSelectedCameraTimestamp;
 
-      bool _debugView;
+      bool _showDebugInfo;
    };
 }
