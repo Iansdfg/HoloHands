@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="AppMain.h" />
     <ClInclude Include="AppView.h" />
+    <ClInclude Include="CV\ConvexityDefectExtractor.h" />
     <ClInclude Include="CV\HandDetector.h" />
     <ClInclude Include="Native\Sensor.h" />
     <ClInclude Include="pch.h" />
@@ -120,6 +121,7 @@
   <ItemGroup>
     <ClCompile Include="AppMain.cpp" />
     <ClCompile Include="AppView.cpp" />
+    <ClCompile Include="CV\ConvexityDefectExtractor.cpp" />
     <ClCompile Include="CV\HandDetector.cpp" />
     <ClCompile Include="Native\Sensor.cpp" />
     <ClCompile Include="pch.cpp">

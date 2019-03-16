@@ -1,20 +1,9 @@
 #pragma once
 
+#include "CV/ConvexityDefectExtractor.h"
+
 namespace HoloHands
 {
-   struct Defect
-   {
-      Defect()
-         :
-         Depth(0)
-      {}
-
-      cv::Point Start;
-      cv::Point End;
-      cv::Point Far;
-      float Depth;
-   };
-
    class HandDetector
    {
    public:
@@ -25,13 +14,13 @@ namespace HoloHands
       cv::Mat& GetDebugImage() { return _debugImage; }
       cv::Point GetHandPosition() { return _handPosition; }
       cv::Point GetHandCenter() { return _handCenter; }
-      void ShowDebugInfo(bool enabled) { _showDebugInfo = enabled; }
+      void ShowDebugInfo(bool enabled);
 
    private:
       const double MAX_IMAGE_DEPTH = 1000;
       const double MIN_CONTOUR_SIZE = 10;
-      const double MIN_DEFECT_DEPTH = 20;
 
+      ConvexityDefectExtractor _defectExtractor;
       bool _isClosedHand;
       cv::Point _handPosition;
       cv::Point _leftDirection;
@@ -62,10 +51,6 @@ namespace HoloHands
          const std::vector<cv::Rect>& rawBounds,
          std::vector<std::vector<cv::Point>>& filteredContours,
          std::vector<cv::Rect>& filteredBounds);
-
-      Defect ExtractDefect(
-         const std::vector<cv::Point>& contour,
-         const cv::Vec4i& defectIndices);
 
       int FindLargestContour(
          const std::vector<std::vector<cv::Point>>& contours,

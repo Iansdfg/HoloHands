@@ -73,6 +73,9 @@
     <ClCompile Include="Rendering\CubeRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="CV\ConvexityDefectExtractor.cpp">
+      <Filter>CV</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="Rendering\Shaders\ShaderStructs.h">
       <Filter>Rendering\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CV\ConvexityDefectExtractor.h">
+      <Filter>CV</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

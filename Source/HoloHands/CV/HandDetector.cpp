@@ -14,6 +14,8 @@ HoloHands::HandDetector::HandDetector()
 
 void HandDetector::Process(cv::Mat& input)
 {
+   _defectExtractor.SetImageSize(Size(input.size()));
+
    Mat scaled = input / MAX_IMAGE_DEPTH * 255.0; //Scale to within 8bit range.
    scaled.convertTo(scaled, CV_8UC1); //Make correct format for OpenCV.
 
@@ -64,6 +66,12 @@ void HandDetector::Process(cv::Mat& input)
    {
       ProcessOpenHand();
    }
+}
+
+void HoloHands::HandDetector::ShowDebugInfo(bool enabled)
+{
+   _showDebugInfo = enabled;
+   _defectExtractor.ShowDebugInfo(enabled);
 }
 
 void HandDetector::CalculateBounds(const std::vector<std::vector<Point>>& contours, std::vector<Rect>& bounds)
@@ -154,31 +162,11 @@ int HandDetector::FindLargestContour(
 
 void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Point& position, Point& direction)
 {
-   std::vector<Point>hull;
-   std::vector<int>hullIndices;
-
-   convexHull(Mat(contour), hull);
-   convexHull(Mat(contour), hullIndices, false, false);
-
-   //Calculate defects for each hull.
-   std::vector<Vec4i> defects;
-   convexityDefects(contour, hullIndices, defects);
-   Defect largestDefect;
-
-   for (size_t d = 1; d < defects.size(); d++) //Ignore the first defect.
-   {
-      Defect defect = ExtractDefect(contour, defects[d]);
-
-      if (defect.Depth > largestDefect.Depth)
-      {
-         largestDefect = defect;
-      }
-   }
-
-   if (largestDefect.Depth > MIN_DEFECT_DEPTH)
+   Defect defect;
+   if (_defectExtractor.FindDefect(contour, defect))
    {
       //Draw hull defects.
-      Point midPoint = (largestDefect.Start + largestDefect.End) / 2.0;
+      Point midPoint = (defect.Start + defect.End) / 2.0;
       position = midPoint;
       
       //Calculate COM
@@ -191,25 +179,14 @@ void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Poin
       if (_showDebugInfo)
       {
          //Draw debug info.
-         circle(_debugImage, largestDefect.Start, 2, Scalar(150), 2);
-         circle(_debugImage, largestDefect.End, 2, Scalar(150), 2);
-         circle(_debugImage, largestDefect.Far, 3, Scalar(150), 2);
+         circle(_debugImage, defect.Start, 2, Scalar(150), 2);
+         circle(_debugImage, defect.End, 2, Scalar(150), 2);
+         circle(_debugImage, defect.Far, 3, Scalar(150), 2);
          circle(_debugImage, midPoint, 3, Scalar(255), 2);
 
          line(_debugImage, midPoint, _handCenter, Scalar(100));
       }
    }
-}
-
-Defect HandDetector::ExtractDefect(const std::vector<Point>& contour, const Vec4i& defectIndices)
-{
-   Defect defect;
-   defect.Start = Point(contour[defectIndices[0]]);
-   defect.End = Point(contour[defectIndices[1]]);
-   defect.Far = Point(contour[defectIndices[2]]);
-   defect.Depth = defectIndices[3] / 256.0f;
-
-   return defect;
 }
 
 void HandDetector::ProcessOpenHand()
