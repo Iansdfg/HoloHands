@@ -1,4 +1,4 @@
-﻿//*********************************************************
+//*********************************************************
 //
 // Copyright (c) Microsoft. All rights reserved.
 // This code is licensed under the MIT License (MIT).
@@ -9,4 +9,10 @@
 //
 //*********************************************************
 
-#include "pch.h"
+#pragma once
+
+#include <Holographic/SpatialInputHandler.h>
+
+#include <Holographic/IAppMain.h>
+#include <Holographic/AppMainBase.h>
+#include <Holographic/AppViewBase.h>

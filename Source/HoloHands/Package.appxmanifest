@@ -23,9 +23,9 @@
     </Application>
   </Applications>
   <Capabilities>
-
-     <uap:Capability Name="picturesLibrary" />
-    <rescap:Capability Name="perceptionSensorsExperimental" />
-    <DeviceCapability Name="webcam" />
+     <rescap:Capability Name="perceptionSensorsExperimental" />
+     <Capability Name="privateNetworkClientServer" />
+     <Capability Name="internetClientServer" />
+     <DeviceCapability Name="webcam" />
   </Capabilities>
 </Package>

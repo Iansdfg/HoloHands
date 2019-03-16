@@ -29,9 +29,6 @@
     <Filter Include="Native">
       <UniqueIdentifier>{2f1926b7-c202-433f-a2ee-c21e90565fd5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Managed">
-      <UniqueIdentifier>{41eb6604-90a8-458c-bb7c-c9f5ef00e052}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Native\Rendering">
       <UniqueIdentifier>{633981d2-71b3-44de-8ab1-f5dd03e7018d}</UniqueIdentifier>
     </Filter>
@@ -56,20 +53,11 @@
     <ClCompile Include="Native\Rendering\QuadRenderer.cpp">
       <Filter>Native\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Managed\AppView.cpp">
-      <Filter>Managed</Filter>
-    </ClCompile>
-    <ClCompile Include="Native\HoloHandsMain.cpp">
-      <Filter>Native</Filter>
-    </ClCompile>
     <ClCompile Include="Native\Sensor.cpp">
       <Filter>Native</Filter>
     </ClCompile>
     <ClCompile Include="Native\Rendering\DepthTexture.cpp">
       <Filter>Native\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Native\OpenCV\HandDetector.cpp">
-      <Filter>Native\OpenCV</Filter>
     </ClCompile>
     <ClCompile Include="Native\OpenCV\Converter.cpp">
       <Filter>Native\OpenCV</Filter>
@@ -80,6 +68,11 @@
     <ClCompile Include="Native\SpatialInputHandler.cpp">
       <Filter>Native</Filter>
     </ClCompile>
+    <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="AppView.cpp" />
+    <ClCompile Include="HandDetector.cpp" />
+    <ClCompile Include="AxisRenderer.cpp" />
+    <ClCompile Include="CubeRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -98,12 +91,6 @@
     <ClInclude Include="Native\Rendering\ShaderStructures.h">
       <Filter>Native\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Managed\AppView.h">
-      <Filter>Managed</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\HoloHandsMain.h">
-      <Filter>Native</Filter>
-    </ClInclude>
     <ClInclude Include="Native\Utils\StepTimer.h">
       <Filter>Native\Utils</Filter>
     </ClInclude>
@@ -112,9 +99,6 @@
     </ClInclude>
     <ClInclude Include="Native\Rendering\DepthTexture.h">
       <Filter>Native\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\OpenCV\HandDetector.h">
-      <Filter>Native\OpenCV</Filter>
     </ClInclude>
     <ClInclude Include="Native\OpenCV\Converter.h">
       <Filter>Native\OpenCV</Filter>
@@ -125,6 +109,11 @@
     <ClInclude Include="Native\SpatialInputHandler.h">
       <Filter>Native</Filter>
     </ClInclude>
+    <ClInclude Include="AppMain.h" />
+    <ClInclude Include="AppView.h" />
+    <ClInclude Include="HandDetector.h" />
+    <ClInclude Include="AxisRenderer.h" />
+    <ClInclude Include="CubeRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

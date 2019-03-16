@@ -19,12 +19,13 @@ namespace HoloHands
    {
    public:
       HandDetector();
-      void Process(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap);
+      //void Process(Windows::Graphics::Imaging::SoftwareBitmap^ input);
+      void Process(cv::Mat& input);
 
       void IsClosed(bool isClosed) { m_isClosedHand = isClosed; }
       cv::Mat GetImage() { return m_image; }
       cv::Point GetLeftHandPosition() { return m_leftPosition; }
-      cv::Point GetRightHandPosition() { return m_rightPosition; }
+      cv::Point GetLeftHandCenter() { return m_leftCenter; }
 
    private:
       const double MAX_IMAGE_DEPTH = 1000;
@@ -36,6 +37,7 @@ namespace HoloHands
       cv::Point m_rightPosition;
       cv::Point m_leftDirection;
       cv::Point m_rightDirection;
+      cv::Point m_leftCenter;
       cv::Mat m_image;
       std::vector<cv::Point> m_contour;
 

@@ -4,7 +4,6 @@
 
 #include "Native/Rendering/DirectXHelper.h"
 
-#include "Io/All.h"
 #include <MemoryBuffer.h>
 
 using namespace HoloHands;

@@ -2,9 +2,6 @@
 
 #include "HandDetector.h"
 
-#include "Converter.h"
-#include "Io/All.h"
-
 using namespace HoloHands;
 using namespace Windows::Graphics::Imaging;
 using namespace cv;
@@ -138,11 +135,11 @@ void HandDetector::CalculateHandPosition(const std::vector<Point>& contour, Mat&
       
       //Calculate COM
       auto moment = cv::moments(contour);
-      Point center(moment.m10 / moment.m00, moment.m01 / moment.m00);
+      m_leftCenter = cv::Point(moment.m10 / moment.m00, moment.m01 / moment.m00);
 
       //Calculate direction to position.
-      direction = midPoint - center;
-      line(mat, midPoint, center, Scalar(100));
+      direction = midPoint - m_leftCenter;
+      line(mat, midPoint, m_leftCenter, Scalar(100));
    }
 }
 
@@ -169,6 +166,11 @@ Mat HandDetector::ProcessOpenHand(const Mat& hands)
 
    m_leftPosition = position; //TODO: largest should not == left.
    m_leftDirection = direction;
+
+   if (m_leftPosition != Point(0, 0))
+   {
+      OutputDebugString(L"hand found\n");
+   }
 
    //Draw hulls and contours.
    //for (int i = 0; i < largestContour.size(); i++)
@@ -202,12 +204,12 @@ Mat HandDetector::ProcessClosedHand(const Mat& hands)
    return hands;
 }
 
-void HandDetector::Process(SoftwareBitmap^ input)
+void HandDetector::Process(cv::Mat& input)
 {
-   Mat original;
-   Converter::Convert(input, original); //convert to opencv mat.
+   //Mat original;
+   //Converter::Convert(input, original); //convert to opencv mat.
 
-   Mat scaled = original / MAX_IMAGE_DEPTH * 255.0; //scale to within 8bit range.
+   Mat scaled = input / MAX_IMAGE_DEPTH * 255.0; //scale to within 8bit range.
 
    scaled.convertTo(scaled, CV_8UC1); //make correct format of opencv.
 

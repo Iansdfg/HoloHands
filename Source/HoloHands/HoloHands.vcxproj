@@ -43,9 +43,21 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)\Microsoft\Debugging\Debugging.props" />
+    <Import Project="$(SolutionDir)\Microsoft\OpenCVHelpers\OpenCVHelpers.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Graphics\Graphics.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Holographic\Holographic.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Rendering\Rendering.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Io\Io.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)\Microsoft\Debugging\Debugging.props" />
+    <Import Project="$(SolutionDir)\Microsoft\OpenCVHelpers\OpenCVHelpers.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Graphics\Graphics.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Holographic\Holographic.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Rendering\Rendering.props" />
+    <Import Project="$(SolutionDir)\Microsoft\Io\Io.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -61,7 +73,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Microsoft\Io\Include;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -75,7 +87,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Microsoft\Io\Include;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -91,12 +103,14 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Managed\AppView.h" />
+    <ClInclude Include="AppMain.h" />
+    <ClInclude Include="AppView.h" />
+    <ClInclude Include="AxisRenderer.h" />
+    <ClInclude Include="CubeRenderer.h" />
+    <ClInclude Include="HandDetector.h" />
     <ClInclude Include="Native\OpenCV\Converter.h" />
-    <ClInclude Include="Native\OpenCV\HandDetector.h" />
     <ClInclude Include="Native\Rendering\DepthTexture.h" />
     <ClInclude Include="Native\Sensor.h" />
-    <ClInclude Include="Native\HoloHandsMain.h" />
     <ClInclude Include="Native\Rendering\CameraResources.h" />
     <ClInclude Include="Native\Rendering\DeviceResources.h" />
     <ClInclude Include="Native\Rendering\DirectXHelper.h" />
@@ -108,12 +122,14 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Managed\AppView.cpp" />
+    <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="AppView.cpp" />
+    <ClCompile Include="AxisRenderer.cpp" />
+    <ClCompile Include="CubeRenderer.cpp" />
+    <ClCompile Include="HandDetector.cpp" />
     <ClCompile Include="Native\OpenCV\Converter.cpp" />
-    <ClCompile Include="Native\OpenCV\HandDetector.cpp" />
     <ClCompile Include="Native\Rendering\DepthTexture.cpp" />
     <ClCompile Include="Native\Sensor.cpp" />
-    <ClCompile Include="Native\HoloHandsMain.cpp" />
     <ClCompile Include="Native\Rendering\CameraResources.cpp" />
     <ClCompile Include="Native\Rendering\DeviceResources.cpp" />
     <ClCompile Include="Native\Rendering\QuadRenderer.cpp" />
@@ -134,6 +150,12 @@
     <ProjectReference Include="..\Microsoft\Debugging\Debugging.vcxproj">
       <Project>{ad347424-7340-47ce-a979-2c7f2df0eb38}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft\Graphics\Graphics.vcxproj">
+      <Project>{39cd08ae-9700-49cf-8616-18c20644416f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft\Holographic\Holographic.vcxproj">
+      <Project>{a1f9e48f-49e3-4f8c-ac48-2efdbed4b873}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft\HoloLensForCV\HoloLensForCV.vcxproj">
       <Project>{208c932d-a71e-4c67-a444-0697e9a4226e}</Project>
     </ProjectReference>
@@ -142,6 +164,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Microsoft\OpenCVHelpers\OpenCVHelpers.vcxproj">
       <Project>{940a6d80-0775-4272-84c9-1585c4757071}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft\Rendering\Rendering.vcxproj">
+      <Project>{421bb462-74f2-4831-9ab7-06b77e0a98b4}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +199,8 @@
     <Import Project="..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets" Condition="Exists('..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets')" />
     <Import Project="..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets" Condition="Exists('..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets')" />
     <Import Project="..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets" Condition="Exists('..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets')" />
+    <Import Project="..\packages\Eigen.3.3.3\build\native\Eigen.targets" Condition="Exists('..\packages\Eigen.3.3.3\build\native\Eigen.targets')" />
+    <Import Project="..\packages\directxtk_uwp.2019.2.7.1\build\native\directxtk_uwp.targets" Condition="Exists('..\packages\directxtk_uwp.2019.2.7.1\build\native\directxtk_uwp.targets')" />
   </ImportGroup>
   <PropertyGroup>
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
@@ -198,5 +225,7 @@
     <Error Condition="!Exists('..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.ML.310.6.1\build\native\opencv.win.ml.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.Features2D.310.6.1\build\native\opencv.win.features2d.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV.Win.Calib3D.310.6.1\build\native\opencv.win.calib3d.targets'))" />
+    <Error Condition="!Exists('..\packages\Eigen.3.3.3\build\native\Eigen.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Eigen.3.3.3\build\native\Eigen.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtk_uwp.2019.2.7.1\build\native\directxtk_uwp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_uwp.2019.2.7.1\build\native\directxtk_uwp.targets'))" />
   </Target>
 </Project>
