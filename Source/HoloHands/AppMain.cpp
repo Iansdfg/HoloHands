@@ -75,8 +75,6 @@ namespace HoloHands
       cv::Point handPosition2D = _handDetector->GetHandPosition();
       float handDepth = _handDetector->GetHandDepth();
 
-      //float depth = 500;// static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter())); //TODO:
-
       if (handDepth < 200 || handDepth > 1000)
       {
          handFound = false;

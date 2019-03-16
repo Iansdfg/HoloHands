@@ -10,24 +10,26 @@ namespace HoloHands
       HandDetector();
       bool Process(cv::Mat& input);
 
-      void IsClosed(bool isClosed) { _isClosedHand = isClosed; }
-      cv::Mat& GetDebugImage() { return _debugImage; }
       cv::Point GetHandPosition() { return _handPosition; }
-      float GetHandDepth() { return _handDepth; }
+      double GetHandDepth() { return _handDepth; }
+      void IsClosed(bool isClosed) { _isClosedHand = isClosed; }
+
       void ShowDebugInfo(bool enabled);
+      cv::Mat& GetDebugImage() { return _debugImage; }
 
    private:
       const double MAX_IMAGE_DEPTH = 1000; //Scales the image to fit within this range.
       const double MAX_DETECTION_THRESHOLD = 120; //Higher == detects objects further away.
       const double MIN_CONTOUR_SIZE = 20; //Minimum size of a valid contour.
       const double CONTOUR_CENTRALITY_BIAS = 0.0; //Higher == More central contours will be selected.
+
       const double CONTOUR_AREA_BIAS = 1.0; //Higher == Larger contours will be selected.
       const double DEPTH_SAMPLE_LENGTH = 10.0; //Higher == Move the depth sample point deeper into the palm.
       const double DEPTH_SAMPLE_COUNT = 5.0; //Higher == Move depth samples per sample length.
-      const double DEPTH_SAMPLE_OFFSET = 2.0;
       const double DEPTH_SAMPLE_SPACING = DEPTH_SAMPLE_LENGTH / DEPTH_SAMPLE_COUNT;
-      const double MIN_DEPTH_SAMPLE = 200;
-      const double MAX_DEPTH_SAMPLE = 1000;
+      const double DEPTH_SAMPLE_OFFSET = 2.0; //Starting sampling offset in the sampling direction.
+      const double DEPTH_SAMPLE_MIN = 200; //Minimum valid sample value, lower value will be discarded.
+      const double DEPTH_SAMPLE_MAX = 1000; //Maximum valid sample value, higher value will be discarded.
 
       ConvexityDefectExtractor _defectExtractor;
       bool _isClosedHand;

@@ -30,12 +30,6 @@ namespace HoloHands
       void SetImageSize(const cv::Size& size);
 
    private:
-      double CalculateDefectScore(const Defect& defect);
-
-      static Defect GetDefectFromContour(
-         const std::vector<cv::Point>& contour,
-         const cv::Vec4i& defectIndices);
-
       const double MIN_DEFECT_DEPTH = 20; //Minimum depth for a valid defect.
       const double HEIGHT_BIAS = 1.0; //Higher == Defects towards to top of the image will be selected.
       const double DEPTH_BIAS = 0.5; //Higher == Deeper defects will be selected.
@@ -43,5 +37,11 @@ namespace HoloHands
 
       cv::Size _imageSize;
       bool _showDebugInfo;
+
+      double CalculateDefectScore(const Defect& defect);
+
+      static Defect GetDefectFromContour(
+         const std::vector<cv::Point>& contour,
+         const cv::Vec4i& defectIndices);
    };
 }

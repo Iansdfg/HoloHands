@@ -45,7 +45,6 @@ namespace HoloHands
    private:
       void StartHoloLensMediaFrameSourceGroup();
 
-   private:
       std::unique_ptr<CubeRenderer> _cubeRenderer;
       std::unique_ptr<AxisRenderer> _axisRenderer;
       std::unique_ptr<QuadRenderer> _quadRenderer;

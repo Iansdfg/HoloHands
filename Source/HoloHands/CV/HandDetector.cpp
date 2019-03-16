@@ -256,14 +256,14 @@ double HandDetector::SampleDepthInDirection(
    const Point2d& startPoint,
    const Point2d& direction)
 {
-   double totalDepth = 0;
+   double totalDepth = 0; 
    int totalSampleCount = 0;
 
    for (int i = 0; i < DEPTH_SAMPLE_COUNT; i++)
    {
       Point point = startPoint + (direction * DEPTH_SAMPLE_OFFSET) + (direction * DEPTH_SAMPLE_SPACING * i);
       double sample = static_cast<double>(depthInput.at<unsigned short>(point));;
-      if (sample > MIN_DEPTH_SAMPLE && sample < MAX_DEPTH_SAMPLE)
+      if (sample > DEPTH_SAMPLE_MIN && sample < DEPTH_SAMPLE_MAX)
       {
          totalSampleCount++;
          totalDepth += sample;
