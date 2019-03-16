@@ -36,11 +36,10 @@ namespace HoloHands
          const std::vector<cv::Point>& contour,
          const cv::Vec4i& defectIndices);
 
-      const double MIN_DEFECT_DEPTH = 20;
-
-      const double HEIGHT_BIAS = 1.0;
-      const double DEPTH_BIAS = 0.5;
-      const double VERTICALITY_BIAS = 10.0;
+      const double MIN_DEFECT_DEPTH = 20; //Minimum depth for a valid defect.
+      const double HEIGHT_BIAS = 1.0; //Higher == Defects towards to top of the image will be selected.
+      const double DEPTH_BIAS = 0.5; //Higher == Deeper defects will be selected.
+      const double VERTICALITY_BIAS = 10.0; //Higher == Defects forward upwards will be selected.
 
       cv::Size _imageSize;
       bool _showDebugInfo;

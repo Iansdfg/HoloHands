@@ -48,14 +48,10 @@ bool HandDetector::Process(cv::Mat& input)
 
    //Select best contour.
    std::vector<Point> finalContour = FindBestContour(contours, bounds);
-
-   //Check best contour.
    if (finalContour.size() == 0)
    {
       return false;
    }
-
-   //Check best contour size.
 
    if (_isClosedHand)
    {
@@ -65,6 +61,8 @@ bool HandDetector::Process(cv::Mat& input)
    {
       ProcessOpenHand(finalContour);
    }
+
+   _handDepth = CalculateDepth(input);
 
    return true;
 }
@@ -195,7 +193,7 @@ double HandDetector::CalculateContourScore(const std::vector<cv::Point>& countou
 void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
 {
    Point position;
-   Point direction;
+   Point2d direction;
 
    Defect defect;
    if (_defectExtractor.FindDefect(contour, defect))
@@ -205,13 +203,14 @@ void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
       position = midPoint;
 
       //Calculate COM
-      auto moment = cv::moments(contour);
-      _handCenter = cv::Point(
+      auto moment = moments(contour);
+      auto handCenter = Point(
          static_cast<int>(moment.m10 / moment.m00),
          static_cast<int>(moment.m01 / moment.m00));
 
       //Calculate direction to position.
-      direction = midPoint - _handCenter;
+      _direction = midPoint - handCenter;
+      _direction /= norm(_direction); //Normalise.
 
       if (_showDebugInfo)
       {
@@ -221,12 +220,14 @@ void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
          circle(_debugImage, defect.Far, 3, Scalar(150), 2);
          circle(_debugImage, midPoint, 3, Scalar(255), 2);
 
-         line(_debugImage, midPoint, _handCenter, Scalar(100));
+         line(_debugImage, midPoint, handCenter, Scalar(100));
       }
-   }
 
-   _handPosition = position;
-   _leftDirection = direction;
+      _handPosition = position;
+      _finger1Position = Point2d(defect.Start);
+      _finger2Position = Point2d(defect.End);
+      _palmPosition = Point2d(defect.Far);
+   }
 }
 
 void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
@@ -244,8 +245,39 @@ void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
 
       if (_showDebugInfo)
       {
-         line(_debugImage, _handPosition, _handPosition - _leftDirection, Scalar(200));
+         line(_debugImage, _handPosition, Point2d(_handPosition) + _direction, Scalar(200));
          circle(_debugImage, leftMostPoint, 3, Scalar(255), 4);
       }
    }
+}
+
+double HandDetector::SampleDepthInDirection(
+   const Mat& depthInput,
+   const Point2d& startPoint,
+   const Point2d& direction)
+{
+   double totalDepth = 0;
+   int totalSampleCount = 0;
+
+   for (int i = 0; i < DEPTH_SAMPLE_COUNT; i++)
+   {
+      Point point = startPoint + (direction * DEPTH_SAMPLE_OFFSET) + (direction * DEPTH_SAMPLE_SPACING * i);
+      double sample = static_cast<double>(depthInput.at<unsigned short>(point));;
+      if (sample > MIN_DEPTH_SAMPLE && sample < MAX_DEPTH_SAMPLE)
+      {
+         totalSampleCount++;
+         totalDepth += sample;
+      }
+   }
+
+   return totalDepth / totalSampleCount;
+}
+
+double HandDetector::CalculateDepth(const cv::Mat& depthInput)
+{
+   double totalSamples =
+      SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
+      SampleDepthInDirection(depthInput, _finger2Position, -_direction);
+
+   return totalSamples / 2.0;
 }

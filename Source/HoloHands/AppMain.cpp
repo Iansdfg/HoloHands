@@ -72,15 +72,15 @@ namespace HoloHands
 
       bool handFound = _handDetector->Process(image);
 
-      auto imagePos = _handDetector->GetHandPosition();
+      cv::Point handPosition2D = _handDetector->GetHandPosition();
+      float handDepth = _handDetector->GetHandDepth();
 
-      float depth = 500;// static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter())); //TODO:
+      //float depth = 500;// static_cast<float>(image.at<unsigned short>(_handDetector->GetHandCenter())); //TODO:
 
-      //if (depth < 200 || depth > 1000)
-      //{
-      //   //Invalid depth.
-      //   return;
-      //}
+      if (handDepth < 200 || handDepth > 1000)
+      {
+         handFound = false;
+      }
 
       float4x4 camToRef;
 
@@ -91,8 +91,8 @@ namespace HoloHands
 
       Windows::Foundation::Point uv;
 
-      uv.X = static_cast<float>(imagePos.x);
-      uv.Y = static_cast<float>(imagePos.y);
+      uv.X = static_cast<float>(handPosition2D.x);
+      uv.Y = static_cast<float>(handPosition2D.y);
 
       Windows::Foundation::Point xy;
 
@@ -105,7 +105,7 @@ namespace HoloHands
       dirCam[2] = -1.0f;
 
       dirCam.normalize();
-      dirCam *= depth * 0.001f;
+      dirCam *= handDepth * 0.001f;
 
       Eigen::Matrix3f finalTransform = MathsUtils::Convert(camToOrigin).transpose();
       Eigen::Vector3f dir = finalTransform * dirCam;
