@@ -29,15 +29,6 @@
     <Filter Include="Native">
       <UniqueIdentifier>{2f1926b7-c202-433f-a2ee-c21e90565fd5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Native\Rendering">
-      <UniqueIdentifier>{633981d2-71b3-44de-8ab1-f5dd03e7018d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Native\Rendering\Shaders">
-      <UniqueIdentifier>{a382a5fa-e49e-40bf-a3a9-b36c8cd55618}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Native\Utils">
-      <UniqueIdentifier>{b5d9deef-61c8-4838-950f-9328245b8a00}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{f2788c16-69b4-4589-8a19-998e8b28c467}</UniqueIdentifier>
     </Filter>
@@ -47,19 +38,13 @@
     <Filter Include="CV">
       <UniqueIdentifier>{ede56dd9-7d4a-4d9a-9d9c-15bf5d530328}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Rendering\Shaders">
+      <UniqueIdentifier>{30544a7c-2e37-4b2a-8735-e574b302cb26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Native\Rendering\CameraResources.cpp">
-      <Filter>Native\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Native\Rendering\DeviceResources.cpp">
-      <Filter>Native\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Native\Sensor.cpp">
-      <Filter>Native</Filter>
-    </ClCompile>
-    <ClCompile Include="Native\SpatialInputHandler.cpp">
       <Filter>Native</Filter>
     </ClCompile>
     <ClCompile Include="AppMain.cpp" />
@@ -91,22 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Native\Rendering\CameraResources.h">
-      <Filter>Native\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\Rendering\DeviceResources.h">
-      <Filter>Native\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\Rendering\ShaderStructures.h">
-      <Filter>Native\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\Utils\StepTimer.h">
-      <Filter>Native\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Native\Sensor.h">
-      <Filter>Native</Filter>
-    </ClInclude>
-    <ClInclude Include="Native\SpatialInputHandler.h">
       <Filter>Native</Filter>
     </ClInclude>
     <ClInclude Include="AppMain.h" />
@@ -135,6 +105,9 @@
     <ClInclude Include="Rendering\CubeRenderer.h">
       <Filter>Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\Shaders\ShaderStructs.h">
+      <Filter>Rendering\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -149,11 +122,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Native\Rendering\Shaders\Quad.vs.hlsl">
-      <Filter>Native\Rendering\Shaders</Filter>
+    <FxCompile Include="Rendering\Shaders\Quad.ps.hlsl">
+      <Filter>Rendering\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Native\Rendering\Shaders\Quad.ps.hlsl">
-      <Filter>Native\Rendering\Shaders</Filter>
+    <FxCompile Include="Rendering\Shaders\Quad.vs.hlsl">
+      <Filter>Rendering\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

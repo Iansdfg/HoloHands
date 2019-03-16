@@ -2,7 +2,6 @@
 
 #include "Sensor.h"
 
-#include "Native/Rendering/DepthTexture.h"
 #include "Io/All.h"
 #include <unordered_set>
 #include <sstream>

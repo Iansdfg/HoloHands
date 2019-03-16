@@ -107,16 +107,12 @@
     <ClInclude Include="AppView.h" />
     <ClInclude Include="CV\HandDetector.h" />
     <ClInclude Include="Native\Sensor.h" />
-    <ClInclude Include="Native\Rendering\CameraResources.h" />
-    <ClInclude Include="Native\Rendering\DeviceResources.h" />
-    <ClInclude Include="Native\Rendering\ShaderStructures.h" />
-    <ClInclude Include="Native\SpatialInputHandler.h" />
-    <ClInclude Include="Native\Utils\StepTimer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Rendering\AxisRenderer.h" />
     <ClInclude Include="Rendering\CubeRenderer.h" />
     <ClInclude Include="Rendering\DepthTexture.h" />
     <ClInclude Include="Rendering\QuadRenderer.h" />
+    <ClInclude Include="Rendering\Shaders\ShaderStructs.h" />
     <ClInclude Include="Utils\ImageUtils.h" />
     <ClInclude Include="Utils\IO.h" />
     <ClInclude Include="Utils\MathsUtils.h" />
@@ -126,9 +122,6 @@
     <ClCompile Include="AppView.cpp" />
     <ClCompile Include="CV\HandDetector.cpp" />
     <ClCompile Include="Native\Sensor.cpp" />
-    <ClCompile Include="Native\Rendering\CameraResources.cpp" />
-    <ClCompile Include="Native\Rendering\DeviceResources.cpp" />
-    <ClCompile Include="Native\SpatialInputHandler.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -171,19 +164,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Native\Rendering\Shaders\Quad.ps.hlsl">
+    <FxCompile Include="Rendering\Shaders\Quad.ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-      <DeploymentContent>false</DeploymentContent>
     </FxCompile>
-    <FxCompile Include="Native\Rendering\Shaders\Quad.vs.hlsl">
+    <FxCompile Include="Rendering\Shaders\Quad.vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-      <DeploymentContent>false</DeploymentContent>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

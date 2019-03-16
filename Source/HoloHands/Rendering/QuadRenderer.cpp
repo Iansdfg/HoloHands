@@ -13,12 +13,11 @@ using namespace Windows::UI::Input::Spatial;
 using namespace Microsoft::WRL;
 
 QuadRenderer::QuadRenderer(
-   const std::shared_ptr<DeviceResources>& deviceResources,
-   const Size& size)
+   const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
    :
-   Resource(std::move(deviceResources)),
+   _deviceResources(deviceResources),
    _quadPosition({ 0.f, 0.f, -2.f }),
-   _quadSize(size)
+   _quadSize(Windows::Foundation::Size(1.4, 1))
 {
    CreateDeviceDependentResources();
 }
@@ -152,12 +151,14 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
       _headForwardDirection = pointerPose->Head->ForwardDirection;
       _headUpDirection = pointerPose->Head->UpDirection;
 
-      float distance = 2;
-      _quadPosition = _headPosition + _headForwardDirection * distance;
+      float distance = 4.f;
+      float3 yOffset = _headUpDirection * 0.33;
+      float3 xOffset = normalize(cross(_headForwardDirection, _headUpDirection)) * -0.63;
+      _quadPosition = _headPosition + _headForwardDirection * distance + yOffset + xOffset;
    }
 }
 
-void QuadRenderer::Update(const StepTimer& timer)
+void QuadRenderer::Update()
 {
    const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
       XMLoadFloat3(&_headPosition),

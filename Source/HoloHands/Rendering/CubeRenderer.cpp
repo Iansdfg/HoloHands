@@ -4,35 +4,17 @@
 
 namespace HoloHands
 {
-   CubeRenderer::CubeRenderer(
-      const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
-      : _deviceResources(deviceResources)
+   CubeRenderer::CubeRenderer(const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
+      :
+      _deviceResources(deviceResources),
+      _indexCount(0),
+      _loadingComplete(false),
+      _position({ 0.f, 0.f, 0.f })
    {
       CreateDeviceDependentResources();
    }
 
-   void CubeRenderer::PositionHologram(
-      Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose)
-   {
-      if (pointerPose != nullptr)
-      {
-         using Windows::Foundation::Numerics::float3;
-
-         const float3 headPosition = pointerPose->Head->Position;
-         const float3 headDirection = pointerPose->Head->ForwardDirection;
-
-         constexpr float distanceFromUser = 2.0f;
-         const float3 gazeAtTwoMeters = headPosition + (distanceFromUser * headDirection);
-
-         SetPosition(gazeAtTwoMeters);
-
-         _rotationInRadians = std::atan2(
-            headDirection.z,
-            headDirection.x) + DirectX::XM_PIDIV2;
-      }
-   }
-
-   void CubeRenderer::Update(_In_ const Graphics::StepTimer&)
+   void CubeRenderer::Update()
    {
       const DirectX::XMMATRIX modelTranslation = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&_position));
 
@@ -92,6 +74,11 @@ namespace HoloHands
       context->DrawIndexedInstanced(_indexCount, 2, 0, 0, 0);
    }
 
+   void CubeRenderer::SetPosition(const Windows::Foundation::Numerics::float3& pos)
+   {
+      _position = pos;
+   }
+
    void CubeRenderer::CreateDeviceDependentResources()
    {
       if (nullptr == _slateMaterial)
@@ -114,12 +101,7 @@ namespace HoloHands
          );
       }
 
-      // Once all shaders are loaded, create the mesh.
       {
-         // Load mesh vertices. Each vertex has a position and a color.
-         // Note that the cube size has changed from the default DirectX app
-         // template. Windows Holographic is scaled in meters, so to draw the
-         // cube at a comfortable size we made the cube width 0.2 m (20 cm).
          const float sx = 0.0035f, sy = 0.0035f, sz = 0.0035f;
          static const std::array<Rendering::VertexPositionColorTexture, 8> cubeVertices =
          { {
@@ -151,32 +133,26 @@ namespace HoloHands
             )
          );
 
-         // Load mesh indices. Each trio of indices represents
-         // a triangle to be rendered on the screen.
-         // For example: 2,1,0 means that the vertices with indexes
-         // 2, 1, and 0 from the vertex buffer compose the
-         // first triangle of this mesh.
-         // Note that the winding order is clockwise by default.
          constexpr std::array<unsigned short, 36> cubeIndices =
          { {
-                 2,1,0, // -x
-                 2,3,1,
+            2,1,0, // -x
+            2,3,1,
 
-                 6,4,5, // +x
-                 6,5,7,
+            6,4,5, // +x
+            6,5,7,
 
-                 0,1,5, // -y
-                 0,5,4,
+            0,1,5, // -y
+            0,5,4,
 
-                 2,6,7, // +y
-                 2,7,3,
+            2,6,7, // +y
+            2,7,3,
 
-                 0,4,6, // -z
-                 0,6,2,
+            0,4,6, // -z
+            0,6,2,
 
-                 1,3,7, // +z
-                 1,7,5,
-             } };
+            1,3,7, // +z
+            1,7,5,
+         } };
 
          _indexCount = static_cast<uint32_t>(cubeIndices.size());
 

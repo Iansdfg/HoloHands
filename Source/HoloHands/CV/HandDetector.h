@@ -22,9 +22,13 @@ namespace HoloHands
       void Process(cv::Mat& input);
 
       void IsClosed(bool isClosed) { _isClosedHand = isClosed; }
-      cv::Mat GetImage() { return _image; }
+      cv::Mat& GetDebugImage() { return _debugImage; }
       cv::Point GetLeftHandPosition() { return _leftPosition; }
       cv::Point GetLeftHandCenter() { return _leftCenter; }
+
+      void LockDebugImage();
+      void UnlockDebugImage();
+      std::mutex _debugImageLock;
 
    private:
       const double MAX_IMAGE_DEPTH = 1000;
@@ -35,8 +39,8 @@ namespace HoloHands
       cv::Point _leftPosition;
       cv::Point _leftDirection;
       cv::Point _leftCenter;
-      cv::Mat _image;
       std::vector<cv::Point> _contour;
+      cv::Mat _debugImage;
 
       cv::Mat ProcessOpenHand(const cv::Mat& hands);
       cv::Mat ProcessClosedHand(const cv::Mat& hands);
@@ -64,5 +68,7 @@ namespace HoloHands
          const std::vector<cv::Rect>& bounds);
 
       void CalculateHandPosition(const std::vector<cv::Point>& contour, cv::Mat& mat, cv::Point& position, cv::Point& direction);
+
+      void SetDebugImage(const cv::Mat& image);
    };
 }

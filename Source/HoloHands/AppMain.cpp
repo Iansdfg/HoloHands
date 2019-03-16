@@ -32,6 +32,8 @@ namespace HoloHands
       _handDetector = std::make_unique<HoloHands::HandDetector>();
       _axisRenderer = std::make_unique<HoloHands::AxisRenderer>(_deviceResources);
       _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources);
+      _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
+      _depthTexture = std::make_unique<DepthTexture>(_deviceResources);
    }
 
    void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
@@ -43,8 +45,6 @@ namespace HoloHands
       Windows::Graphics::Holographic::HolographicFrame^ holographicFrame,
       const Graphics::StepTimer& stepTimer)
    {
-      _cubeRenderer->Update(stepTimer);
-
       if (!_holoLensMediaFrameSourceGroupStarted)
       {
          return;
@@ -53,42 +53,36 @@ namespace HoloHands
       HoloLensForCV::SensorFrame^ latestFrame =
          _holoLensMediaFrameSourceGroup->GetLatestSensorFrame(HoloLensForCV::SensorType::ShortThrowToFDepth);
 
-      if (nullptr == latestFrame)
-      {
-         return;
-      }
-
-      if (_latestSelectedCameraTimestamp.UniversalTime == latestFrame->Timestamp.UniversalTime)
+      if (latestFrame == nullptr ||
+         _latestSelectedCameraTimestamp.UniversalTime == latestFrame->Timestamp.UniversalTime)
       {
          return;
       }
 
       _latestSelectedCameraTimestamp = latestFrame->Timestamp;
 
-      cv::Mat wrappedImage;
+      cv::Mat image;
 
       rmcv::WrapHoloLensSensorFrameWithCvMat(
          latestFrame,
-         wrappedImage);
+         image);
 
-      HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
-
-      _handDetector->Process(wrappedImage);
+      _handDetector->Process(image);
       auto imagePos = _handDetector->GetLeftHandPosition();
 
-      auto depth = wrappedImage.at<unsigned short>(_handDetector->GetLeftHandCenter());
-      float depthF = static_cast<float>(depth);
+      float depth = static_cast<float>(image.at<unsigned short>(_handDetector->GetLeftHandCenter()));
 
-      if (depthF < 200 || depthF > 1000)
-      {
-         return;
-      }
+      //if (depth < 200 || depth > 1000)
+      //{
+      //   //Invalid depth.
+      //   return;
+      //}
 
-      Windows::Foundation::Numerics::float4x4 camToRef;
+      float4x4 camToRef;
 
-      Windows::Foundation::Numerics::invert(latestFrame->CameraViewTransform, &camToRef);
+      invert(latestFrame->CameraViewTransform, &camToRef);
 
-      Windows::Foundation::Numerics::float4x4 camToOrigin = camToRef * latestFrame->FrameToOrigin;
+      float4x4 camToOrigin = camToRef * latestFrame->FrameToOrigin;
       Eigen::Vector3f camPinhole(camToOrigin.m41, camToOrigin.m42, camToOrigin.m43);
 
       Eigen::Matrix3f camToOriginR;
@@ -119,23 +113,36 @@ namespace HoloHands
       dirCam[2] = -1.0f;
 
       dirCam.normalize();
-      dirCam *= depthF * 0.001f;
+      dirCam *= depth * 0.001f;
 
       Eigen::Matrix3f finalTransform = camToOriginR.transpose();
       Eigen::Vector3f dir = finalTransform * dirCam;
 
       Eigen::Vector3f worldPosition = camPinhole + dir;
 
-      Windows::Foundation::Numerics::float3 p(
+      float3 p(
          worldPosition.x(),
          worldPosition.y(),
          worldPosition.z());
 
       _cubeRenderer->SetPosition(p);
 
-      _axisRenderer->SetPosition(p);
-      _axisRenderer->SetTransform(Windows::Foundation::Numerics::float4x4::identity());
-      _axisRenderer->Update();
+      _cubeRenderer->Update();
+
+      if (_debugView)
+      {
+         auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
+         HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
+         SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(cs, prediction->Timestamp);
+         _quadRenderer->UpdatePosition(pose);
+         _quadRenderer->Update();
+
+         _depthTexture->CopyFrom(_handDetector->GetDebugImage());
+
+         _axisRenderer->SetPosition(p);
+         _axisRenderer->SetTransform(float4x4::identity());
+         _axisRenderer->Update();
+      }
    }
 
    void AppMain::OnPreRender()
@@ -146,13 +153,21 @@ namespace HoloHands
    void AppMain::OnRender()
    {
       _cubeRenderer->Render();
-      _axisRenderer->Render();
+
+      if (_debugView)
+      {
+         _axisRenderer->Render();
+         
+         _quadRenderer->Render(*_depthTexture);
+      }
    }
 
    void AppMain::OnDeviceLost()
    {
       _cubeRenderer->ReleaseDeviceDependentResources();
       _axisRenderer->ReleaseDeviceDependentResources();
+      _quadRenderer->ReleaseDeviceDependentResources();
+      _depthTexture->ReleaseDeviceDependentResources();
 
       _holoLensMediaFrameSourceGroup = nullptr;
       _holoLensMediaFrameSourceGroupStarted = false;
@@ -162,6 +177,8 @@ namespace HoloHands
    {
       _cubeRenderer->CreateDeviceDependentResources();
       _axisRenderer->CreateDeviceDependentResources();
+      _quadRenderer->CreateDeviceDependentResources();
+      _depthTexture->CreateDeviceDependentResources();
 
       StartHoloLensMediaFrameSourceGroup();
    }

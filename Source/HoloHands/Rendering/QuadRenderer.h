@@ -1,30 +1,27 @@
 #pragma once
 
-#include "Native/Rendering/DeviceResources.h"
-#include "Native/Rendering/ShaderStructures.h"
-#include "Native/Utils/StepTimer.h"
+#include "Rendering/Shaders/ShaderStructs.h"
 
 namespace HoloHands
 {
    class DepthTexture;
 
-   class QuadRenderer : public Resource
+   class QuadRenderer
    {
    public:
       QuadRenderer(
-         const std::shared_ptr<DeviceResources>& deviceResources,
-         const Windows::Foundation::Size& size);
+         const std::shared_ptr<Graphics::DeviceResources>& deviceResources);
 
-      void CreateDeviceDependentResources() override;
-      void ReleaseDeviceDependentResources() override;
+      void CreateDeviceDependentResources();
+      void ReleaseDeviceDependentResources();
 
       void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
-      void Update(const StepTimer& timer);
+      void Update();
       void Render(const DepthTexture& depthTexture);
 
-      Windows::Foundation::Numerics::float3 GetQuadPosition() { return _quadPosition; }
-
    private:
+      Graphics::DeviceResourcesPtr _deviceResources;
+
       Microsoft::WRL::ComPtr<ID3D11InputLayout> _inputLayout;
       Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
       Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;

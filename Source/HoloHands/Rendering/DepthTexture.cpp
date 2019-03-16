@@ -14,9 +14,10 @@ using namespace Microsoft::WRL;
 using namespace Windows::Storage;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-DepthTexture::DepthTexture(std::shared_ptr<DeviceResources> deviceResources)
+DepthTexture::DepthTexture(
+   const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
    :
-   Resource(std::move(deviceResources)),
+   _deviceResources(deviceResources),
    _width(1),
    _height(1)
 {
@@ -73,10 +74,7 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 
 void DepthTexture::CopyFrom(cv::Mat& matrix)
 {
-   if (_texture == nullptr)
-   {
-      return;
-   }
+   //matrix.setTo(cv::Scalar(255)); //TODO: temp
 
    int width = matrix.cols;
    int height = matrix.rows;

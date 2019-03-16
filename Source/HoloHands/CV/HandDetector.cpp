@@ -169,7 +169,7 @@ Mat HandDetector::ProcessOpenHand(const Mat& hands)
 
    if (_leftPosition != Point(0, 0))
    {
-      OutputDebugString(L"hand found\n");
+      //TODO
    }
 
    //Draw hulls and contours.
@@ -241,7 +241,7 @@ void HandDetector::Process(cv::Mat& input)
    //Check contours found.
    if (filteredContours.size() == 0)
    {
-      _image = hands;
+      SetDebugImage(hands);
       return;
    }
 
@@ -251,13 +251,32 @@ void HandDetector::Process(cv::Mat& input)
 
    _contour = largestContour;
 
-
+   cv::Mat image;
    if (_isClosedHand)
    {
-      _image = ProcessClosedHand(hands);
+      image = ProcessClosedHand(hands);
    }
    else
    {
-      _image = ProcessOpenHand(hands);
+      image = ProcessOpenHand(hands);
    }
+
+   SetDebugImage(image);
 }
+
+void HoloHands::HandDetector::SetDebugImage(const cv::Mat & image)
+{
+   //LockDebugImage();
+   _debugImage = image;
+   //UnlockDebugImage();
+}
+//
+//void HoloHands::HandDetector::LockDebugImage()
+//{
+//   _debugImageLock.lock();
+//}
+//
+//void HoloHands::HandDetector::UnlockDebugImage()
+//{
+//   _debugImageLock.unlock();
+//}
