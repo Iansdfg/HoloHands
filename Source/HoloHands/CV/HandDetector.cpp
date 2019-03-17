@@ -8,7 +8,7 @@ using namespace cv;
 
 HoloHands::HandDetector::HandDetector()
    :
-   _isClosedHand(false)
+   _isClosed(false)
 {
 }
 
@@ -44,6 +44,7 @@ bool HandDetector::Process(cv::Mat& input)
    {
       //Save debug image.
       _debugImage = hands;
+
    }
 
    //Select best contour.
@@ -53,7 +54,7 @@ bool HandDetector::Process(cv::Mat& input)
       return false;
    }
 
-   if (_isClosedHand)
+   if (_isClosed)
    {
       ProcessClosedHand(finalContour);
    }
@@ -63,6 +64,11 @@ bool HandDetector::Process(cv::Mat& input)
    }
 
    _handDepth = CalculateDepth(input);
+
+   if (_showDebugInfo)
+   {
+      putText(_debugImage, std::to_string(_handDepth), cvPoint(40, 40), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
+   }
 
    return true;
 }
@@ -87,46 +93,6 @@ bool HandDetector::Intersects(const Rect& a, const Rect& b)
    return (a & b).area() > 0;
 }
 
-void HandDetector::FilterContour(
-   const std::vector<Point>& newContour,
-   const Rect& newBounds,
-   std::vector<std::vector<Point>>& filteredContours,
-   std::vector<Rect>& filteredBounds)
-{
-   //Ignore small contours.
-   if (newBounds.width > MIN_CONTOUR_SIZE && newBounds.height > MIN_CONTOUR_SIZE)
-   {
-      //Check if new contour overlaps with existing contours.
-      size_t overlappingIndex = -1;
-      for (size_t i = 0; i < filteredContours.size(); i++)
-      {
-         if (Intersects(newBounds, filteredBounds[i]))
-         {
-            overlappingIndex = i;
-            break;
-         }
-      }
-
-      if (overlappingIndex == -1)
-      {
-         //Does not overlap.
-         filteredContours.push_back(newContour);
-         filteredBounds.push_back(newBounds);
-      }
-      else
-      {
-         //Merge overlapping contours.
-         std::move(
-            filteredContours[overlappingIndex].begin(),
-            filteredContours[overlappingIndex].end(),
-            std::back_inserter(const_cast<std::vector<Point>&>(newContour)));
-
-         //Calculate new bounding rect.
-         filteredBounds[overlappingIndex] = boundingRect(filteredContours[overlappingIndex]);
-      }
-   }
-}
-
 std::vector<Point> HandDetector::FindBestContour(
    const std::vector<std::vector<Point>>& rawCountours,
    const std::vector<Rect>& rawBounds)
@@ -136,17 +102,21 @@ std::vector<Point> HandDetector::FindBestContour(
 
    for (size_t i = 0; i < rawCountours.size(); i++)
    {
-      //Remove small and merge overlapping contours.
-      FilterContour(rawCountours[i], rawBounds[i], filteredContours, filteredBounds);
+      //Filter out small contours.
+      if (rawBounds[i].width > MIN_CONTOUR_SIZE && rawBounds[i].height > MIN_CONTOUR_SIZE)
+      {
+         filteredContours.push_back(rawCountours[i]);
+         filteredBounds.push_back(rawBounds[i]);
+      }
    }
 
    int contourCandidateIndex = -1;
-   double contourCandiadateScore = 0;
+   float contourCandiadateScore = 0;
 
    //Find contour with the highest score.
    for (size_t i = 0; i < filteredContours.size(); i++)
    {
-      double score = CalculateContourScore(filteredContours[i], filteredBounds[i]);
+      float score = CalculateContourScore(filteredContours[i], filteredBounds[i]);
 
       if (score > contourCandiadateScore)
       {
@@ -177,13 +147,13 @@ std::vector<Point> HandDetector::FindBestContour(
 
 }
 
-double HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour, const cv::Rect& bound)
+float HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour, const cv::Rect& bound)
 {
-   Point imageCenter = Point(_imageSize.width / 2, _imageSize.height / 2);
-   Point boundsCenter = (bound.br() + bound.tl()) * 0.5;
+   Point2f imageCenter(_imageSize.width * 0.5f, _imageSize.height * 0.5f);
+   Point2f boundsCenter = (bound.br() + bound.tl()) * 0.5f;
 
-   double centrality = (_imageSize.width / 2) - cv::norm(imageCenter - boundsCenter);
-   double area = bound.area();
+   float centrality = (_imageSize.width / 2.f) - static_cast<float>(cv::norm(imageCenter - boundsCenter));
+   float area = static_cast<float>(bound.area());
 
    return
       centrality * CONTOUR_CENTRALITY_BIAS +
@@ -192,21 +162,21 @@ double HandDetector::CalculateContourScore(const std::vector<cv::Point>& countou
 
 void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
 {
-   Point position;
-   Point2d direction;
+   Point2f position;
+   Point2f direction;
 
    Defect defect;
    if (_defectExtractor.FindDefect(contour, defect))
    {
       //Draw hull defects.
-      Point midPoint = (defect.Start + defect.End) / 2.0;
+      Point2f midPoint = (defect.Start + defect.End) / 2.f;
       position = midPoint;
 
       //Calculate COM
       auto moment = moments(contour);
-      auto handCenter = Point(
-         static_cast<int>(moment.m10 / moment.m00),
-         static_cast<int>(moment.m01 / moment.m00));
+      Point2f handCenter(
+         static_cast<float>(moment.m10 / moment.m00),
+         static_cast<float>(moment.m01 / moment.m00));
 
       //Calculate direction to position.
       _direction = midPoint - handCenter;
@@ -215,18 +185,21 @@ void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
       if (_showDebugInfo)
       {
          //Draw debug info.
-         circle(_debugImage, defect.Start, 2, Scalar(150), 2);
-         circle(_debugImage, defect.End, 2, Scalar(150), 2);
-         circle(_debugImage, defect.Far, 3, Scalar(150), 2);
-         circle(_debugImage, midPoint, 3, Scalar(255), 2);
+         circle(_debugImage, defect.Start, 6, Scalar(255), 1);
+         circle(_debugImage, defect.End, 6, Scalar(255), 1);
+         circle(_debugImage, defect.Far, 6, Scalar(255), 1);
 
-         line(_debugImage, midPoint, handCenter, Scalar(100));
+         float crossSize = 6.f;
+         line(_debugImage, midPoint - Point2f(crossSize, 0), midPoint + Point2f(crossSize, 0), Scalar(255), 2);
+         line(_debugImage, midPoint - Point2f(0, crossSize), midPoint + Point2f(0, crossSize), Scalar(255), 2);
+
+         line(_debugImage, midPoint, handCenter, Scalar(200));
       }
 
-      _handPosition = position;
-      _finger1Position = Point2d(defect.Start);
-      _finger2Position = Point2d(defect.End);
-      _palmPosition = Point2d(defect.Far);
+      _handPosition = ApplySmoothing(position);
+      _finger1Position = Point2f(defect.Start);
+      _finger2Position = Point2f(defect.End);
+      _palmPosition = Point2f(defect.Far);
    }
 }
 
@@ -245,24 +218,24 @@ void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
 
       if (_showDebugInfo)
       {
-         line(_debugImage, _handPosition, Point2d(_handPosition) + _direction, Scalar(200));
+         line(_debugImage, _handPosition, Point2f(_handPosition) + _direction, Scalar(200));
          circle(_debugImage, leftMostPoint, 3, Scalar(255), 4);
       }
    }
 }
 
-double HandDetector::SampleDepthInDirection(
+float HandDetector::SampleDepthInDirection(
    const Mat& depthInput,
-   const Point2d& startPoint,
-   const Point2d& direction)
+   const Point2f& startPoint,
+   const Point2f& direction)
 {
-   double totalDepth = 0; 
+   float totalDepth = 0;
    int totalSampleCount = 0;
 
    for (int i = 0; i < DEPTH_SAMPLE_COUNT; i++)
    {
       Point point = startPoint + (direction * DEPTH_SAMPLE_OFFSET) + (direction * DEPTH_SAMPLE_SPACING * i);
-      double sample = static_cast<double>(depthInput.at<unsigned short>(point));;
+      float sample = static_cast<float>(depthInput.at<unsigned short>(point));;
       if (sample > DEPTH_SAMPLE_MIN && sample < DEPTH_SAMPLE_MAX)
       {
          totalSampleCount++;
@@ -270,14 +243,26 @@ double HandDetector::SampleDepthInDirection(
       }
    }
 
-   return totalDepth / totalSampleCount;
+   if (totalSampleCount > 0)
+   {
+      return totalDepth / totalSampleCount;
+   }
+   return 0;
 }
 
-double HandDetector::CalculateDepth(const cv::Mat& depthInput)
+Point2f HandDetector::ApplySmoothing(const Point2f& position)
 {
-   double totalSamples =
+   Point2f previous = _handPosition;
+   Point2f total = previous * POSITION_SMOOTHING + position;
+   
+   return total / (1.f + POSITION_SMOOTHING);
+}
+
+float HandDetector::CalculateDepth(const cv::Mat& depthInput)
+{
+   float totalSamples =
       SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
       SampleDepthInDirection(depthInput, _finger2Position, -_direction);
 
-   return totalSamples / 2.0;
+  return totalSamples / 2.0;
 }

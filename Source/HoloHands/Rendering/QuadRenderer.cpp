@@ -17,8 +17,8 @@ QuadRenderer::QuadRenderer(
    :
    _deviceResources(deviceResources),
    _quadPosition({ 0.f, 0.f, 0.f }),
-   _quadSize(Windows::Foundation::Size(1.4, 1)),
-   _quadOffset({-0.6f, 0.3f})
+   _quadSize(Windows::Foundation::Size(1.4f, 1.f)),
+   _quadOffset({-0.6f, 0.3f, 4.0f})
 {
    CreateDeviceDependentResources();
 }
@@ -117,7 +117,9 @@ void QuadRenderer::CreateDeviceDependentResources()
       vertexBufferData.SysMemPitch = 0;
       vertexBufferData.SysMemSlicePitch = 0;
 
-      const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()), D3D11_BIND_VERTEX_BUFFER);
+      const CD3D11_BUFFER_DESC vertexBufferDesc(
+         sizeof(VertexPositionTextureCoords) * static_cast<UINT>(quadVertices.size()),
+         D3D11_BIND_VERTEX_BUFFER);
 
       ASSERT_SUCCEEDED(
          _deviceResources->GetD3DDevice()->CreateBuffer(
@@ -148,23 +150,33 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
 {
    if (pointerPose != nullptr)
    {
-      _headPosition = pointerPose->Head->Position;
       _headForwardDirection = pointerPose->Head->ForwardDirection;
       _headUpDirection = pointerPose->Head->UpDirection;
 
-      _quadPosition = _headPosition + _headForwardDirection * 4.f;
+      _quadPosition = pointerPose->Head->Position + _headForwardDirection * 4.0;
    }
 }
 
 void QuadRenderer::Update()
 {
-   const XMMATRIX rotation = XMMatrixTranspose(XMMatrixLookAtRH(
-      XMLoadFloat3(&_headPosition),
-      XMLoadFloat3(&_quadPosition),
-      XMLoadFloat3(&_headUpDirection)));
+   float3 forwardDirection(_headForwardDirection.x, 0, _headForwardDirection.z);
+   float3 quadNormal(0, 0, -1);
 
+   //Rotate quad to always face the view.
+   XMVECTOR angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&forwardDirection), XMLoadFloat3(&quadNormal));
+   auto down = cross(forwardDirection, quadNormal);
+
+   if (dot(down, _headUpDirection) > 0)
+   {
+      //Invert angle when facing other direction.
+      float3 tempAngle;
+      XMStoreFloat3(&tempAngle, angle);
+      tempAngle *= -1;
+      angle = XMLoadFloat3(&tempAngle);
+   }
+
+   const XMMATRIX rotation = XMMatrixRotationY(XMVectorGetY(angle));
    const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&_quadPosition));
-
    XMStoreFloat4x4(&_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
 
    if (!_loadingComplete)

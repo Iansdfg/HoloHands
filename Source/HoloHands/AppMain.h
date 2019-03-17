@@ -43,6 +43,7 @@ namespace HoloHands
       virtual void OnRender() override;
 
    private:
+      bool GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, Windows::Foundation::Numerics::float3& handPosition);
       void StartHoloLensMediaFrameSourceGroup();
 
       std::unique_ptr<CubeRenderer> _cubeRenderer;

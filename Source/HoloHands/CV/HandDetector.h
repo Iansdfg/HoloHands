@@ -10,35 +10,36 @@ namespace HoloHands
       HandDetector();
       bool Process(cv::Mat& input);
 
-      cv::Point GetHandPosition() { return _handPosition; }
-      double GetHandDepth() { return _handDepth; }
-      void IsClosed(bool isClosed) { _isClosedHand = isClosed; }
+      cv::Point2f GetHandPosition2D() { return _handPosition; }
+      float GetHandDepth() { return _handDepth; }
+      void SetIsClosed(bool isClosed) { _isClosed = isClosed; }
 
       void ShowDebugInfo(bool enabled);
       cv::Mat& GetDebugImage() { return _debugImage; }
 
    private:
-      const double MAX_IMAGE_DEPTH = 1000; //Scales the image to fit within this range.
-      const double MAX_DETECTION_THRESHOLD = 120; //Higher == detects objects further away.
-      const double MIN_CONTOUR_SIZE = 20; //Minimum size of a valid contour.
-      const double CONTOUR_CENTRALITY_BIAS = 0.0; //Higher == More central contours will be selected.
+      const float MAX_IMAGE_DEPTH = 1000; //Scales the image to fit within this range.
+      const float MAX_DETECTION_THRESHOLD = 120; //Higher == detects objects further away.
+      const float MIN_CONTOUR_SIZE = 20; //Minimum size of a valid contour.
+      const float CONTOUR_CENTRALITY_BIAS = 0.0; //Higher == More central contours will be selected.
 
-      const double CONTOUR_AREA_BIAS = 1.0; //Higher == Larger contours will be selected.
-      const double DEPTH_SAMPLE_LENGTH = 10.0; //Higher == Move the depth sample point deeper into the palm.
-      const double DEPTH_SAMPLE_COUNT = 5.0; //Higher == Move depth samples per sample length.
-      const double DEPTH_SAMPLE_SPACING = DEPTH_SAMPLE_LENGTH / DEPTH_SAMPLE_COUNT;
-      const double DEPTH_SAMPLE_OFFSET = 2.0; //Starting sampling offset in the sampling direction.
-      const double DEPTH_SAMPLE_MIN = 200; //Minimum valid sample value, lower value will be discarded.
-      const double DEPTH_SAMPLE_MAX = 1000; //Maximum valid sample value, higher value will be discarded.
+      const float CONTOUR_AREA_BIAS = 1.f; //Higher == Larger contours will be selected.
+      const float DEPTH_SAMPLE_LENGTH = 10.f; //Higher == Move the depth sample point deeper into the palm.
+      const float DEPTH_SAMPLE_COUNT = 5.f; //Higher == Move depth samples per sample length.
+      const float DEPTH_SAMPLE_SPACING = DEPTH_SAMPLE_LENGTH / DEPTH_SAMPLE_COUNT;
+      const float DEPTH_SAMPLE_OFFSET = 2.f; //Starting sampling offset in the sampling direction.
+      const float DEPTH_SAMPLE_MIN = 200; //Minimum valid sample value, lower value will be discarded.
+      const float DEPTH_SAMPLE_MAX = 1000; //Maximum valid sample value, higher value will be discarded.
+      const float POSITION_SMOOTHING = 0.0f; //Higher == Positions are smoothed more with previous positions.
 
       ConvexityDefectExtractor _defectExtractor;
-      bool _isClosedHand;
-      cv::Point _handPosition;
-      cv::Point2d _finger1Position;
-      cv::Point2d _finger2Position;
-      cv::Point2d _palmPosition;
-      cv::Point2d _direction;
-      double _handDepth;
+      bool _isClosed;
+      cv::Point2f _handPosition;
+      cv::Point2f _finger1Position;
+      cv::Point2f _finger2Position;
+      cv::Point2f _palmPosition;
+      cv::Point2f _direction;
+      float _handDepth;
       cv::Mat _debugImage;
       bool _showDebugInfo;
       cv::Size _imageSize;
@@ -54,25 +55,22 @@ namespace HoloHands
          const cv::Rect& a,
          const cv::Rect& b);
 
-      void FilterContour(
-         const std::vector<cv::Point>& newContour,
-         const cv::Rect& newBounds,
-         std::vector<std::vector<cv::Point>>& filteredContours,
-         std::vector<cv::Rect>& filteredBounds);
-
       std::vector<cv::Point> FindBestContour(
          const std::vector<std::vector<cv::Point>>& rawCountours,
          const std::vector<cv::Rect>& rawBounds);
 
-      double CalculateContourScore(
+      float CalculateContourScore(
          const std::vector<cv::Point>& countour,
          const cv::Rect& bound);
 
-      double HandDetector::CalculateDepth(const cv::Mat& depthInput);
+      float HandDetector::CalculateDepth(const cv::Mat& depthInput);
 
-      double SampleDepthInDirection(
+      float SampleDepthInDirection(
          const cv::Mat& depthInput,
-         const cv::Point2d& startPoint,
-         const cv::Point2d& direction);
+         const cv::Point2f& startPoint,
+         const cv::Point2f& direction);
+
+      cv::Point2f HandDetector::ApplySmoothing(
+         const cv::Point2f& position);
    };
-}
+}  

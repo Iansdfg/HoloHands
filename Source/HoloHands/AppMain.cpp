@@ -21,7 +21,7 @@ namespace HoloHands
       Holographic::AppMainBase(deviceResources),
       _selectedHoloLensMediaFrameSourceGroupType(HoloLensForCV::MediaFrameSourceGroupType::HoloLensResearchModeSensors),
       _holoLensMediaFrameSourceGroupStarted(false),
-      _showDebugInfo(true)
+      _showDebugInfo(false)
    {
    }
 
@@ -41,7 +41,60 @@ namespace HoloHands
 
    void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
    {
-      //Do nothing.
+      _handDetector->SetIsClosed(pointerState->IsPressed);
+   }
+
+   bool AppMain::GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, float3& handPosition)
+   {
+      cv::Mat image;
+      rmcv::WrapHoloLensSensorFrameWithCvMat(frame, image);
+
+      //Detect 2D hand position and depth from OpenCV Mat.
+      bool handFound = _handDetector->Process(image);
+      float depth = _handDetector->GetHandDepth();
+      cv::Point position2D = _handDetector->GetHandPosition2D();
+
+      if (handFound == false || depth < 200 || depth > 1000)
+      {
+         //Invalid hand position detected.
+         return false;
+      }
+
+      //Calculate transforms.
+      float4x4 viewToFrame;
+      invert(frame->CameraViewTransform, &viewToFrame);
+
+      float4x4 camToOrigin = viewToFrame * frame->FrameToOrigin;
+      Eigen::Vector3f camToOriginTranslation(camToOrigin.m41, camToOrigin.m42, camToOrigin.m43);
+      Eigen::Matrix3f camToOriginRotation = MathsUtils::Convert(camToOrigin);
+
+      //Convert from UV space to XY direction.
+      Point uv(
+         static_cast<float>(position2D.x),
+         static_cast<float>(position2D.y));
+
+      Point xy;
+      frame->SensorStreamingCameraIntrinsics->MapImagePointToCameraUnitPlane(uv, &xy);
+
+      //Add depth to direction.
+      Eigen::Vector3f depthDirection;
+      depthDirection[0] = -xy.X;
+      depthDirection[1] = -xy.Y;
+      depthDirection[2] = -1.0f;
+
+      depthDirection.normalize();
+      depthDirection *= depth * 0.001f;
+
+      //Transform into world space.
+      Eigen::Vector3f worldDirection = camToOriginRotation.transpose() * depthDirection;
+      Eigen::Vector3f worldPosition = camToOriginTranslation + worldDirection;
+
+      handPosition = float3(
+         worldPosition.x(),
+         worldPosition.y(),
+         worldPosition.z());
+
+      return true;
    }
 
    void AppMain::OnUpdate(
@@ -64,61 +117,10 @@ namespace HoloHands
 
       _latestSelectedCameraTimestamp = latestFrame->Timestamp;
 
-      cv::Mat image;
-
-      rmcv::WrapHoloLensSensorFrameWithCvMat(
-         latestFrame,
-         image);
-
-      bool handFound = _handDetector->Process(image);
-
-      cv::Point handPosition2D = _handDetector->GetHandPosition();
-      float handDepth = _handDetector->GetHandDepth();
-
-      if (handDepth < 200 || handDepth > 1000)
+      float3 handPosition;
+      if (GetHandPositionFromFrame(latestFrame, handPosition))
       {
-         handFound = false;
-      }
-
-      float4x4 camToRef;
-
-      invert(latestFrame->CameraViewTransform, &camToRef);
-
-      float4x4 camToOrigin = camToRef * latestFrame->FrameToOrigin;
-      Eigen::Vector3f camPinhole(camToOrigin.m41, camToOrigin.m42, camToOrigin.m43);
-
-      Windows::Foundation::Point uv;
-
-      uv.X = static_cast<float>(handPosition2D.x);
-      uv.Y = static_cast<float>(handPosition2D.y);
-
-      Windows::Foundation::Point xy;
-
-      latestFrame->SensorStreamingCameraIntrinsics->MapImagePointToCameraUnitPlane(uv, &xy);
-
-      Eigen::Vector3f dirCam;
-
-      dirCam[0] = -xy.X;
-      dirCam[1] = -xy.Y;
-      dirCam[2] = -1.0f;
-
-      dirCam.normalize();
-      dirCam *= handDepth * 0.001f;
-
-      Eigen::Matrix3f finalTransform = MathsUtils::Convert(camToOrigin).transpose();
-      Eigen::Vector3f dir = finalTransform * dirCam;
-
-      Eigen::Vector3f worldPosition = camPinhole + dir;
-
-      float3 p(
-         worldPosition.x(),
-         worldPosition.y(),
-         worldPosition.z());
-
-      if (handFound)
-      {
-         _cubeRenderer->SetPosition(p);
-
+         _cubeRenderer->SetPosition(handPosition);
          _cubeRenderer->Update();
       }
 
@@ -132,7 +134,7 @@ namespace HoloHands
 
          _depthTexture->CopyFrom(_handDetector->GetDebugImage());
 
-         _axisRenderer->SetPosition(p);
+         _axisRenderer->SetPosition(handPosition);
          _axisRenderer->SetTransform(float4x4::identity());
          _axisRenderer->Update();
       }
