@@ -35,6 +35,8 @@ namespace Holographic
         // Event registration token.
         Windows::Foundation::EventRegistrationToken _sourcePressedEventToken;
         Windows::Foundation::EventRegistrationToken _sourceReleasedEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceLostEventToken;
+        Windows::Foundation::EventRegistrationToken _sourceDetectedEventToken;
 
         // Used to indicate that a Pressed input event was received this frame.
         Windows::UI::Input::Spatial::SpatialInteractionSourceState^ _sourceState = nullptr;

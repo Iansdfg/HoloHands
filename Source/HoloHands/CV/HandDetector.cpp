@@ -54,6 +54,7 @@ bool HandDetector::Process(cv::Mat& input)
       return false;
    }
 
+   //Calculate 2d hand position.
    if (_isClosed)
    {
       ProcessClosedHand(finalContour);
@@ -63,14 +64,81 @@ bool HandDetector::Process(cv::Mat& input)
       ProcessOpenHand(finalContour);
    }
 
+   //Calculate depth.
    _handDepth = CalculateDepth(input);
 
    if (_showDebugInfo)
    {
-      putText(_debugImage, std::to_string(_handDepth), cvPoint(40, 40), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
+      //Draw hand position.
+      float crossSize = 6.f;
+      line(_debugImage, _handPosition - Point2f(crossSize, 0), _handPosition + Point2f(crossSize, 0), Scalar(255), 2);
+      line(_debugImage, _handPosition - Point2f(0, crossSize), _handPosition + Point2f(0, crossSize), Scalar(255), 2);
+
+      //Draw hand direction.
+      line(_debugImage, _handPosition, _handPosition + _direction * 50, Scalar(200));
+
+      if (!_isClosed)
+      {
+         circle(_debugImage, _finger1Position, 6, Scalar(255), 1);
+         circle(_debugImage, _finger2Position, 6, Scalar(255), 1);
+         circle(_debugImage, _palmPosition, 6, Scalar(255), 1);
+      }
+
+      //Draw depth text.
+      putText(_debugImage, std::to_string(_handDepth), Point(40, 40), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
    }
 
    return true;
+}
+
+void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
+{
+   Point2f position;
+   Point2f direction;
+
+   Defect defect;
+   if (_defectExtractor.FindDefect(contour, defect))
+   {
+      //Draw hull defects.
+      Point2f midPoint = (defect.Start + defect.End) / 2.f;
+      position = midPoint;
+
+      //Calculate COM
+      auto moment = moments(contour);
+      Point2f handCenter(
+         static_cast<float>(moment.m10 / moment.m00),
+         static_cast<float>(moment.m01 / moment.m00));
+
+      //Calculate direction.
+      Point across = defect.Start - defect.End;
+      _direction = Point(across.y, -across.x); //Orthogonal.
+      _direction /= norm(_direction); //Normalise.
+
+      _handPosition = ApplySmoothing(position);
+      _finger1Position = Point2f(defect.Start);
+      _finger2Position = Point2f(defect.End);
+      _palmPosition = Point2f(defect.Far);
+   }
+}
+
+void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
+{
+   if (contour.size() > 0)
+   {
+      int furthestIndex = 0;
+      float furthestDistance = FLT_MIN;
+      for (int i = 0; i < contour.size(); i++)
+      {
+         float distance = _direction.dot(contour[i]);
+         if (distance > furthestDistance)
+         {
+            furthestIndex = i;
+            furthestDistance = distance;
+         }
+      }
+
+      _handPosition = contour[furthestIndex];
+   }
 }
 
 void HandDetector::ShowDebugInfo(bool enabled)
@@ -134,6 +202,7 @@ std::vector<Point> HandDetector::FindBestContour(
             drawContours(_debugImage, filteredContours, i, Scalar(255));
             rectangle(_debugImage, filteredBounds[i], Scalar(100));
          }
+
          drawContours(_debugImage, filteredContours, contourCandidateIndex, Scalar(255), 3);
          rectangle(_debugImage, filteredBounds[contourCandidateIndex], Scalar(100), 3);
       }
@@ -143,8 +212,8 @@ std::vector<Point> HandDetector::FindBestContour(
    {
       return filteredContours[contourCandidateIndex];
    }
-   return {};
 
+   return {};
 }
 
 float HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour, const cv::Rect& bound)
@@ -158,70 +227,6 @@ float HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour
    return
       centrality * CONTOUR_CENTRALITY_BIAS +
       area * CONTOUR_AREA_BIAS;
-}
-
-void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
-{
-   Point2f position;
-   Point2f direction;
-
-   Defect defect;
-   if (_defectExtractor.FindDefect(contour, defect))
-   {
-      //Draw hull defects.
-      Point2f midPoint = (defect.Start + defect.End) / 2.f;
-      position = midPoint;
-
-      //Calculate COM
-      auto moment = moments(contour);
-      Point2f handCenter(
-         static_cast<float>(moment.m10 / moment.m00),
-         static_cast<float>(moment.m01 / moment.m00));
-
-      //Calculate direction to position.
-      _direction = midPoint - handCenter;
-      _direction /= norm(_direction); //Normalise.
-
-      if (_showDebugInfo)
-      {
-         //Draw debug info.
-         circle(_debugImage, defect.Start, 6, Scalar(255), 1);
-         circle(_debugImage, defect.End, 6, Scalar(255), 1);
-         circle(_debugImage, defect.Far, 6, Scalar(255), 1);
-
-         float crossSize = 6.f;
-         line(_debugImage, midPoint - Point2f(crossSize, 0), midPoint + Point2f(crossSize, 0), Scalar(255), 2);
-         line(_debugImage, midPoint - Point2f(0, crossSize), midPoint + Point2f(0, crossSize), Scalar(255), 2);
-
-         line(_debugImage, midPoint, handCenter, Scalar(200));
-      }
-
-      _handPosition = ApplySmoothing(position);
-      _finger1Position = Point2f(defect.Start);
-      _finger2Position = Point2f(defect.End);
-      _palmPosition = Point2f(defect.Far);
-   }
-}
-
-void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
-{
-   if (contour.size() > 0)
-   {
-      auto leftMostPoint = contour.front();
-      for (auto& p : contour)
-      {
-         if (p.x < leftMostPoint.x)
-         {
-            leftMostPoint = p;
-         }
-      }
-
-      if (_showDebugInfo)
-      {
-         line(_debugImage, _handPosition, Point2f(_handPosition) + _direction, Scalar(200));
-         circle(_debugImage, leftMostPoint, 3, Scalar(255), 4);
-      }
-   }
 }
 
 float HandDetector::SampleDepthInDirection(
@@ -247,6 +252,7 @@ float HandDetector::SampleDepthInDirection(
    {
       return totalDepth / totalSampleCount;
    }
+
    return 0;
 }
 
@@ -260,9 +266,16 @@ Point2f HandDetector::ApplySmoothing(const Point2f& position)
 
 float HandDetector::CalculateDepth(const cv::Mat& depthInput)
 {
-   float totalSamples =
-      SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
-      SampleDepthInDirection(depthInput, _finger2Position, -_direction);
+   if (_isClosed)
+   {
+      return SampleDepthInDirection(depthInput, _handPosition, -_direction);
+   }
+   else
+   {
+      float totalSamples =
+         SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
+         SampleDepthInDirection(depthInput, _finger2Position, -_direction);
 
-  return totalSamples / 2.0;
+      return totalSamples / 2.0;
+   }
 }

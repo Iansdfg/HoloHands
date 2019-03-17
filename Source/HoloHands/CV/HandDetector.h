@@ -20,9 +20,8 @@ namespace HoloHands
    private:
       const float MAX_IMAGE_DEPTH = 1000; //Scales the image to fit within this range.
       const float MAX_DETECTION_THRESHOLD = 120; //Higher == detects objects further away.
-      const float MIN_CONTOUR_SIZE = 20; //Minimum size of a valid contour.
+      const float MIN_CONTOUR_SIZE = 40; //Minimum size of a valid contour.
       const float CONTOUR_CENTRALITY_BIAS = 0.0; //Higher == More central contours will be selected.
-
       const float CONTOUR_AREA_BIAS = 1.f; //Higher == Larger contours will be selected.
       const float DEPTH_SAMPLE_LENGTH = 10.f; //Higher == Move the depth sample point deeper into the palm.
       const float DEPTH_SAMPLE_COUNT = 5.f; //Higher == Move depth samples per sample length.

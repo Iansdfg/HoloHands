@@ -102,16 +102,16 @@ namespace HoloHands
       }
 
       {
-         const float sx = 0.0035f, sy = 0.0035f, sz = 0.0035f;
+         const float sx = 0.010f, sy = 0.010f, sz = 0.010f;
          static const std::array<Rendering::VertexPositionColorTexture, 8> cubeVertices =
          { {
              { { -sx, -sy, -sz }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
-             { { -sx, -sy,  sz }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
+             { { -sx, -sy,  sz }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
              { { -sx,  sy, -sz }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
              { { -sx,  sy,  sz }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
              { {  sx, -sy, -sz }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-             { {  sx, -sy,  sz }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f } },
-             { {  sx,  sy, -sz }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } },
+             { {  sx, -sy,  sz }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+             { {  sx,  sy, -sz }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
              { {  sx,  sy,  sz }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
          } };
 

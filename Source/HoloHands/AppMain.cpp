@@ -21,7 +21,7 @@ namespace HoloHands
       Holographic::AppMainBase(deviceResources),
       _selectedHoloLensMediaFrameSourceGroupType(HoloLensForCV::MediaFrameSourceGroupType::HoloLensResearchModeSensors),
       _holoLensMediaFrameSourceGroupStarted(false),
-      _showDebugInfo(false)
+      _showDebugInfo(true)
    {
    }
 

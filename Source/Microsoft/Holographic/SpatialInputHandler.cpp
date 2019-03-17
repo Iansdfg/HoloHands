@@ -33,9 +33,30 @@ namespace Holographic
                             std::placeholders::_1,
                             std::placeholders::_2));
 
-
         _sourceReleasedEventToken =
            _interactionManager->SourceReleased +=
+           ref new Windows::Foundation::TypedEventHandler<
+           Windows::UI::Input::Spatial::SpatialInteractionManager^,
+           Windows::UI::Input::Spatial::SpatialInteractionSourceEventArgs^>(
+              std::bind(
+                 &SpatialInputHandler::OnSourcePressed,
+                 this,
+                 std::placeholders::_1,
+                 std::placeholders::_2));
+
+        _sourceLostEventToken =
+           _interactionManager->SourceLost +=
+           ref new Windows::Foundation::TypedEventHandler<
+           Windows::UI::Input::Spatial::SpatialInteractionManager^,
+           Windows::UI::Input::Spatial::SpatialInteractionSourceEventArgs^>(
+              std::bind(
+                 &SpatialInputHandler::OnSourcePressed,
+                 this,
+                 std::placeholders::_1,
+                 std::placeholders::_2));
+
+        _sourceDetectedEventToken =
+           _interactionManager->SourceDetected +=
            ref new Windows::Foundation::TypedEventHandler<
            Windows::UI::Input::Spatial::SpatialInteractionManager^,
            Windows::UI::Input::Spatial::SpatialInteractionSourceEventArgs^>(
@@ -52,6 +73,10 @@ namespace Holographic
         _interactionManager->SourcePressed -=
             _sourcePressedEventToken;
         _interactionManager->SourceReleased -=
+           _sourcePressedEventToken;
+        _interactionManager->SourceLost -=
+           _sourcePressedEventToken;
+        _interactionManager->SourceDetected -=
            _sourcePressedEventToken;
     }
 
