@@ -5,7 +5,7 @@
   <Properties>
     <DisplayName>HoloHands</DisplayName>
     <PublisherDisplayName>MagnusMaynard</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <Logo>Assets\holohands_logo_50x50.png</Logo>
   </Properties>
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.16299.0" MaxVersionTested="10.0.17134.0" />
@@ -15,8 +15,8 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="HoloHands.AppView">
-      <uap:VisualElements DisplayName="HoloHands" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="HoloHands" BackgroundColor="#464646">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+      <uap:VisualElements DisplayName="HoloHands" Square150x150Logo="Assets\holohands_logo_300x300.png" Square44x44Logo="holohands_logo_24x24.png" Description="HoloHands" BackgroundColor="#000000">
+        <uap:DefaultTile Wide310x150Logo="Assets\holohands_logo_300x300.png">
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>

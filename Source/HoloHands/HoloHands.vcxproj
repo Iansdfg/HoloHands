@@ -93,14 +93,12 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Image Include="Assets\LockScreenLogo.scale-200.png" />
+    <Image Include="Assets\holohands_logo_24x24.png" />
+    <Image Include="Assets\holohands_logo_300x300.png" />
+    <Image Include="Assets\holohands_logo_48x48.png" />
+    <Image Include="Assets\holohands_logo_50x50.png" />
+    <Image Include="Assets\holohands_logo_88x88.png" />
     <Image Include="Assets\SplashScreen.scale-200.png" />
-    <Image Include="Assets\Square150x150Logo.scale-200.png" />
-    <Image Include="Assets\Square44x44Logo.scale-200.png" />
-    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Image Include="Assets\StoreLogo.png" />
-    <Image Include="Assets\sunset.jpg" />
-    <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppMain.h" />

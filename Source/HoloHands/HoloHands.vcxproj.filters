@@ -5,25 +5,7 @@
       <UniqueIdentifier>3865892a-c798-41ed-a4fc-b69a563cbb80</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
-    <Image Include="Assets\LockScreenLogo.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
     <Image Include="Assets\SplashScreen.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Square150x150Logo.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Square44x44Logo.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\StoreLogo.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
     <Filter Include="Native">
@@ -123,16 +105,28 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\sunset.jpg">
-      <Filter>Assets</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="Rendering\Shaders\Quad.ps.hlsl">
       <Filter>Rendering\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Rendering\Shaders\Quad.vs.hlsl">
       <Filter>Rendering\Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\holohands_logo_24x24.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\holohands_logo_48x48.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\holohands_logo_50x50.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\holohands_logo_88x88.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\holohands_logo_300x300.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>
