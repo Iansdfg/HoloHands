@@ -43,8 +43,7 @@ bool HandDetector::Process(cv::Mat& input)
    if (_showDebugInfo)
    {
       //Save debug image.
-      _debugImage = hands;
-
+      _debugImage = scaled;
    }
 
    //Select best contour.
@@ -77,20 +76,27 @@ bool HandDetector::Process(cv::Mat& input)
       //Draw hand direction.
       line(_debugImage, _handPosition, _handPosition + _direction * 50, Scalar(200));
 
-      if (!_isClosed)
+      if (_isClosed)
       {
+         putText(_debugImage, "Closed", Point(20, 20), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
+      }
+      else
+      {
+         putText(_debugImage, "Open", Point(20, 20), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
+
          circle(_debugImage, _finger1Position, 6, Scalar(255), 1);
          circle(_debugImage, _finger2Position, 6, Scalar(255), 1);
          circle(_debugImage, _palmPosition, 6, Scalar(255), 1);
       }
 
       //Draw depth text.
-      putText(_debugImage, std::to_string(_handDepth), Point(40, 40), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
+      putText(_debugImage, std::to_string(_handDepth), Point(20, 40), CV_FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255));
    }
 
    return true;
 }
 
+//Selects the mid point between the thumb and finger.
 void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
 {
    Point2f position;
@@ -121,15 +127,17 @@ void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
    }
 }
 
+//Selects the furthest contour point in the hand's direction.
+//The hand direction is defined by the most recent open pose.
 void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
 {
    if (contour.size() > 0)
    {
       int furthestIndex = 0;
-      float furthestDistance = FLT_MIN;
-      for (int i = 0; i < contour.size(); i++)
+      float furthestDistance = -1000000; //TODO: FLT_MIN does not work!?
+      for (int i = 0; i < static_cast<int>(contour.size()); i++)
       {
-         float distance = _direction.dot(contour[i]);
+         float distance =  _direction.dot(contour[i]);
          if (distance > furthestDistance)
          {
             furthestIndex = i;
@@ -276,6 +284,6 @@ float HandDetector::CalculateDepth(const cv::Mat& depthInput)
          SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
          SampleDepthInDirection(depthInput, _finger2Position, -_direction);
 
-      return totalSamples / 2.0;
+      return totalSamples / 2.0f;
    }
 }

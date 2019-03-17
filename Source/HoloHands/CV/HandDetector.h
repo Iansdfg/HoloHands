@@ -23,8 +23,8 @@ namespace HoloHands
       const float MIN_CONTOUR_SIZE = 40; //Minimum size of a valid contour.
       const float CONTOUR_CENTRALITY_BIAS = 0.0; //Higher == More central contours will be selected.
       const float CONTOUR_AREA_BIAS = 1.f; //Higher == Larger contours will be selected.
-      const float DEPTH_SAMPLE_LENGTH = 10.f; //Higher == Move the depth sample point deeper into the palm.
-      const float DEPTH_SAMPLE_COUNT = 5.f; //Higher == Move depth samples per sample length.
+      const float DEPTH_SAMPLE_LENGTH = 5.f; //Higher == Move the depth sample point deeper into the palm.
+      const float DEPTH_SAMPLE_COUNT = 3.f; //Higher == Move depth samples per sample length.
       const float DEPTH_SAMPLE_SPACING = DEPTH_SAMPLE_LENGTH / DEPTH_SAMPLE_COUNT;
       const float DEPTH_SAMPLE_OFFSET = 2.f; //Starting sampling offset in the sampling direction.
       const float DEPTH_SAMPLE_MIN = 200; //Minimum valid sample value, lower value will be discarded.

@@ -6,7 +6,8 @@ namespace HoloHands
    {
    public:
       CubeRenderer(
-         const std::shared_ptr<Graphics::DeviceResources>& deviceResources);
+         const std::shared_ptr<Graphics::DeviceResources>& deviceResources,
+         float size);
 
       void CreateDeviceDependentResources();
       void ReleaseDeviceDependentResources();
@@ -15,6 +16,7 @@ namespace HoloHands
       void Render();
 
       void SetPosition(const Windows::Foundation::Numerics::float3& pos);
+      Windows::Foundation::Numerics::float3 GetPosition();
 
    private:
       Graphics::DeviceResourcesPtr _deviceResources;
@@ -28,5 +30,6 @@ namespace HoloHands
       uint32 _indexCount;
       bool _loadingComplete;
       Windows::Foundation::Numerics::float3 _position;
+      float _size;
    };
 }

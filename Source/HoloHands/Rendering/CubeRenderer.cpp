@@ -4,12 +4,15 @@
 
 namespace HoloHands
 {
-   CubeRenderer::CubeRenderer(const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
+   CubeRenderer::CubeRenderer(
+      const std::shared_ptr<Graphics::DeviceResources>& deviceResources,
+      float size)
       :
       _deviceResources(deviceResources),
       _indexCount(0),
       _loadingComplete(false),
-      _position({ 0.f, 0.f, 0.f })
+      _position({ 0.f, 0.f, 0.f }),
+      _size(size)
    {
       CreateDeviceDependentResources();
    }
@@ -79,6 +82,11 @@ namespace HoloHands
       _position = pos;
    }
 
+   Windows::Foundation::Numerics::float3 CubeRenderer::GetPosition()
+   {
+      return _position;
+   }
+
    void CubeRenderer::CreateDeviceDependentResources()
    {
       if (nullptr == _slateMaterial)
@@ -102,17 +110,16 @@ namespace HoloHands
       }
 
       {
-         const float sx = 0.010f, sy = 0.010f, sz = 0.010f;
          static const std::array<Rendering::VertexPositionColorTexture, 8> cubeVertices =
          { {
-             { { -sx, -sy, -sz }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
-             { { -sx, -sy,  sz }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
-             { { -sx,  sy, -sz }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { -sx,  sy,  sz }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-             { {  sx, -sy, -sz }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-             { {  sx, -sy,  sz }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-             { {  sx,  sy, -sz }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
-             { {  sx,  sy,  sz }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
+             { { -_size, -_size, -_size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
+             { { -_size, -_size,  _size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
+             { { -_size,  _size, -_size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+             { { -_size,  _size,  _size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+             { {  _size, -_size, -_size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+             { {  _size, -_size,  _size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+             { {  _size,  _size, -_size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
+             { {  _size,  _size,  _size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
          } };
 
          D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };

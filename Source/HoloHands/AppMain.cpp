@@ -21,8 +21,15 @@ namespace HoloHands
       Holographic::AppMainBase(deviceResources),
       _selectedHoloLensMediaFrameSourceGroupType(HoloLensForCV::MediaFrameSourceGroupType::HoloLensResearchModeSensors),
       _holoLensMediaFrameSourceGroupStarted(false),
-      _showDebugInfo(true)
+      _showDebugInfo(true),
+      _handFound(false),
+      _cubeSize(0.01f),
+      _pickingTolerance(0.03f),
+      _selectedCubeIndex(-1)
    {
+      _cubePositions.push_back({ 0.5, 0, 0 });
+      _cubePositions.push_back({ 0, 0, 0.5 });
+      _cubePositions.push_back({ -0.5, 0, 0 });
    }
 
    void AppMain::OnHolographicSpaceChanged(
@@ -32,7 +39,7 @@ namespace HoloHands
 
       _handDetector = std::make_unique<HoloHands::HandDetector>();
       _axisRenderer = std::make_unique<HoloHands::AxisRenderer>(_deviceResources);
-      _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources);
+      _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources, _cubeSize);
       _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
       _depthTexture = std::make_unique<DepthTexture>(_deviceResources);
 
@@ -42,6 +49,25 @@ namespace HoloHands
    void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
    {
       _handDetector->SetIsClosed(pointerState->IsPressed);
+
+      _selectedCubeIndex = SelectCube(pointerState->IsPressed);
+   }
+
+   int AppMain::SelectCube(bool handIsClosed)
+   {
+      if (handIsClosed)
+      {
+         const float pickArea = _pickingTolerance + _cubeSize;
+         for (int i = 0; i < static_cast<int>(_cubePositions.size()); i++)
+         {
+            if (length(_handPosition - _cubePositions[i]) < pickArea)
+            {
+               return i;
+            }
+         }
+      }
+
+      return -1;
    }
 
    bool AppMain::GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, float3& handPosition)
@@ -50,11 +76,11 @@ namespace HoloHands
       rmcv::WrapHoloLensSensorFrameWithCvMat(frame, image);
 
       //Detect 2D hand position and depth from OpenCV Mat.
-      bool handFound = _handDetector->Process(image);
+      _handFound = _handDetector->Process(image);
       float depth = _handDetector->GetHandDepth();
       cv::Point position2D = _handDetector->GetHandPosition2D();
 
-      if (handFound == false || depth < 200 || depth > 1000)
+      if (_handFound == false || depth < 200 || depth > 1000)
       {
          //Invalid hand position detected.
          return false;
@@ -117,11 +143,14 @@ namespace HoloHands
 
       _latestSelectedCameraTimestamp = latestFrame->Timestamp;
 
-      float3 handPosition;
-      if (GetHandPositionFromFrame(latestFrame, handPosition))
+
+      if (GetHandPositionFromFrame(latestFrame, _handPosition))
       {
-         _cubeRenderer->SetPosition(handPosition);
-         _cubeRenderer->Update();
+         //Move cube to hand position.
+         if (_selectedCubeIndex != -1)
+         {
+            _cubePositions[_selectedCubeIndex] = _handPosition;
+         }
       }
 
       if (_showDebugInfo)
@@ -134,9 +163,13 @@ namespace HoloHands
 
          _depthTexture->CopyFrom(_handDetector->GetDebugImage());
 
-         _axisRenderer->SetPosition(handPosition);
-         _axisRenderer->SetTransform(float4x4::identity());
+         _axisRenderer->SetPosition(_handPosition);
          _axisRenderer->Update();
+
+         if (_selectedCubeIndex != -1)
+         {
+            //TODO: Visual feedback on selection.
+         }
       }
    }
 
@@ -147,11 +180,19 @@ namespace HoloHands
 
    void AppMain::OnRender()
    {
-      _cubeRenderer->Render();
+      for (int i = 0; i < _cubePositions.size(); i++)
+      {
+         _cubeRenderer->SetPosition(_cubePositions[i]);
+         _cubeRenderer->Update();
+         _cubeRenderer->Render();
+      }
 
       if (_showDebugInfo)
       {
-         _axisRenderer->Render();
+         if (_handFound)
+         {
+            _axisRenderer->Render();
+         }
 
          _quadRenderer->Render(*_depthTexture);
       }

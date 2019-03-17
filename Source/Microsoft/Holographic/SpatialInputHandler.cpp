@@ -44,7 +44,7 @@ namespace Holographic
                  std::placeholders::_1,
                  std::placeholders::_2));
 
-        _sourceLostEventToken =
+ /*       _sourceLostEventToken =
            _interactionManager->SourceLost +=
            ref new Windows::Foundation::TypedEventHandler<
            Windows::UI::Input::Spatial::SpatialInteractionManager^,
@@ -64,7 +64,7 @@ namespace Holographic
                  &SpatialInputHandler::OnSourcePressed,
                  this,
                  std::placeholders::_1,
-                 std::placeholders::_2));
+                 std::placeholders::_2));*/
     }
 
     SpatialInputHandler::~SpatialInputHandler()

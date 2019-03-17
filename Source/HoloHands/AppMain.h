@@ -45,12 +45,20 @@ namespace HoloHands
    private:
       bool GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, Windows::Foundation::Numerics::float3& handPosition);
       void StartHoloLensMediaFrameSourceGroup();
+      int SelectCube(bool handIsClosed);
 
       std::unique_ptr<CubeRenderer> _cubeRenderer;
       std::unique_ptr<AxisRenderer> _axisRenderer;
       std::unique_ptr<QuadRenderer> _quadRenderer;
       std::unique_ptr<HandDetector> _handDetector;
       std::unique_ptr<DepthTexture> _depthTexture;
+
+      Windows::Foundation::Numerics::float3 _handPosition;
+      std::vector<Windows::Foundation::Numerics::float3> _cubePositions;
+      float _cubeSize;
+      float _pickingTolerance;
+      int _selectedCubeIndex;
+      bool _handFound;
 
       HoloLensForCV::MediaFrameSourceGroupType _selectedHoloLensMediaFrameSourceGroupType;
       HoloLensForCV::MediaFrameSourceGroup^ _holoLensMediaFrameSourceGroup;
