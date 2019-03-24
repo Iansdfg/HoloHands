@@ -26,7 +26,7 @@ void ImageUtils::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
       pixelBufferData);
 }
 
-void Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)
+void ImageUtils::Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)
 {
    BitmapBuffer^ bitmapBuffer = outBitmap->LockBuffer(BitmapBufferAccessMode::ReadWrite);
 

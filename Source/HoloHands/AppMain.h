@@ -15,6 +15,7 @@
 #include "Rendering/AxisRenderer.h"
 #include "Rendering/CubeRenderer.h"
 #include "Rendering/QuadRenderer.h"
+#include "Rendering/CrosshairRenderer.h"
 #include "Rendering/DepthTexture.h"
 
 namespace HoloHands
@@ -50,6 +51,8 @@ namespace HoloHands
       std::unique_ptr<CubeRenderer> _cubeRenderer;
       std::unique_ptr<AxisRenderer> _axisRenderer;
       std::unique_ptr<QuadRenderer> _quadRenderer;
+      std::unique_ptr<CrosshairRenderer> _crosshairRenderer;
+
       std::unique_ptr<HandDetector> _handDetector;
       std::unique_ptr<DepthTexture> _depthTexture;
 

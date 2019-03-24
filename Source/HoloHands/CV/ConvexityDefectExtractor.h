@@ -33,7 +33,7 @@ namespace HoloHands
       const double MIN_DEFECT_DEPTH = 20; //Minimum depth for a valid defect.
       const double HEIGHT_BIAS = 1.0; //Higher == Defects towards to top of the image will be selected.
       const double DEPTH_BIAS = 0.5; //Higher == Deeper defects will be selected.
-      const double VERTICALITY_BIAS = 10.0; //Higher == Defects forward upwards will be selected.
+      const double VERTICALITY_BIAS = 10.0; //Higher == Defects facing upwards will be selected.
 
       cv::Size _imageSize;
       bool _showDebugInfo;

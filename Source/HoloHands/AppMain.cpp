@@ -2,6 +2,7 @@
 
 #include "AppMain.h"
 #include "Utils/MathsUtils.h"
+#include "Utils/IO.h"
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
@@ -37,10 +38,12 @@ namespace HoloHands
    {
       StartHoloLensMediaFrameSourceGroup();
 
-      _handDetector = std::make_unique<HoloHands::HandDetector>();
       _axisRenderer = std::make_unique<HoloHands::AxisRenderer>(_deviceResources);
       _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources, _cubeSize);
       _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
+      _crosshairRenderer = std::make_unique<CrosshairRenderer>(_deviceResources);
+
+      _handDetector = std::make_unique<HoloHands::HandDetector>();
       _depthTexture = std::make_unique<DepthTexture>(_deviceResources);
 
       _handDetector->ShowDebugInfo(_showDebugInfo);
@@ -48,9 +51,33 @@ namespace HoloHands
 
    void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
    {
-      _handDetector->SetIsClosed(pointerState->IsPressed);
+      bool isClosed = pointerState->IsPressed;
 
-      _selectedCubeIndex = SelectCube(pointerState->IsPressed);
+      _handDetector->SetIsClosed(isClosed);
+      _selectedCubeIndex = SelectCube(isClosed);
+
+      //Choose crosshair color.
+      float3 crosshairColor;
+      if (isClosed)
+      {
+         if (_selectedCubeIndex != -1)
+         {
+            //Selected cube.
+            crosshairColor = float3(0.3, 1, 0.3);
+         }
+         else
+         {
+            //Selected nothing.
+            crosshairColor = float3(0.5, 0.5, 0.5);
+         }
+      }
+      else
+      {
+         //Open hand.
+         crosshairColor = float3(1, 1, 1);
+      }
+
+      _crosshairRenderer->SetColor(crosshairColor);
    }
 
    int AppMain::SelectCube(bool handIsClosed)
@@ -90,9 +117,7 @@ namespace HoloHands
       float4x4 viewToFrame;
       invert(frame->CameraViewTransform, &viewToFrame);
 
-      float4x4 camToOrigin = viewToFrame * frame->FrameToOrigin;
-      Eigen::Vector3f camToOriginTranslation(camToOrigin.m41, camToOrigin.m42, camToOrigin.m43);
-      Eigen::Matrix3f camToOriginRotation = MathsUtils::Convert(camToOrigin);
+      Eigen::Matrix4f camToOrigin = MathsUtils::Convert(viewToFrame * frame->FrameToOrigin);
 
       //Convert from UV space to XY direction.
       Point uv(
@@ -103,17 +128,19 @@ namespace HoloHands
       frame->SensorStreamingCameraIntrinsics->MapImagePointToCameraUnitPlane(uv, &xy);
 
       //Add depth to direction.
-      Eigen::Vector3f depthDirection;
-      depthDirection[0] = -xy.X;
-      depthDirection[1] = -xy.Y;
-      depthDirection[2] = -1.0f;
+      Eigen::Vector3f direction;
+      direction[0] = -xy.X;
+      direction[1] = -xy.Y;
+      direction[2] = -1.0f;
 
-      depthDirection.normalize();
-      depthDirection *= depth * 0.001f;
+      const float depthScale = 0.001f;
+      direction.normalize();
+      direction *= depth * depthScale;
 
       //Transform into world space.
-      Eigen::Vector3f worldDirection = camToOriginRotation.transpose() * depthDirection;
-      Eigen::Vector3f worldPosition = camToOriginTranslation + worldDirection;
+      Eigen::Vector4f worldPosition =
+         camToOrigin.transpose() *
+         Eigen::Vector4f(direction.x(), direction.y(), direction.z(), 1);
 
       handPosition = float3(
          worldPosition.x(),
@@ -163,13 +190,9 @@ namespace HoloHands
 
          _depthTexture->CopyFrom(_handDetector->GetDebugImage());
 
-         _axisRenderer->SetPosition(_handPosition);
-         _axisRenderer->Update();
 
-         if (_selectedCubeIndex != -1)
-         {
-            //TODO: Visual feedback on selection.
-         }
+         _crosshairRenderer->SetPosition(_handPosition);
+         _crosshairRenderer->Update();
       }
    }
 
@@ -191,7 +214,7 @@ namespace HoloHands
       {
          if (_handFound)
          {
-            _axisRenderer->Render();
+            _crosshairRenderer->Render();
          }
 
          _quadRenderer->Render(*_depthTexture);
@@ -203,6 +226,8 @@ namespace HoloHands
       _cubeRenderer->ReleaseDeviceDependentResources();
       _axisRenderer->ReleaseDeviceDependentResources();
       _quadRenderer->ReleaseDeviceDependentResources();
+      _crosshairRenderer->ReleaseDeviceDependentResources();
+
       _depthTexture->ReleaseDeviceDependentResources();
 
       _holoLensMediaFrameSourceGroup = nullptr;
@@ -214,6 +239,8 @@ namespace HoloHands
       _cubeRenderer->CreateDeviceDependentResources();
       _axisRenderer->CreateDeviceDependentResources();
       _quadRenderer->CreateDeviceDependentResources();
+      _crosshairRenderer->CreateDeviceDependentResources();
+
       _depthTexture->CreateDeviceDependentResources();
 
       StartHoloLensMediaFrameSourceGroup();

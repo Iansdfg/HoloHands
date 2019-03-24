@@ -134,7 +134,7 @@ void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
    if (contour.size() > 0)
    {
       int furthestIndex = 0;
-      float furthestDistance = -1000000; //TODO: FLT_MIN does not work!?
+      float furthestDistance = -FLT_MAX;
       for (int i = 0; i < static_cast<int>(contour.size()); i++)
       {
          float distance =  _direction.dot(contour[i]);
@@ -245,19 +245,26 @@ float HandDetector::SampleDepthInDirection(
    float totalDepth = 0;
    int totalSampleCount = 0;
 
+   //Iterate through all the samples.
    for (int i = 0; i < DEPTH_SAMPLE_COUNT; i++)
    {
-      Point point = startPoint + (direction * DEPTH_SAMPLE_OFFSET) + (direction * DEPTH_SAMPLE_SPACING * i);
-      float sample = static_cast<float>(depthInput.at<unsigned short>(point));;
-      if (sample > DEPTH_SAMPLE_MIN && sample < DEPTH_SAMPLE_MAX)
+      Point samplePosition = startPoint +
+         (direction * DEPTH_SAMPLE_OFFSET) +
+         (direction * DEPTH_SAMPLE_SPACING * i);
+
+      float sampleDepth = static_cast<float>(depthInput.at<unsigned short>(samplePosition));
+
+      if (sampleDepth > DEPTH_SAMPLE_MIN && sampleDepth < DEPTH_SAMPLE_MAX)
       {
+         //Only use depths within a valid range.
          totalSampleCount++;
-         totalDepth += sample;
+         totalDepth += sampleDepth;
       }
    }
 
    if (totalSampleCount > 0)
    {
+      //Calculate the average of the samples.
       return totalDepth / totalSampleCount;
    }
 
@@ -276,10 +283,12 @@ float HandDetector::CalculateDepth(const cv::Mat& depthInput)
 {
    if (_isClosed)
    {
+      //Calculate depth at hand position.
       return SampleDepthInDirection(depthInput, _handPosition, -_direction);
    }
    else
    {
+      //Calculate average depth of both finger tips.
       float totalSamples =
          SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
          SampleDepthInDirection(depthInput, _finger2Position, -_direction);

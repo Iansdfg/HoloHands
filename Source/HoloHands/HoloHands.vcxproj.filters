@@ -46,9 +46,6 @@
     <ClCompile Include="Rendering\QuadRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="CV\HandDetector.cpp">
-      <Filter>CV</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\AxisRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
@@ -58,6 +55,10 @@
     <ClCompile Include="CV\ConvexityDefectExtractor.cpp">
       <Filter>CV</Filter>
     </ClCompile>
+    <ClCompile Include="CV\HandDetector.cpp">
+      <Filter>CV</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\CrosshairRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -81,9 +82,6 @@
     <ClInclude Include="Rendering\QuadRenderer.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="CV\HandDetector.h">
-      <Filter>CV</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\AxisRenderer.h">
       <Filter>Rendering</Filter>
     </ClInclude>
@@ -96,6 +94,10 @@
     <ClInclude Include="CV\ConvexityDefectExtractor.h">
       <Filter>CV</Filter>
     </ClInclude>
+    <ClInclude Include="CV\HandDetector.h">
+      <Filter>CV</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\CrosshairRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -111,6 +113,8 @@
     <FxCompile Include="Rendering\Shaders\Quad.vs.hlsl">
       <Filter>Rendering\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\BasicColor.ps.hlsl" />
+    <FxCompile Include="Rendering\Shaders\BasicColor.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\holohands_logo_24x24.png">

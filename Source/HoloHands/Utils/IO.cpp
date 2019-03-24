@@ -48,8 +48,8 @@ SoftwareBitmap^ ConvertFromGray16ToRGBA8(SoftwareBitmap^ bitmap)
    for (size_t i = 0; i < convBufferByteCount; i += 4)
    {
       uint16_t value = pixelBufferData[i / 4];
-      double max = 1000.0;
-      uint8_t scaled = static_cast<uint8_t>((static_cast<double>(value) / max) * 255.0);
+      double max = 65535.0;
+      uint8_t scaled = static_cast<uint8_t>((static_cast<double>(value) / max) * 255.0); //warning loosing precision.
 
       if (value > max)
       {
@@ -79,7 +79,7 @@ task<void> IO::SaveSoftwareBitmapAsync(SoftwareBitmap^ bitmap)
    {
       auto captureFolder = picturesLibrary->SaveFolder;
 
-      return create_task(captureFolder->CreateFileAsync("temp.jpg", CreationCollisionOption::ReplaceExisting))
+      return create_task(captureFolder->CreateFileAsync("holohands.jpg", CreationCollisionOption::GenerateUniqueName))
          .then([bitmap](StorageFile^ file)
       {
          return create_task(file->OpenAsync(FileAccessMode::ReadWrite));

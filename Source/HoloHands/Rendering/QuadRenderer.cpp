@@ -18,7 +18,7 @@ QuadRenderer::QuadRenderer(
    _deviceResources(deviceResources),
    _quadPosition({ 0.f, 0.f, 0.f }),
    _quadSize(Windows::Foundation::Size(1.4f, 1.f)),
-   _quadOffset({-0.6f, 0.3f, 4.0f})
+   _quadOffset({ -0.6f, 0.3f, 4.0f })
 {
    CreateDeviceDependentResources();
 }
@@ -159,24 +159,27 @@ void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
 
 void QuadRenderer::Update()
 {
+   const float3 quadNormal(0, 0, -1);
    float3 forwardDirection(_headForwardDirection.x, 0, _headForwardDirection.z);
-   float3 quadNormal(0, 0, -1);
 
    //Rotate quad to always face the view.
    XMVECTOR angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&forwardDirection), XMLoadFloat3(&quadNormal));
-   auto down = cross(forwardDirection, quadNormal);
+   auto downDirection = cross(forwardDirection, quadNormal);
 
-   if (dot(down, _headUpDirection) > 0)
+   if (dot(downDirection, _headUpDirection) > 0)
    {
-      //Invert angle when facing other direction.
+      //Invert angle when facing the other direction.
       float3 tempAngle;
       XMStoreFloat3(&tempAngle, angle);
       tempAngle *= -1;
       angle = XMLoadFloat3(&tempAngle);
    }
 
+   //Create transforms.
    const XMMATRIX rotation = XMMatrixRotationY(XMVectorGetY(angle));
    const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&_quadPosition));
+
+   //Store model transform.
    XMStoreFloat4x4(&_modelConstantBufferData.model, XMMatrixTranspose(rotation * translation));
 
    if (!_loadingComplete)

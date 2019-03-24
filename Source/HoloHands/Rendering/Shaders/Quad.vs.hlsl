@@ -31,8 +31,8 @@ VertexShaderOutput main(VertexShaderInput input)
     int idx = input.instId % 2;
 
     pos = mul(pos, model);
-
     pos = mul(pos, viewProjection[idx]);
+
     output.pos = (min16float4)pos;
 
     output.rtvId = idx;

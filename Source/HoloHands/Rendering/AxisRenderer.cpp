@@ -7,7 +7,7 @@ namespace HoloHands
    AxisRenderer::AxisRenderer(const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
       :
       _deviceResources(deviceResources),
-      _position({0,0,0}),
+      _position({ 0,0,0 }),
       _transform(Windows::Foundation::Numerics::float4x4::identity()),
       _vertexCount(0),
       _loadingComplete(false)

@@ -102,13 +102,13 @@ void DepthTexture::CreateDeviceDependentResources()
 {
    D3D11_TEXTURE2D_DESC const texDesc = CD3D11_TEXTURE2D_DESC(
       DXGI_FORMAT_R8_UNORM, //DXGI_FORMAT_R16_UNORM
-      _width,                    // Width of the video frames
-      _height,                   // Height of the video frames
-      1,                          // Number of textures in the array
-      1,                          // Number of miplevels in each texture
-      D3D11_BIND_SHADER_RESOURCE, // We read from this texture in the shader
-      D3D11_USAGE_DYNAMIC,        // Because we'll be copying from CPU memory
-      D3D11_CPU_ACCESS_WRITE      // We only need to write into the texture
+      _width,
+      _height,
+      1,
+      1,
+      D3D11_BIND_SHADER_RESOURCE,
+      D3D11_USAGE_DYNAMIC,
+      D3D11_CPU_ACCESS_WRITE
    );
 
    ASSERT_SUCCEEDED(
