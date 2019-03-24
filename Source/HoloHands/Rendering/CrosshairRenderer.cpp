@@ -15,7 +15,8 @@ namespace HoloHands
    CrosshairRenderer::CrosshairRenderer(const std::shared_ptr<Graphics::DeviceResources>& deviceResources)
       :
       _deviceResources(deviceResources),
-      _position({ 0,0,0 }),
+      _position({ 0, 0, 0 }),
+      _color({ 1, 1, 1 }),
       _vertexCount(0),
       _loadingComplete(false)
    {
@@ -24,8 +25,8 @@ namespace HoloHands
 
    void CrosshairRenderer::CreateDeviceDependentResources()
    {
-      task<std::vector<byte>> loadVSTask = Io::ReadDataAsync(L"ms-appx:///BasicColor.vs.cso");
-      task<std::vector<byte>> loadPSTask = Io::ReadDataAsync(L"ms-appx:///BasicColor.ps.cso");
+      task<std::vector<byte>> loadVSTask = Io::ReadDataAsync(L"ms-appx:///Basic.vs.cso");
+      task<std::vector<byte>> loadPSTask = Io::ReadDataAsync(L"ms-appx:///Basic.ps.cso");
 
       task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
       {

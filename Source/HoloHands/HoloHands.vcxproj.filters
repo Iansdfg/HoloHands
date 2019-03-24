@@ -113,8 +113,8 @@
     <FxCompile Include="Rendering\Shaders\Quad.vs.hlsl">
       <Filter>Rendering\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\BasicColor.ps.hlsl" />
-    <FxCompile Include="Rendering\Shaders\BasicColor.vs.hlsl" />
+    <FxCompile Include="Rendering\Shaders\Basic.vs.hlsl" />
+    <FxCompile Include="Rendering\Shaders\Basic.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\holohands_logo_24x24.png">
