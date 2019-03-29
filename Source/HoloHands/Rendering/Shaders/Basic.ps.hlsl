@@ -6,5 +6,5 @@ struct PixelShaderInput
 
 min16float4 main(PixelShaderInput input) : SV_TARGET
 {
-   return float4(input.color.rgb, 1);
+   return min16float4(input.color.rgb, 1);
 }

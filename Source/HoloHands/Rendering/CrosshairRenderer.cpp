@@ -28,6 +28,7 @@ namespace HoloHands
       task<std::vector<byte>> loadVSTask = Io::ReadDataAsync(L"ms-appx:///Basic.vs.cso");
       task<std::vector<byte>> loadPSTask = Io::ReadDataAsync(L"ms-appx:///Basic.ps.cso");
 
+      //Create vertex shader.
       task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
       {
          ASSERT_SUCCEEDED(
@@ -55,6 +56,7 @@ namespace HoloHands
          );
       });
 
+      //Create pixel shader.
       task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
       {
          ASSERT_SUCCEEDED(
@@ -77,6 +79,8 @@ namespace HoloHands
       });
 
       task<void> shaderTaskGroup = createPSTask && createVSTask;
+
+      //Create vertex data.
       task<void> createQuadTask = shaderTaskGroup.then([this]()
       {
          const float l = 0.03f;
@@ -187,6 +191,7 @@ namespace HoloHands
          0
       );
 
+      //Bind buffers.
       context->IASetInputLayout(_inputLayout.Get());
 
       const UINT stride = sizeof(VertexPosition);
@@ -207,6 +212,7 @@ namespace HoloHands
 
       context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
+      //Draw.
       context->DrawInstanced(_vertexCount, 2, 0, 0);
    }
 

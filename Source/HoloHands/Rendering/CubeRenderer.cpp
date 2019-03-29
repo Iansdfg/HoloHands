@@ -19,6 +19,7 @@ namespace HoloHands
 
    void CubeRenderer::Update()
    {
+      //Update transforms.
       const DirectX::XMMATRIX modelTranslation = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&_position));
 
       XMStoreFloat4x4(&_modelConstantBufferData.model, DirectX::XMMatrixTranspose(modelTranslation));
@@ -48,8 +49,10 @@ namespace HoloHands
 
       const auto context = _deviceResources->GetD3DDeviceContext();
 
+      //Bind shaders.
       _slateMaterial->Bind();
 
+      //Bind buffers.
       const UINT stride = sizeof(Rendering::VertexPositionColorTexture);
       const UINT offset = 0;
       context->IASetVertexBuffers(
@@ -74,6 +77,7 @@ namespace HoloHands
       ID3D11ShaderResourceView* shaderResourceViews[1] = { nullptr };
       context->PSSetShaderResources(0, 1, shaderResourceViews);
 
+      //Draw.
       context->DrawIndexedInstanced(_indexCount, 2, 0, 0, 0);
    }
 
@@ -98,89 +102,82 @@ namespace HoloHands
 
       _slateMaterial->CreateDeviceDependentResources();
 
-      {
-         const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(Rendering::SlateModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-         ASSERT_SUCCEEDED(
-            _deviceResources->GetD3DDevice()->CreateBuffer(
-               &constantBufferDesc,
-               nullptr,
-               &_modelConstantBuffer
-            )
-         );
-      }
+      const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(Rendering::SlateModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
+            &constantBufferDesc,
+            nullptr,
+            &_modelConstantBuffer
+         )
+      );
 
-      {
-         static const std::array<Rendering::VertexPositionColorTexture, 8> cubeVertices =
-         { {
-             { { -_size, -_size, -_size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
-             { { -_size, -_size,  _size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
-             { { -_size,  _size, -_size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { -_size,  _size,  _size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-             { {  _size, -_size, -_size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-             { {  _size, -_size,  _size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-             { {  _size,  _size, -_size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
-             { {  _size,  _size,  _size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
-         } };
+      //Create vertex data.
+      static const std::array<Rendering::VertexPositionColorTexture, 8> cubeVertices =
+      { {
+          { { -_size, -_size, -_size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
+          { { -_size, -_size,  _size }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
+          { { -_size,  _size, -_size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { -_size,  _size,  _size }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+          { {  _size, -_size, -_size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+          { {  _size, -_size,  _size }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+          { {  _size,  _size, -_size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
+          { {  _size,  _size,  _size }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
+      } };
 
-         D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+      D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
 
-         vertexBufferData.pSysMem = cubeVertices.data();
-         vertexBufferData.SysMemPitch = 0;
-         vertexBufferData.SysMemSlicePitch = 0;
+      vertexBufferData.pSysMem = cubeVertices.data();
+      vertexBufferData.SysMemPitch = 0;
+      vertexBufferData.SysMemSlicePitch = 0;
 
-         const CD3D11_BUFFER_DESC vertexBufferDesc(
-            static_cast<uint32_t>(sizeof(Rendering::VertexPositionColorTexture) * cubeVertices.size()),
-            D3D11_BIND_VERTEX_BUFFER);
+      const CD3D11_BUFFER_DESC vertexBufferDesc(
+         static_cast<uint32_t>(sizeof(Rendering::VertexPositionColorTexture) * cubeVertices.size()),
+         D3D11_BIND_VERTEX_BUFFER);
 
-         ASSERT_SUCCEEDED(
-            _deviceResources->GetD3DDevice()->CreateBuffer(
-               &vertexBufferDesc,
-               &vertexBufferData,
-               &_vertexBuffer
-            )
-         );
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
+            &vertexBufferDesc,
+            &vertexBufferData,
+            &_vertexBuffer
+         )
+      );
 
-         constexpr std::array<unsigned short, 36> cubeIndices =
-         { {
-            2,1,0, // -x
-            2,3,1,
+      //Create indices data.
+      constexpr std::array<unsigned short, 36> cubeIndices =
+      { {
+         2,1,0,
+         2,3,1,
+         6,4,5,
+         6,5,7,
+         0,1,5,
+         0,5,4,
+         2,6,7,
+         2,7,3,
+         0,4,6,
+         0,6,2,
+         1,3,7,
+         1,7,5,
+      } };
 
-            6,4,5, // +x
-            6,5,7,
+      _indexCount = static_cast<uint32_t>(cubeIndices.size());
 
-            0,1,5, // -y
-            0,5,4,
+      D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
 
-            2,6,7, // +y
-            2,7,3,
+      indexBufferData.pSysMem = cubeIndices.data();
+      indexBufferData.SysMemPitch = 0;
+      indexBufferData.SysMemSlicePitch = 0;
 
-            0,4,6, // -z
-            0,6,2,
+      CD3D11_BUFFER_DESC indexBufferDesc(
+         static_cast<uint32_t>(sizeof(unsigned short) * cubeIndices.size()),
+         D3D11_BIND_INDEX_BUFFER);
 
-            1,3,7, // +z
-            1,7,5,
-         } };
-
-         _indexCount = static_cast<uint32_t>(cubeIndices.size());
-
-         D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-
-         indexBufferData.pSysMem = cubeIndices.data();
-         indexBufferData.SysMemPitch = 0;
-         indexBufferData.SysMemSlicePitch = 0;
-
-         CD3D11_BUFFER_DESC indexBufferDesc(
-            static_cast<uint32_t>(sizeof(unsigned short) * cubeIndices.size()),
-            D3D11_BIND_INDEX_BUFFER);
-
-         ASSERT_SUCCEEDED(
-            _deviceResources->GetD3DDevice()->CreateBuffer(
-               &indexBufferDesc,
-               &indexBufferData,
-               &_indexBuffer
-            )
-         );
-      }
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
+            &indexBufferDesc,
+            &indexBufferData,
+            &_indexBuffer
+         )
+      );
 
       _loadingComplete = true;
    }

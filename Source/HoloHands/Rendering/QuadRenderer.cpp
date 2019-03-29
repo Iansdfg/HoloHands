@@ -28,6 +28,7 @@ void QuadRenderer::CreateDeviceDependentResources()
    task<std::vector<byte>> loadVSTask = Io::ReadDataAsync(L"ms-appx:///Quad.vs.cso");
    task<std::vector<byte>> loadPSTask = Io::ReadDataAsync(L"ms-appx:///Quad.ps.cso");
 
+   //Create vertex shader.
    task<void> createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
    {
       ASSERT_SUCCEEDED(
@@ -56,6 +57,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       );
    });
 
+   //Create pixel shader.
    task<void> createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData)
    {
       ASSERT_SUCCEEDED(
@@ -77,6 +79,7 @@ void QuadRenderer::CreateDeviceDependentResources()
       );
    });
 
+   //Create texture.
    task<void> createTexture = concurrency::create_task([this]
    {
       D3D11_SAMPLER_DESC samplerDesc = {};
@@ -94,6 +97,8 @@ void QuadRenderer::CreateDeviceDependentResources()
    });
 
    task<void> shaderTaskGroup = createPSTask && createVSTask && createTexture;
+
+   //Create vertex data.
    task<void> createQuadTask = shaderTaskGroup.then([this]()
    {
       float aspect = _quadSize.Width / _quadSize.Height;
@@ -208,6 +213,7 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
 
    const auto context = _deviceResources->GetD3DDeviceContext();
 
+   //Bind buffers.
    const UINT stride = sizeof(VertexPositionTextureCoords);
    const UINT offset = 0;
    context->IASetVertexBuffers(
@@ -221,6 +227,7 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
    context->IASetInputLayout(_inputLayout.Get());
 
+   //Bind shaders.
    context->VSSetShader(
       _vertexShader.Get(),
       nullptr,
@@ -247,52 +254,6 @@ void QuadRenderer::Render(const DepthTexture& depthTexture)
       context->PSSetShaderResources(0, 1, &texture);
    }
 
+   //Draw.
    context->DrawInstanced(_vertexCount, 2, 0, 0);
-}
-
-std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uint32_t& height)
-{
-   ComPtr<IWICImagingFactory> wicFactory;
-   ASSERT_SUCCEEDED(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
-
-   ComPtr<IWICBitmapDecoder> decoder;
-   ASSERT_SUCCEEDED(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
-
-   ComPtr<IWICBitmapFrameDecode> frame;
-   ASSERT_SUCCEEDED(decoder->GetFrame(0, frame.GetAddressOf()));
-
-   ASSERT_SUCCEEDED(frame->GetSize(&width, &height));
-
-   WICPixelFormatGUID pixelFormat;
-   ASSERT_SUCCEEDED(frame->GetPixelFormat(&pixelFormat));
-
-   uint32_t rowPitch = width * sizeof(uint32_t);
-   uint32_t imageSize = rowPitch * height;
-
-   std::vector<uint8_t> image;
-   image.resize(size_t(imageSize));
-
-   if (memcmp(&pixelFormat, &GUID_WICPixelFormat32bppBGRA, sizeof(GUID)) == 0)
-   {
-      ASSERT_SUCCEEDED(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
-   }
-   else
-   {
-      ComPtr<IWICFormatConverter> formatConverter;
-      ASSERT_SUCCEEDED(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
-
-      BOOL canConvert = FALSE;
-      ASSERT_SUCCEEDED(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
-      if (!canConvert)
-      {
-         throw std::exception("CanConvert");
-      }
-
-      ASSERT_SUCCEEDED(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
-         WICBitmapDitherTypeErrorDiffusion, nullptr, 0, WICBitmapPaletteTypeMedianCut));
-
-      ASSERT_SUCCEEDED(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
-   }
-
-   return image;
 }

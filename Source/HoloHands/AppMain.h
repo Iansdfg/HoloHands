@@ -1,14 +1,3 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// This code is licensed under the MIT License (MIT).
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
-
 #pragma once
 
 #include "CV/HandDetector.h"
@@ -44,9 +33,17 @@ namespace HoloHands
       virtual void OnRender() override;
 
    private:
-      bool GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, Windows::Foundation::Numerics::float3& handPosition);
-      void StartHoloLensMediaFrameSourceGroup();
+      // Get a 3D hand position in world space from a given frame.
+      // Returns false if hand is not found and the position as an out parameter.
+      bool GetHandPositionFromFrame(
+         HoloLensForCV::SensorFrame^ frame,
+         Windows::Foundation::Numerics::float3& handPosition);
+
+      // Select a cube at the current hand position.
+      // Returns -1 if no cube is found at the position.
       int SelectCube(bool handIsClosed);
+
+      void StartHoloLensMediaFrameSourceGroup();
 
       std::unique_ptr<CubeRenderer> _cubeRenderer;
       std::unique_ptr<AxisRenderer> _axisRenderer;
@@ -62,15 +59,12 @@ namespace HoloHands
       float _pickingTolerance;
       int _selectedCubeIndex;
       bool _handFound;
+      bool _showDebugInfo;
 
       HoloLensForCV::MediaFrameSourceGroupType _selectedHoloLensMediaFrameSourceGroupType;
       HoloLensForCV::MediaFrameSourceGroup^ _holoLensMediaFrameSourceGroup;
       bool _holoLensMediaFrameSourceGroupStarted;
-
       HoloLensForCV::SensorFrameStreamer^ _sensorFrameStreamer;
-
       Windows::Foundation::DateTime _latestSelectedCameraTimestamp;
-
-      bool _showDebugInfo;
    };
 }

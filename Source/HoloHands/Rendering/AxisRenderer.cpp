@@ -96,57 +96,52 @@ namespace HoloHands
 
       _slateMaterial->CreateDeviceDependentResources();
 
-      {
-         const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(Rendering::SlateModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-         ASSERT_SUCCEEDED(
-            _deviceResources->GetD3DDevice()->CreateBuffer(
-               &constantBufferDesc,
-               nullptr,
-               &_modelConstantBuffer
-            )
-         );
-      }
+      const CD3D11_BUFFER_DESC constantBufferDesc(sizeof(Rendering::SlateModelConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
+            &constantBufferDesc,
+            nullptr,
+            &_modelConstantBuffer
+         )
+      );
 
+      static const std::array<Rendering::VertexPositionColorTexture, 12> cubeVertices =
       {
-         static const std::array<Rendering::VertexPositionColorTexture, 12> cubeVertices =
          {
-            {
-             { {-1, 0, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 0.4f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 1, 0, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0,-1, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 0.0f, 0.4f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 1, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0,-1 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 0.0f, 0.0f, 0.4f }, { 0.0f, 0.0f } },
-             { { 0, 0, 0 }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-             { { 0, 0, 1 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
-         }
-         };
-
-         _vertexCount = cubeVertices.size();
-
-         D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-
-         vertexBufferData.pSysMem = cubeVertices.data();
-         vertexBufferData.SysMemPitch = 0;
-         vertexBufferData.SysMemSlicePitch = 0;
-
-         const CD3D11_BUFFER_DESC vertexBufferDesc(
-            static_cast<uint32_t>(sizeof(Rendering::VertexPositionColorTexture) * cubeVertices.size()),
-            D3D11_BIND_VERTEX_BUFFER);
-
-         ASSERT_SUCCEEDED(
-            _deviceResources->GetD3DDevice()->CreateBuffer(
-               &vertexBufferDesc,
-               &vertexBufferData,
-               &_vertexBuffer
-            )
-         );
+          { {-1, 0, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 0.4f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 1, 0, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0,-1, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 0.0f, 0.4f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 1, 0 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0,-1 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 0.0f, 0.0f, 0.4f }, { 0.0f, 0.0f } },
+          { { 0, 0, 0 }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+          { { 0, 0, 1 }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
       }
+      };
 
+      _vertexCount = cubeVertices.size();
+
+      D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+
+      vertexBufferData.pSysMem = cubeVertices.data();
+      vertexBufferData.SysMemPitch = 0;
+      vertexBufferData.SysMemSlicePitch = 0;
+
+      const CD3D11_BUFFER_DESC vertexBufferDesc(
+         static_cast<uint32_t>(sizeof(Rendering::VertexPositionColorTexture) * cubeVertices.size()),
+         D3D11_BIND_VERTEX_BUFFER);
+
+      ASSERT_SUCCEEDED(
+         _deviceResources->GetD3DDevice()->CreateBuffer(
+            &vertexBufferDesc,
+            &vertexBufferData,
+            &_vertexBuffer
+         )
+      );
 
       _loadingComplete = true;
    }

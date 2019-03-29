@@ -30,12 +30,13 @@ VertexShaderOutput main(VertexShaderInput input)
 
     int index = input.instanceId % 2;
 
+    //Apply transforms.
     position = mul(position, model);
     position = mul(position, viewProjection[index]);
 
     output.position = (min16float4)position;
     output.rtvId = index;
-    output.color = color;
+    output.color = (min16float4)color;
 
     return output;
 }

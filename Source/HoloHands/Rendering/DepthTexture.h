@@ -8,7 +8,11 @@ namespace HoloHands
       DepthTexture(
          const std::shared_ptr<Graphics::DeviceResources>& deviceResources);
 
+      //Copy a SoftwareBitmap into a DirectX texture.
+      //Only supports Gray 16 bit images.
       void CopyFrom(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap);
+
+      //Copy an OpenCV Mat bitmap into a DirectX texture.
       void CopyFrom(cv::Mat& matrix);
 
       void CreateDeviceDependentResources();

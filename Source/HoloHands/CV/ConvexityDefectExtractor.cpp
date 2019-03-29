@@ -2,6 +2,8 @@
 
 #include "ConvexityDefectExtractor.h"
 
+#include "Defect.h"
+
 using namespace HoloHands;
 using namespace cv;
 
@@ -29,11 +31,14 @@ bool ConvexityDefectExtractor::FindDefect(
    Defect defectCandidate;
    double highestScore = 0;
 
+   //Select the defect with the highest score.
    for (size_t d = 1; d < defects.size(); d++) //Ignore the first defect.
    {
       Defect defect = GetDefectFromContour(contour, defects[d]);
       if (defect.Depth > MIN_DEFECT_DEPTH)
       {
+         //Discard smaller contours.
+
          double score = CalculateDefectScore(defect);
 
          if (score > highestScore)

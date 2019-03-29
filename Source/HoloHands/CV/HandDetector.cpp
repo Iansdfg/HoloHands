@@ -2,6 +2,8 @@
 
 #include "HandDetector.h"
 
+#include "Defect.h"
+
 using namespace HoloHands;
 using namespace Windows::Graphics::Imaging;
 using namespace cv;
@@ -20,10 +22,12 @@ bool HandDetector::Process(cv::Mat& input)
    Mat scaled = input / MAX_IMAGE_DEPTH * 255.0; //Scale to within 8bit range.
    scaled.convertTo(scaled, CV_8UC1); //Make correct format for OpenCV.
 
+   //Create background mask.
    Mat mask;
    threshold(scaled, mask, MAX_DETECTION_THRESHOLD, 255, CV_THRESH_BINARY);
    mask = 255 - mask; //Invert.
 
+   //Discard background information.
    Mat hands;
    scaled.copyTo(hands, mask);
 
@@ -96,7 +100,6 @@ bool HandDetector::Process(cv::Mat& input)
    return true;
 }
 
-//Selects the mid point between the thumb and finger.
 void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
 {
    Point2f position;
@@ -127,8 +130,6 @@ void HandDetector::ProcessOpenHand(const std::vector<Point>& contour)
    }
 }
 
-//Selects the furthest contour point in the hand's direction.
-//The hand direction is defined by the most recent open pose.
 void HandDetector::ProcessClosedHand(const std::vector<Point>& contour)
 {
    if (contour.size() > 0)
@@ -203,6 +204,7 @@ std::vector<Point> HandDetector::FindBestContour(
 
    if (_showDebugInfo)
    {
+      //Draw debug info.
       if (contourCandidateIndex != -1)
       {
          for (size_t i = 0; i < filteredContours.size(); i++)

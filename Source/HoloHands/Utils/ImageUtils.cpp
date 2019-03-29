@@ -9,7 +9,8 @@ using namespace Windows::Graphics::Imaging;
 
 void ImageUtils::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
 {
-   BitmapBuffer^ bitmapBuffer = bitmap->LockBuffer(BitmapBufferAccessMode::Read);
+   BitmapBuffer^ bitmapBuffer =
+      bitmap->LockBuffer(BitmapBufferAccessMode::Read);
 
    uint32_t pixelBufferDataLength = 0;
 
@@ -28,7 +29,8 @@ void ImageUtils::Convert(SoftwareBitmap^ bitmap, cv::Mat& outMatrix)
 
 void ImageUtils::Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)
 {
-   BitmapBuffer^ bitmapBuffer = outBitmap->LockBuffer(BitmapBufferAccessMode::ReadWrite);
+   BitmapBuffer^ bitmapBuffer =
+      outBitmap->LockBuffer(BitmapBufferAccessMode::ReadWrite);
 
    uint32_t byteCount = 0;
    uint16_t* pixelBufferData = Io::GetTypedPointerToMemoryBuffer<uint16_t>(
@@ -37,9 +39,9 @@ void ImageUtils::Convert(const cv::Mat& matrix, SoftwareBitmap^ outBitmap)
 
    int pixelCount = byteCount / 2;
 
-   for (size_t i = 0; i < pixelCount; i++)
+   for (int i = 0; i < pixelCount; i++)
    {
       //Normalize uint8 to uint16 range.
-      pixelBufferData[i] = (matrix.data[i] / 256.0) * 65536.0;
+      pixelBufferData[i] = (matrix.data[i] / UCHAR_MAX) * USHORT_MAX;
    }
 }

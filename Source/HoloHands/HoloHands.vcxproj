@@ -106,8 +106,8 @@
     <ClInclude Include="AppMain.h" />
     <ClInclude Include="AppView.h" />
     <ClInclude Include="CV\ConvexityDefectExtractor.h" />
+    <ClInclude Include="CV\Defect.h" />
     <ClInclude Include="CV\HandDetector.h" />
-    <ClInclude Include="Native\Sensor.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Rendering\AxisRenderer.h" />
     <ClInclude Include="Rendering\CrosshairRenderer.h" />
@@ -116,7 +116,7 @@
     <ClInclude Include="Rendering\QuadRenderer.h" />
     <ClInclude Include="Rendering\Shaders\ShaderStructs.h" />
     <ClInclude Include="Utils\ImageUtils.h" />
-    <ClInclude Include="Utils\IO.h" />
+    <ClInclude Include="Utils\IOUtils.h" />
     <ClInclude Include="Utils\MathsUtils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -124,7 +124,6 @@
     <ClCompile Include="AppView.cpp" />
     <ClCompile Include="CV\ConvexityDefectExtractor.cpp" />
     <ClCompile Include="CV\HandDetector.cpp" />
-    <ClCompile Include="Native\Sensor.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -134,7 +133,7 @@
     <ClCompile Include="Rendering\DepthTexture.cpp" />
     <ClCompile Include="Rendering\QuadRenderer.cpp" />
     <ClCompile Include="Utils\ImageUtils.cpp" />
-    <ClCompile Include="Utils\IO.cpp" />
+    <ClCompile Include="Utils\IOUtils.cpp" />
     <ClCompile Include="Utils\MathsUtils.cpp" />
   </ItemGroup>
   <ItemGroup>

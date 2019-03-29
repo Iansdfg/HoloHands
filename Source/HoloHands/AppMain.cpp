@@ -2,7 +2,7 @@
 
 #include "AppMain.h"
 #include "Utils/MathsUtils.h"
-#include "Utils/IO.h"
+#include "Utils/IOUtils.h"
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
@@ -28,9 +28,10 @@ namespace HoloHands
       _pickingTolerance(0.03f),
       _selectedCubeIndex(-1)
    {
-      _cubePositions.push_back({ 0.5, 0, 0 });
-      _cubePositions.push_back({ 0, 0, 0.5 });
-      _cubePositions.push_back({ -0.5, 0, 0 });
+      //Add cubes to scene.
+      _cubePositions.push_back({ 0.5f, 0.0f, 0.0f });
+      _cubePositions.push_back({ 0.0f, 0.0f, 0.5f });
+      _cubePositions.push_back({-0.5f, 0.0f, 0.0f });
    }
 
    void AppMain::OnHolographicSpaceChanged(
@@ -38,18 +39,19 @@ namespace HoloHands
    {
       StartHoloLensMediaFrameSourceGroup();
 
+      //Create renderers.
       _axisRenderer = std::make_unique<HoloHands::AxisRenderer>(_deviceResources);
       _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources, _cubeSize);
       _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
       _crosshairRenderer = std::make_unique<CrosshairRenderer>(_deviceResources);
 
+      //Create hand detector.
       _handDetector = std::make_unique<HoloHands::HandDetector>();
       _depthTexture = std::make_unique<DepthTexture>(_deviceResources);
-
       _handDetector->ShowDebugInfo(_showDebugInfo);
    }
 
-   void AppMain::OnSpatialInput(Windows::UI::Input::Spatial::SpatialInteractionSourceState^ pointerState)
+   void AppMain::OnSpatialInput(SpatialInteractionSourceState^ pointerState)
    {
       bool isClosed = pointerState->IsPressed;
 
@@ -63,32 +65,134 @@ namespace HoloHands
          if (_selectedCubeIndex != -1)
          {
             //Selected cube.
-            crosshairColor = float3(0.3, 1, 0.3);
+            crosshairColor = float3(0.3f, 1.f, 0.3f);
          }
          else
          {
             //Selected nothing.
-            crosshairColor = float3(0.5, 0.5, 0.5);
+            crosshairColor = float3(0.5f, 0.5f, 0.5f);
          }
       }
       else
       {
          //Open hand.
-         crosshairColor = float3(1, 1, 1);
+         crosshairColor = float3(1.f, 1.f, 1.f);
       }
 
       _crosshairRenderer->SetColor(crosshairColor);
    }
 
+   void AppMain::OnUpdate(
+      Windows::Graphics::Holographic::HolographicFrame^ holographicFrame,
+      const Graphics::StepTimer& stepTimer)
+   {
+      if (!_holoLensMediaFrameSourceGroupStarted)
+      {
+         return;
+      }
+
+      //Get image from depth sensor.
+      HoloLensForCV::SensorFrame^ latestFrame =
+         _holoLensMediaFrameSourceGroup->GetLatestSensorFrame(HoloLensForCV::SensorType::ShortThrowToFDepth);
+
+      if (latestFrame == nullptr ||
+         _latestSelectedCameraTimestamp.UniversalTime == latestFrame->Timestamp.UniversalTime)
+      {
+         return;
+      }
+
+      _latestSelectedCameraTimestamp = latestFrame->Timestamp;
+
+
+      if (GetHandPositionFromFrame(latestFrame, _handPosition))
+      {
+         //Move cube to hand position.
+         if (_selectedCubeIndex != -1)
+         {
+            _cubePositions[_selectedCubeIndex] = _handPosition;
+         }
+      }
+
+      if (_showDebugInfo)
+      {
+         //Render debug information.
+         auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
+         HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
+         SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(cs, prediction->Timestamp);
+         _quadRenderer->UpdatePosition(pose);
+         _quadRenderer->Update();
+
+         _depthTexture->CopyFrom(_handDetector->GetDebugImage());
+         _crosshairRenderer->SetPosition(_handPosition);
+         _crosshairRenderer->Update();
+      }
+   }
+
+   void AppMain::OnPreRender()
+   {
+      //Do nothing.
+   }
+
+   void AppMain::OnRender()
+   {
+      //Render cubes.
+      for(auto& position : _cubePositions)
+      {
+         _cubeRenderer->SetPosition(position);
+         _cubeRenderer->Update();
+         _cubeRenderer->Render();
+      }
+
+      if (_showDebugInfo)
+      {
+         //Render debug info.
+         if (_handFound)
+         {
+            _crosshairRenderer->Render();
+         }
+
+         _quadRenderer->Render(*_depthTexture);
+      }
+   }
+
+   void AppMain::OnDeviceLost()
+   {
+      _cubeRenderer->ReleaseDeviceDependentResources();
+      _axisRenderer->ReleaseDeviceDependentResources();
+      _quadRenderer->ReleaseDeviceDependentResources();
+      _crosshairRenderer->ReleaseDeviceDependentResources();
+
+      _depthTexture->ReleaseDeviceDependentResources();
+
+      _holoLensMediaFrameSourceGroup = nullptr;
+      _holoLensMediaFrameSourceGroupStarted = false;
+   }
+
+   void AppMain::OnDeviceRestored()
+   {
+      _cubeRenderer->CreateDeviceDependentResources();
+      _axisRenderer->CreateDeviceDependentResources();
+      _quadRenderer->CreateDeviceDependentResources();
+      _crosshairRenderer->CreateDeviceDependentResources();
+
+      _depthTexture->CreateDeviceDependentResources();
+
+      StartHoloLensMediaFrameSourceGroup();
+   }
+
+
    int AppMain::SelectCube(bool handIsClosed)
    {
       if (handIsClosed)
       {
+         //Only select cubes on closed pose.
+
          const float pickArea = _pickingTolerance + _cubeSize;
          for (int i = 0; i < static_cast<int>(_cubePositions.size()); i++)
          {
             if (length(_handPosition - _cubePositions[i]) < pickArea)
             {
+               //Cube position is near the hand position.
                return i;
             }
          }
@@ -150,102 +254,6 @@ namespace HoloHands
       return true;
    }
 
-   void AppMain::OnUpdate(
-      Windows::Graphics::Holographic::HolographicFrame^ holographicFrame,
-      const Graphics::StepTimer& stepTimer)
-   {
-      if (!_holoLensMediaFrameSourceGroupStarted)
-      {
-         return;
-      }
-
-      HoloLensForCV::SensorFrame^ latestFrame =
-         _holoLensMediaFrameSourceGroup->GetLatestSensorFrame(HoloLensForCV::SensorType::ShortThrowToFDepth);
-
-      if (latestFrame == nullptr ||
-         _latestSelectedCameraTimestamp.UniversalTime == latestFrame->Timestamp.UniversalTime)
-      {
-         return;
-      }
-
-      _latestSelectedCameraTimestamp = latestFrame->Timestamp;
-
-
-      if (GetHandPositionFromFrame(latestFrame, _handPosition))
-      {
-         //Move cube to hand position.
-         if (_selectedCubeIndex != -1)
-         {
-            _cubePositions[_selectedCubeIndex] = _handPosition;
-         }
-      }
-
-      if (_showDebugInfo)
-      {
-         auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
-         HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
-         SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(cs, prediction->Timestamp);
-         _quadRenderer->UpdatePosition(pose);
-         _quadRenderer->Update();
-
-         _depthTexture->CopyFrom(_handDetector->GetDebugImage());
-
-
-         _crosshairRenderer->SetPosition(_handPosition);
-         _crosshairRenderer->Update();
-      }
-   }
-
-   void AppMain::OnPreRender()
-   {
-      //Do nothing.
-   }
-
-   void AppMain::OnRender()
-   {
-      for (int i = 0; i < _cubePositions.size(); i++)
-      {
-         _cubeRenderer->SetPosition(_cubePositions[i]);
-         _cubeRenderer->Update();
-         _cubeRenderer->Render();
-      }
-
-      if (_showDebugInfo)
-      {
-         if (_handFound)
-         {
-            _crosshairRenderer->Render();
-         }
-
-         _quadRenderer->Render(*_depthTexture);
-      }
-   }
-
-   void AppMain::OnDeviceLost()
-   {
-      _cubeRenderer->ReleaseDeviceDependentResources();
-      _axisRenderer->ReleaseDeviceDependentResources();
-      _quadRenderer->ReleaseDeviceDependentResources();
-      _crosshairRenderer->ReleaseDeviceDependentResources();
-
-      _depthTexture->ReleaseDeviceDependentResources();
-
-      _holoLensMediaFrameSourceGroup = nullptr;
-      _holoLensMediaFrameSourceGroupStarted = false;
-   }
-
-   void AppMain::OnDeviceRestored()
-   {
-      _cubeRenderer->CreateDeviceDependentResources();
-      _axisRenderer->CreateDeviceDependentResources();
-      _quadRenderer->CreateDeviceDependentResources();
-      _crosshairRenderer->CreateDeviceDependentResources();
-
-      _depthTexture->CreateDeviceDependentResources();
-
-      StartHoloLensMediaFrameSourceGroup();
-   }
-
    void AppMain::StartHoloLensMediaFrameSourceGroup()
    {
       _sensorFrameStreamer =
@@ -257,10 +265,10 @@ namespace HoloHands
             _spatialPerception,
             _sensorFrameStreamer);
 
+      //Enable depth sensor.
       _holoLensMediaFrameSourceGroup->Enable(HoloLensForCV::SensorType::ShortThrowToFDepth);
 
-      concurrency::create_task(_holoLensMediaFrameSourceGroup->StartAsync()).then(
-         [&]()
+      concurrency::create_task(_holoLensMediaFrameSourceGroup->StartAsync()).then([&]()
       {
          _holoLensMediaFrameSourceGroupStarted = true;
       });

@@ -8,12 +8,13 @@ namespace HoloHands
    {
    public:
       HandDetector();
+
+      // Calculate a 2D position from a given image using OpenCV.
       bool Process(cv::Mat& input);
 
       cv::Point2f GetHandPosition2D() { return _handPosition; }
       float GetHandDepth() { return _handDepth; }
       void SetIsClosed(bool isClosed) { _isClosed = isClosed; }
-
       void ShowDebugInfo(bool enabled);
       cv::Mat& GetDebugImage() { return _debugImage; }
 
@@ -43,32 +44,44 @@ namespace HoloHands
       bool _showDebugInfo;
       cv::Size _imageSize;
 
+      // Selects the mid point between the thumb and finger.
       void ProcessOpenHand(const std::vector<cv::Point>& contour);
+
+      // Selects the furthest contour point in the hand's direction.
+      // The hand direction is defined by the most recent open pose.
       void ProcessClosedHand(const std::vector<cv::Point>& contour);
 
+      // Calculates a vector of bounds for a given vector of contours.
       static void CalculateBounds(
          const std::vector<std::vector<cv::Point>>& contours,
          std::vector<cv::Rect>& bounds);
 
+      // Returns true when the two rectangles intersect.
       static bool Intersects(
          const cv::Rect& a,
          const cv::Rect& b);
 
+      // Find the most suitable contours.
       std::vector<cv::Point> FindBestContour(
-         const std::vector<std::vector<cv::Point>>& rawCountours,
-         const std::vector<cv::Rect>& rawBounds);
+         const std::vector<std::vector<cv::Point>>& countours,
+         const std::vector<cv::Rect>& bounds);
 
+      // Calculates a score for a given contour.
+      // The higher to score, to more suitable the contour.
       float CalculateContourScore(
          const std::vector<cv::Point>& countour,
          const cv::Rect& bound);
 
+      // Calculate a depth at the current hand postion.
       float HandDetector::CalculateDepth(const cv::Mat& depthInput);
 
+      // Samples depth value at multiples points in a given direction.
       float SampleDepthInDirection(
          const cv::Mat& depthInput,
          const cv::Point2f& startPoint,
          const cv::Point2f& direction);
 
+      // Apply temporal smoothing the 2D position values.
       cv::Point2f HandDetector::ApplySmoothing(
          const cv::Point2f& position);
    };

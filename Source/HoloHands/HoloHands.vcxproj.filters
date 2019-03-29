@@ -26,14 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Native\Sensor.cpp">
-      <Filter>Native</Filter>
-    </ClCompile>
     <ClCompile Include="AppMain.cpp" />
     <ClCompile Include="AppView.cpp" />
-    <ClCompile Include="Utils\IO.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\ImageUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -59,17 +53,14 @@
       <Filter>CV</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\CrosshairRenderer.cpp" />
+    <ClCompile Include="Utils\IOUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Native\Sensor.h">
-      <Filter>Native</Filter>
-    </ClInclude>
     <ClInclude Include="AppMain.h" />
     <ClInclude Include="AppView.h" />
-    <ClInclude Include="Utils\IO.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\ImageUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -98,6 +89,10 @@
       <Filter>CV</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\CrosshairRenderer.h" />
+    <ClInclude Include="Utils\IOUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="CV\Defect.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

@@ -11,33 +11,32 @@ cbuffer ViewProjectionConstantBuffer : register(b1)
 
 struct VertexShaderInput
 {
-    min16float3 pos : POSITION;
-    min16float2 texCoord : TEXCOORD1;
-    uint instId : SV_InstanceID;
+    min16float3 position : POSITION;
+    min16float2 textureCoords : TEXCOORD1;
+    uint instanceId : SV_InstanceID;
 };
 
 struct VertexShaderOutput
 {
-    min16float4 pos : SV_POSITION;
-    min16float2 texCoord : TEXCOORD1;
+    min16float4 position : SV_POSITION;
+    min16float2 textureCoords : TEXCOORD1;
     uint rtvId : SV_RenderTargetArrayIndex;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    float4 pos = float4(input.pos, 1.0f);
+    float4 position = float4(input.position, 1.0f);
 
-    int idx = input.instId % 2;
+    int index = input.instanceId % 2;
 
-    pos = mul(pos, model);
-    pos = mul(pos, viewProjection[idx]);
+    //Apply transforms.
+    position = mul(position, model);
+    position = mul(position, viewProjection[index]);
 
-    output.pos = (min16float4)pos;
-
-    output.rtvId = idx;
-
-    output.texCoord = input.texCoord;
+    output.position = (min16float4)position;
+    output.rtvId = index;
+    output.textureCoords = input.textureCoords;
 
     return output;
 }

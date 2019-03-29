@@ -35,6 +35,7 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 
    if (width != _width || height != _height)
    {
+      //Update DX resources if size changes.
       _width = width;
       _height = height;
 
@@ -46,13 +47,14 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 
    if (format != BitmapPixelFormat::Gray16)
    {
-      OutputDebugString(L"BitmapPixelFormat was not depth\r\n");
+      OutputDebugString(L"BitmapPixelFormat was for a depth image\r\n");
       return;
    }
 
    BitmapBuffer^ bitmapBuffer = bitmap->LockBuffer(BitmapBufferAccessMode::Read);
    IMemoryBufferReference^ bufferRef = bitmapBuffer->CreateReference();
 
+   //Copy data from buffer.
    ComPtr<IMemoryBufferByteAccess> memoryBufferByteAccess;
    if (SUCCEEDED(reinterpret_cast<IInspectable*>(bufferRef)->QueryInterface(IID_PPV_ARGS(&memoryBufferByteAccess))))
    {
@@ -74,13 +76,12 @@ void DepthTexture::CopyFrom(SoftwareBitmap^ bitmap)
 
 void DepthTexture::CopyFrom(cv::Mat& matrix)
 {
-   //matrix.setTo(cv::Scalar(255)); //TODO: temp
-
    int width = matrix.cols;
    int height = matrix.rows;
 
    if (width != _width || height != _height)
    {
+      //Update DX resources if size changes.
       _width = width;
       _height = height;
 
@@ -90,6 +91,7 @@ void DepthTexture::CopyFrom(cv::Mat& matrix)
 
    auto const context = _deviceResources->GetD3DDeviceContext();
 
+   //Copy data from buffer.
    D3D11_MAPPED_SUBRESOURCE subResource;
    if (SUCCEEDED(context->Map(_texture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource)))
    {
@@ -101,7 +103,7 @@ void DepthTexture::CopyFrom(cv::Mat& matrix)
 void DepthTexture::CreateDeviceDependentResources()
 {
    D3D11_TEXTURE2D_DESC const texDesc = CD3D11_TEXTURE2D_DESC(
-      DXGI_FORMAT_R8_UNORM, //DXGI_FORMAT_R16_UNORM
+      DXGI_FORMAT_R8_UNORM,
       _width,
       _height,
       1,
@@ -122,7 +124,7 @@ void DepthTexture::CreateDeviceDependentResources()
    D3D11_SHADER_RESOURCE_VIEW_DESC const viewDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(
       _texture.Get(),
       D3D11_SRV_DIMENSION_TEXTURE2D,
-      DXGI_FORMAT_R8_UNORM); //DXGI_FORMAT_R16_UNORM
+      DXGI_FORMAT_R8_UNORM);
 
    ASSERT_SUCCEEDED(
       _deviceResources->GetD3DDevice()->CreateShaderResourceView(
