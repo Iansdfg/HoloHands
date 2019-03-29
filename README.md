@@ -1,6 +1,5 @@
 # HoloHands
-University final year project to explore improved methods of HoloLens hand gestures and interactions.
+## Investigating Hand Tracking in Mixed Reality using the First-Generation Microsoft HoloLens
 
-Written in C++/WinRT and UWP.
-
-Work in-progress...
+Final year project for University of South Wales.
+Written in C++/CX and UWP.
