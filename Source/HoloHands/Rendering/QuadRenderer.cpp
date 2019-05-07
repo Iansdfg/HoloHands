@@ -151,7 +151,7 @@ void QuadRenderer::ReleaseDeviceDependentResources()
    _vertexBuffer.Reset();
 }
 
-void QuadRenderer::UpdatePosition(SpatialPointerPose^ pointerPose)
+void QuadRenderer::UpdatePose(SpatialPointerPose^ pointerPose)
 {
    if (pointerPose != nullptr)
    {

@@ -16,7 +16,7 @@ namespace HoloHands
       :
       _deviceResources(deviceResources),
       _direction({ 1, 0, 0 }),
-      _color({1, 0, 0}),
+      _color({0.3, 0.3, 0.3}),
       _vertexCount(0),
       _loadingComplete(false)
    {
@@ -83,7 +83,7 @@ namespace HoloHands
       //Create vertex data.
       task<void> createQuadTask = shaderTaskGroup.then([this]()
       {
-         static const std::array<VertexPosition, 2> vertices =
+         const std::array<VertexPosition, 2> vertices =
          {
             {
                { { 0, 0, 0 } },
@@ -101,7 +101,9 @@ namespace HoloHands
 
          const CD3D11_BUFFER_DESC vertexBufferDesc(
             static_cast<uint32_t>(sizeof(VertexPosition) * vertices.size()),
-            D3D11_BIND_VERTEX_BUFFER);
+            D3D11_BIND_VERTEX_BUFFER,
+            D3D11_USAGE_DYNAMIC,
+            D3D11_CPU_ACCESS_WRITE);
 
          ASSERT_SUCCEEDED(
             _deviceResources->GetD3DDevice()->CreateBuffer(
@@ -129,43 +131,36 @@ namespace HoloHands
       _vertexBuffer.Reset();
    }
 
-   void MarkerRenderer::Update(SpatialPointerPose^ pose)
+   void MarkerRenderer::Update()
    {
-      if (pose == nullptr)
-      {
-         return;
-      }
+      //const float3 quadNormal(0, 0, -1);
+      //float3 forwardDirection(_headForwardDirection.x, 0, _headForwardDirection.z);
 
-      auto headForwardDirection = pose->Head->ForwardDirection;
-      auto headUpDirection = pose->Head->UpDirection;
-      auto position = pose->Head->Position + headForwardDirection * 4.0;
+      ////Rotate quad to always face the view.
+      //XMVECTOR angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&forwardDirection), XMLoadFloat3(&quadNormal));
+      //auto downDirection = cross(forwardDirection, quadNormal);
 
-      const float3 quadNormal(0, 0, -1);
-      float3 forwardDirection(headForwardDirection.x, 0, headForwardDirection.z);
+      //if (dot(downDirection, _headUpDirection) > 0)
+      //{
+      //   //Invert angle when facing the other direction.
+      //   float3 tempAngle;
+      //   XMStoreFloat3(&tempAngle, angle);
+      //   tempAngle *= -1;
+      //   angle = XMLoadFloat3(&tempAngle);
+      //}
 
-      //Rotate quad to always face the view.
-      XMVECTOR angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&forwardDirection), XMLoadFloat3(&quadNormal));
-      auto downDirection = cross(forwardDirection, quadNormal);
+      ////Create transforms.
+      //const XMMATRIX rotationY = XMMatrixRotationY(XMVectorGetY(angle));
 
-      if (dot(downDirection, headUpDirection) > 0)
-      {
-         //Invert angle when facing the other direction.
-         float3 tempAngle;
-         XMStoreFloat3(&tempAngle, angle);
-         tempAngle *= -1;
-         angle = XMLoadFloat3(&tempAngle);
-      }
-
-      //Create transforms.
-      const XMMATRIX rotationY = XMMatrixRotationY(XMVectorGetY(angle));
-
-      const float deg = 45.0f;
-      const float PI = 3.1415926;
-      const XMMATRIX rotationZ = XMMatrixRotationZ(deg * PI / 180.f);
-      const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&position));
+      ////const float deg = 45.0f;
+      ////const float PI = 3.1415926;
+      ////const XMMATRIX rotationZ = XMMatrixRotationZ(deg * PI / 180.f);
+      ////const XMMATRIX rotationZ = XMMatrixRotationZ(_targetAngle);
+      //const XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&_position));
 
       //Store model transform.
-      XMStoreFloat4x4(&_constantBufferData.model, XMMatrixTranspose(rotationZ * rotationY * translation));
+      auto empty = XMMatrixIdentity();
+      XMStoreFloat4x4(&_constantBufferData.model, XMMatrixTranspose(empty));
 
       //Update color.
       float4 color(_color, 1);
@@ -235,8 +230,46 @@ namespace HoloHands
       context->DrawInstanced(_vertexCount, 2, 0, 0);
    }
 
-   void MarkerRenderer::SetDirection(const float3& direction)
+   void MarkerRenderer::SetPosition(const Windows::Foundation::Numerics::float3 & targetPosition)
    {
-      _direction = direction;
+      if (!_loadingComplete)
+      {
+         return;
+      }
+
+      const auto context = _deviceResources->GetD3DDeviceContext();
+
+
+	  float3 startPos = _headPosition + _headForwardDirection * 3.0;
+	  float3 offsetPos = startPos + normalize(targetPosition) * 0.6;
+
+      const std::array<VertexPosition, 2> vertices =
+      {
+         {
+            { { offsetPos.x, offsetPos.y, offsetPos.z } },
+            { { targetPosition.x, targetPosition.y, targetPosition.z } },
+         }
+      };
+      _vertexCount = vertices.size();
+
+
+      D3D11_MAPPED_SUBRESOURCE mappedResource;
+      void* dataPtr;
+      context->Map(_vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+      dataPtr = (void*)mappedResource.pData;
+      memcpy(dataPtr, vertices.data(), sizeof(vertices));
+      context->Unmap(_vertexBuffer.Get(), 0);
+   }
+
+   void MarkerRenderer::UpdatePose(Windows::UI::Input::Spatial::SpatialPointerPose^ pose)
+   {
+      if (pose == nullptr)
+      {
+         return;
+      }
+
+      _headPosition = pose->Head->Position;
+      _headForwardDirection = pose->Head->ForwardDirection;
+      _headUpDirection = pose->Head->UpDirection;
    }
 }

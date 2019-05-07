@@ -108,10 +108,10 @@ namespace HoloHands
          auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
          HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
          SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(cs, prediction->Timestamp);
-         _quadRenderer->UpdatePosition(pose);
+         _quadRenderer->UpdatePose(pose);
          _quadRenderer->Update();
 
-         _markerRenderer->Update(pose);
+         _markerRenderer->UpdatePose(pose);
 
          _depthTexture->CopyFrom(_handDetector->GetDebugImage());
          _crosshairRenderer->SetPosition(_handPosition);
@@ -124,6 +124,12 @@ namespace HoloHands
       //Do nothing.
    }
 
+   bool InsideFrustum(const float3& position)
+   {
+	   //TODO:
+	   return false;
+   }
+
    void AppMain::OnRender()
    {
       //Render cubes.
@@ -132,6 +138,13 @@ namespace HoloHands
          _cubeRenderer->SetPosition(position);
          _cubeRenderer->Update();
          _cubeRenderer->Render();
+
+		 if (!InsideFrustum(position))
+		 {
+			 _markerRenderer->SetPosition(position);
+			 _markerRenderer->Update();
+			 _markerRenderer->Render();
+		 }
       }
 
       if (_showDebugInfo)
@@ -143,7 +156,6 @@ namespace HoloHands
          }
 
          _quadRenderer->Render(*_depthTexture);
-         //_markerRenderer->Render();
       }
    }
 
@@ -245,7 +257,7 @@ namespace HoloHands
       invert(frame->CameraViewTransform, &viewToFrame);
 
       Eigen::Matrix4f camToOrigin = MathsUtils::Convert(viewToFrame * frame->FrameToOrigin);
-
+	  frame->CameraProjectionTransform;
       //Convert from UV space to XY direction.
       Point uv(
          static_cast<float>(position2D.x),

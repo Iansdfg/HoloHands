@@ -15,7 +15,7 @@ namespace HoloHands
       void CreateDeviceDependentResources();
       void ReleaseDeviceDependentResources();
 
-      void UpdatePosition(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
+      void UpdatePose(Windows::UI::Input::Spatial::SpatialPointerPose^ pointerPose);
       void Update();
       void Render(const DepthTexture& depthTexture);
 

@@ -11,10 +11,10 @@ namespace HoloHands
       void CreateDeviceDependentResources();
       void ReleaseDeviceDependentResources();
 
-      void Update(Windows::UI::Input::Spatial::SpatialPointerPose^ pose);
+      void UpdatePose(Windows::UI::Input::Spatial::SpatialPointerPose^ pose);
+      void SetPosition(const Windows::Foundation::Numerics::float3& targetPosition);
+      void Update();
       void Render();
-
-      void SetDirection(const Windows::Foundation::Numerics::float3& direction);
 
    private:
       Graphics::DeviceResourcesPtr _deviceResources;
@@ -31,5 +31,9 @@ namespace HoloHands
       bool _loadingComplete = false;
       Windows::Foundation::Numerics::float3 _direction;
       Windows::Foundation::Numerics::float3 _color;
+      Windows::Foundation::Numerics::float3 _headPosition;
+      Windows::Foundation::Numerics::float3 _headForwardDirection;
+      Windows::Foundation::Numerics::float3 _headUpDirection;
+      DirectX::XMMATRIX _rotationZ;
    };
 }
