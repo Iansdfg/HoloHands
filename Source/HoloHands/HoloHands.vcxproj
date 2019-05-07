@@ -113,6 +113,7 @@
     <ClInclude Include="Rendering\CrosshairRenderer.h" />
     <ClInclude Include="Rendering\CubeRenderer.h" />
     <ClInclude Include="Rendering\DepthTexture.h" />
+    <ClInclude Include="Rendering\MarkerRenderer.h" />
     <ClInclude Include="Rendering\QuadRenderer.h" />
     <ClInclude Include="Rendering\Shaders\ShaderStructs.h" />
     <ClInclude Include="Utils\ImageUtils.h" />
@@ -131,6 +132,7 @@
     <ClCompile Include="Rendering\CrosshairRenderer.cpp" />
     <ClCompile Include="Rendering\CubeRenderer.cpp" />
     <ClCompile Include="Rendering\DepthTexture.cpp" />
+    <ClCompile Include="Rendering\MarkerRenderer.cpp" />
     <ClCompile Include="Rendering\QuadRenderer.cpp" />
     <ClCompile Include="Utils\ImageUtils.cpp" />
     <ClCompile Include="Utils\IOUtils.cpp" />

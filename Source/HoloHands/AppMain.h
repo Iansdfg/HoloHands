@@ -5,6 +5,7 @@
 #include "Rendering/CubeRenderer.h"
 #include "Rendering/QuadRenderer.h"
 #include "Rendering/CrosshairRenderer.h"
+#include "Rendering/MarkerRenderer.h"
 #include "Rendering/DepthTexture.h"
 
 namespace HoloHands
@@ -41,7 +42,9 @@ namespace HoloHands
 
       // Select a cube at the current hand position.
       // Returns -1 if no cube is found at the position.
-      int SelectCube(bool handIsClosed);
+      int NearestCube();
+
+      Windows::Foundation::Numerics::float3 GetCrosshairColor();
 
       void StartHoloLensMediaFrameSourceGroup();
 
@@ -49,6 +52,7 @@ namespace HoloHands
       std::unique_ptr<AxisRenderer> _axisRenderer;
       std::unique_ptr<QuadRenderer> _quadRenderer;
       std::unique_ptr<CrosshairRenderer> _crosshairRenderer;
+      std::unique_ptr<MarkerRenderer> _markerRenderer;
 
       std::unique_ptr<HandDetector> _handDetector;
       std::unique_ptr<DepthTexture> _depthTexture;

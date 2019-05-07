@@ -44,6 +44,7 @@ namespace HoloHands
       _cubeRenderer = std::make_unique<CubeRenderer>(_deviceResources, _cubeSize);
       _quadRenderer = std::make_unique<QuadRenderer>(_deviceResources);
       _crosshairRenderer = std::make_unique<CrosshairRenderer>(_deviceResources);
+      _markerRenderer = std::make_unique<MarkerRenderer>(_deviceResources);
 
       //Create hand detector.
       _handDetector = std::make_unique<HoloHands::HandDetector>();
@@ -56,30 +57,16 @@ namespace HoloHands
       bool isClosed = pointerState->IsPressed;
 
       _handDetector->SetIsClosed(isClosed);
-      _selectedCubeIndex = SelectCube(isClosed);
 
-      //Choose crosshair color.
-      float3 crosshairColor;
       if (isClosed)
       {
-         if (_selectedCubeIndex != -1)
-         {
-            //Selected cube.
-            crosshairColor = float3(0.3f, 1.f, 0.3f);
-         }
-         else
-         {
-            //Selected nothing.
-            crosshairColor = float3(0.5f, 0.5f, 0.5f);
-         }
+         _selectedCubeIndex = NearestCube();
       }
       else
       {
-         //Open hand.
-         crosshairColor = float3(1.f, 1.f, 1.f);
+         _selectedCubeIndex = -1;
       }
 
-      _crosshairRenderer->SetColor(crosshairColor);
    }
 
    void AppMain::OnUpdate(
@@ -115,12 +102,16 @@ namespace HoloHands
 
       if (_showDebugInfo)
       {
+         _crosshairRenderer->SetColor(GetCrosshairColor());
+
          //Render debug information.
          auto cs = _spatialPerception->GetOriginFrameOfReference()->CoordinateSystem;
          HolographicFramePrediction^ prediction = holographicFrame->CurrentPrediction;
          SpatialPointerPose^ pose = SpatialPointerPose::TryGetAtTimestamp(cs, prediction->Timestamp);
          _quadRenderer->UpdatePosition(pose);
          _quadRenderer->Update();
+
+         _markerRenderer->Update(pose);
 
          _depthTexture->CopyFrom(_handDetector->GetDebugImage());
          _crosshairRenderer->SetPosition(_handPosition);
@@ -152,6 +143,7 @@ namespace HoloHands
          }
 
          _quadRenderer->Render(*_depthTexture);
+         //_markerRenderer->Render();
       }
    }
 
@@ -161,6 +153,7 @@ namespace HoloHands
       _axisRenderer->ReleaseDeviceDependentResources();
       _quadRenderer->ReleaseDeviceDependentResources();
       _crosshairRenderer->ReleaseDeviceDependentResources();
+      _markerRenderer->ReleaseDeviceDependentResources();
 
       _depthTexture->ReleaseDeviceDependentResources();
 
@@ -174,6 +167,7 @@ namespace HoloHands
       _axisRenderer->CreateDeviceDependentResources();
       _quadRenderer->CreateDeviceDependentResources();
       _crosshairRenderer->CreateDeviceDependentResources();
+      _markerRenderer->CreateDeviceDependentResources();
 
       _depthTexture->CreateDeviceDependentResources();
 
@@ -181,24 +175,53 @@ namespace HoloHands
    }
 
 
-   int AppMain::SelectCube(bool handIsClosed)
+   int AppMain::NearestCube()
    {
-      if (handIsClosed)
-      {
-         //Only select cubes on closed pose.
+      //Only select cubes on closed pose.
 
-         const float pickArea = _pickingTolerance + _cubeSize;
-         for (int i = 0; i < static_cast<int>(_cubePositions.size()); i++)
+      const float pickArea = _pickingTolerance + _cubeSize;
+      for (int i = 0; i < static_cast<int>(_cubePositions.size()); i++)
+      {
+         if (length(_handPosition - _cubePositions[i]) < pickArea)
          {
-            if (length(_handPosition - _cubePositions[i]) < pickArea)
-            {
-               //Cube position is near the hand position.
-               return i;
-            }
+            //Cube position is near the hand position.
+            return i;
          }
       }
 
       return -1;
+   }
+
+   float3 AppMain::GetCrosshairColor()
+   {
+      if (_handDetector->GetIsClosed())
+      {
+         //Closed hand.
+         if (_selectedCubeIndex == -1)
+         {
+            //Selected nothing.
+            return float3(1.0f, 0.3f, 0.3f);
+         }
+         else
+         {
+            //Cube selected.
+            return float3(0.3f, 1.f, 0.3f);
+         }
+      }
+      else
+      {
+         //Open hand.
+         if (NearestCube() != -1)
+         {
+            //Over cube.
+            return float3(0.3f, 1.f, 0.3f);
+         }
+         else
+         {
+            //Over nothing.
+            return float3(1.f, 1.f, 1.f);
+         }
+      }
    }
 
    bool AppMain::GetHandPositionFromFrame(HoloLensForCV::SensorFrame^ frame, float3& handPosition)

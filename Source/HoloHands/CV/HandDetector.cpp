@@ -27,6 +27,11 @@ bool HandDetector::Process(cv::Mat& input)
    threshold(scaled, mask, MAX_DETECTION_THRESHOLD, 255, CV_THRESH_BINARY);
    mask = 255 - mask; //Invert.
 
+   //Create mask for depth sampling.
+   Mat depthMask;
+   scaled.copyTo(depthMask, mask);
+   threshold(depthMask, depthMask, 0, 255, CV_THRESH_BINARY);
+
    //Discard background information.
    Mat hands;
    scaled.copyTo(hands, mask);
@@ -48,6 +53,9 @@ bool HandDetector::Process(cv::Mat& input)
    {
       //Save debug image.
       _debugImage = scaled;
+
+
+      //_debugImage = depthMask;
    }
 
    //Select best contour.
@@ -68,7 +76,7 @@ bool HandDetector::Process(cv::Mat& input)
    }
 
    //Calculate depth.
-   _handDepth = CalculateDepth(input);
+   _handDepth = CalculateDepth(input, depthMask);
 
    if (_showDebugInfo)
    {
@@ -240,7 +248,8 @@ float HandDetector::CalculateContourScore(const std::vector<cv::Point>& countour
 }
 
 float HandDetector::SampleDepthInDirection(
-   const Mat& depthInput,
+   const Mat& depth,
+   const Mat& mask,
    const Point2f& startPoint,
    const Point2f& direction)
 {
@@ -254,9 +263,13 @@ float HandDetector::SampleDepthInDirection(
          (direction * DEPTH_SAMPLE_OFFSET) +
          (direction * DEPTH_SAMPLE_SPACING * i);
 
-      float sampleDepth = static_cast<float>(depthInput.at<unsigned short>(samplePosition));
+      auto t0 = depth.type();
+      auto t1 = mask.type();
 
-      if (sampleDepth > DEPTH_SAMPLE_MIN && sampleDepth < DEPTH_SAMPLE_MAX)
+      float sampleDepth = static_cast<float>(depth.at<unsigned short>(samplePosition));
+      auto sampleMask = mask.at<unsigned char>(samplePosition);
+
+      if (sampleMask > 0 && sampleDepth > DEPTH_SAMPLE_MIN && sampleDepth < DEPTH_SAMPLE_MAX)
       {
          //Only use depths within a valid range.
          totalSampleCount++;
@@ -281,19 +294,19 @@ Point2f HandDetector::ApplySmoothing(const Point2f& position)
    return total / (1.f + POSITION_SMOOTHING);
 }
 
-float HandDetector::CalculateDepth(const cv::Mat& depthInput)
+float HandDetector::CalculateDepth(const cv::Mat& depthInput, const cv::Mat& mask)
 {
    if (_isClosed)
    {
       //Calculate depth at hand position.
-      return SampleDepthInDirection(depthInput, _handPosition, -_direction);
+      return SampleDepthInDirection(depthInput, mask, _handPosition, -_direction);
    }
    else
    {
       //Calculate average depth of both finger tips.
       float totalSamples =
-         SampleDepthInDirection(depthInput, _finger1Position, -_direction) +
-         SampleDepthInDirection(depthInput, _finger2Position, -_direction);
+         SampleDepthInDirection(depthInput, mask, _finger1Position, -_direction) +
+         SampleDepthInDirection(depthInput, mask, _finger2Position, -_direction);
 
       return totalSamples / 2.0f;
    }

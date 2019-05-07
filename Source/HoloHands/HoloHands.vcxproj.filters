@@ -56,6 +56,7 @@
     <ClCompile Include="Utils\IOUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\MarkerRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -93,6 +94,7 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="CV\Defect.h" />
+    <ClInclude Include="Rendering\MarkerRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
